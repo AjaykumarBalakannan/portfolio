@@ -206,9 +206,14 @@ h2{font-family:var(--display);font-size:clamp(26px,3.5vw,46px);font-weight:800;c
 .pnum{font-size:9px;color:var(--text);opacity:.4;letter-spacing:.15em;margin-bottom:10px;}
 .ptitle{font-family:var(--display);font-size:15px;font-weight:700;color:#fff;margin-bottom:9px;line-height:1.3;padding-right:20px;}
 .pdesc{font-size:11px;color:var(--text);line-height:1.8;margin-bottom:14px;opacity:.82;}
-.ptags{display:flex;flex-wrap:wrap;gap:4px;}
+.pstats{display:flex;gap:14px;margin-bottom:12px;font-size:10px;}
+.pstat{color:var(--green);}
+.pstat span{color:var(--text);opacity:.6;}
+.ptags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;}
 .ptag{font-size:9px;padding:2px 8px;background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.18);color:var(--green);}
 .pbadge{margin-top:10px;font-size:9px;}
+.plink{display:inline-block;margin-top:12px;padding:6px 14px;font-size:9px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);color:var(--cyan);text-decoration:none;transition:all .2s;letter-spacing:.05em;}
+.plink:hover{background:rgba(0,212,255,.15);border-color:var(--cyan);}
 
 /* ── EDUCATION ── */
 .edu-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
@@ -281,7 +286,7 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
       <div class="h-chip"><div class="h-chipdot"></div>MS Data Science · UMD · GPA 3.78</div>
       <h1 class="hname"><em>Ajay</em>kumar<br/>Balakannan</h1>
       <div class="tw-line"><span class="tw-prompt">&gt; </span><span id="tw"></span><span class="tw-cursor"></span></div>
-      <p class="hdesc">Building systems that learn, adapt, and reveal hidden patterns — from large-scale anomaly detection pipelines to real-time forecasting models. Grounded in electrical engineering, fluent in modern data science.</p>
+      <p class="hdesc">Building scalable ML systems on 15M+ records — from anomaly detection pipelines to real-time forecasting models. Proven track record of 35% false positive reduction, 25% efficiency gains, and data-driven decision making.</p>
       <div class="hero-btns">
         <a href="#projects" class="btn btn-p">View Projects</a>
         <a href="mailto:ajayport@umd.edu" class="btn btn-g">Get In Touch ↗</a>
@@ -333,26 +338,28 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
     <div>
       <div class="etitle">Data Science Intern</div>
       <ul class="elist">
-        <li>Built v0 statistical models and v1 unsupervised PyCaret pipelines (Isolation Forest, KNN, HBOS, OCSVM) on <span class="hl">15M+ records</span>, containerized with Docker — improving anomaly detection accuracy by <span class="hlg">35%</span>.</li>
-        <li>Designed CI/CD workflows with GitHub Actions and Docker for reproducible, real-time ML model deployment and monitoring.</li>
-        <li>Developed Grafana dashboards and Python signal processing pipelines, reducing monitoring time by <span class="hlg">25%</span>.</li>
+        <li>Built v0 statistical models and v1 PyCaret pipelines (Isolation Forest, KNN, HBOS, COPOD, OCSVM) on <span class="hl">15M+ records</span>, containerized with Docker. Reduced false positives by <span class="hlg">35%</span> and improved system reliability.</li>
+        <li>Developed a salary modeling system (Random Forest, Gradient Boosting), segmented by SOC × location × experience. Deployed on <span class="hl">AWS</span>, boosting client trust and adding <span class="hlg">10+ new clients</span>.</li>
+        <li>Designed <span class="hl">LLM-powered GenAI workflows</span> for unstructured text, automating summarization and reporting. Eliminated repetitive manual tasks, saving <span class="hlg">15+ analyst hours weekly</span> and accelerating delivery cycles.</li>
+        <li>Delivered granular pay insights across <span class="hl">40,000+ zip codes</span> and showcased real-world GenAI applications, strengthening business adoption and enhancing client satisfaction.</li>
       </ul>
-      <div class="etags"><span class="etag">PyCaret</span><span class="etag">Isolation Forest</span><span class="etag">Docker</span><span class="etag">Grafana</span><span class="etag">CI/CD</span></div>
+      <div class="etags"><span class="etag">PyCaret</span><span class="etag">Isolation Forest</span><span class="etag">Docker</span><span class="etag">AWS</span><span class="etag">GenAI/LLM</span><span class="etag">Random Forest</span></div>
     </div>
   </div>
   <div class="exp-row rv">
     <div>
-      <div class="ep">Sep 2024 – May 2025</div>
+      <div class="ep">Sep 2024 – Present</div>
       <div class="eco">Counseling Center, UMD</div>
       <div class="eloc">College Park, MD</div>
     </div>
     <div>
-      <div class="etitle">Graduate Data Analyst</div>
+      <div class="etitle">Graduate Research Assistant</div>
       <ul class="elist">
-        <li>Led SQL ETL workflows (Informatica) and Tableau dashboards — improving counselor scheduling efficiency by <span class="hlg">25%</span>.</li>
-        <li>Applied hypothesis testing and sentiment analysis on <span class="hl">10+ years</span> of survey data; findings helped secure increased budgets for two consecutive quarters.</li>
+        <li>Led a team to build <span class="hl">SQL ETL workflows</span> and Tableau dashboards with Informatica integration, delivering weekly insights that improved counselor time management and scheduling efficiency by <span class="hlg">25%</span>.</li>
+        <li>Applied <span class="hl">hypothesis testing and sentiment analysis</span> on <span class="hl">10+ years</span> of student survey data, uncovering behavioral patterns that helped administrators secure budget increases for two consecutive quarters.</li>
+        <li>Supported resource allocation discussions with administrators by translating insights into clear actions, cutting redundant resources by <span class="hlg">20%</span> and enabling more productive counselor utilization.</li>
       </ul>
-      <div class="etags"><span class="etag">SQL · Informatica</span><span class="etag">Tableau</span><span class="etag">Sentiment Analysis</span><span class="etag">Python</span></div>
+      <div class="etags"><span class="etag">SQL · Informatica</span><span class="etag">Tableau</span><span class="etag">Sentiment Analysis</span><span class="etag">Hypothesis Testing</span><span class="etag">Python</span></div>
     </div>
   </div>
 </section>
@@ -369,17 +376,16 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
         <div data-pct="92"><div class="sk-row-top"><span class="sk-name">Python · NumPy · Pandas · Sklearn</span><span class="sk-val">92%</span></div><div class="sk-track"><div class="sk-bar"></div></div></div>
         <div data-pct="88"><div class="sk-row-top"><span class="sk-name">ML / Anomaly Detection</span><span class="sk-val">88%</span></div><div class="sk-track"><div class="sk-bar"></div></div></div>
         <div data-pct="85"><div class="sk-row-top"><span class="sk-name">SQL · Data Engineering</span><span class="sk-val">85%</span></div><div class="sk-track"><div class="sk-bar"></div></div></div>
-        <div data-pct="80"><div class="sk-row-top"><span class="sk-name">Visualization · Tableau · Grafana</span><span class="sk-val">80%</span></div><div class="sk-track"><div class="sk-bar ora"></div></div></div>
+        <div data-pct="80"><div class="sk-row-top"><span class="sk-name">Visualization · Tableau · Power BI</span><span class="sk-val">80%</span></div><div class="sk-track"><div class="sk-bar ora"></div></div></div>
         <div data-pct="75"><div class="sk-row-top"><span class="sk-name">Cloud · Docker · CI/CD</span><span class="sk-val">75%</span></div><div class="sk-track"><div class="sk-bar"></div></div></div>
         <div data-pct="78"><div class="sk-row-top"><span class="sk-name">Deep Learning · NLP</span><span class="sk-val">78%</span></div><div class="sk-track"><div class="sk-bar pur"></div></div></div>
       </div>
     </div>
     <div class="stack-cats">
-      <div><div class="cat-lbl">Machine Learning</div><div class="stags"><span class="stag">Isolation Forest</span><span class="stag">HBOS</span><span class="stag">Random Forest</span><span class="stag">XGBoost</span><span class="stag">ARIMA</span><span class="stag">SVM</span><span class="stag">YOLOv5</span><span class="stag">KNN</span></div></div>
-      <div><div class="cat-lbl">Programming & Data</div><div class="stags"><span class="stag">Python</span><span class="stag">R</span><span class="stag">SQL</span><span class="stag">MATLAB</span><span class="stag">Pandas</span><span class="stag">NumPy</span><span class="stag">PyCaret</span></div></div>
-      <div><div class="cat-lbl">Engineering & Cloud</div><div class="stags"><span class="stag">Docker</span><span class="stag">Apache Spark</span><span class="stag">AWS</span><span class="stag">Azure</span><span class="stag">Git/CI-CD</span><span class="stag">Postgres</span><span class="stag">ClickHouse</span></div></div>
-      <div><div class="cat-lbl">Visualization</div><div class="stags"><span class="stag">Tableau</span><span class="stag">Power BI</span><span class="stag">Grafana</span><span class="stag">Qlik Sense</span><span class="stag">Excel (Pivot)</span></div></div>
-      <div><div class="cat-lbl">Embedded & Signal</div><div class="stags"><span class="stag">Arduino</span><span class="stag">ARM Cortex</span><span class="stag">DSP</span><span class="stag">IoT</span><span class="stag">8051</span></div></div>
+      <div><div class="cat-lbl">Machine Learning</div><div class="stags"><span class="stag">Isolation Forest</span><span class="stag">HBOS</span><span class="stag">Random Forest</span><span class="stag">XGBoost</span><span class="stag">ARIMA</span><span class="stag">SVM</span><span class="stag">YOLOv5</span><span class="stag">KNN</span><span class="stag">Gradient Boosting</span></div></div>
+      <div><div class="cat-lbl">Programming & Data</div><div class="stags"><span class="stag">Python</span><span class="stag">R</span><span class="stag">SQL</span><span class="stag">MATLAB</span><span class="stag">Pandas</span><span class="stag">NumPy</span><span class="stag">PyCaret</span><span class="stag">Scikit-learn</span></div></div>
+      <div><div class="cat-lbl">Engineering & Cloud</div><div class="stags"><span class="stag">Docker</span><span class="stag">Apache Spark</span><span class="stag">AWS</span><span class="stag">Azure</span><span class="stag">Git/CI-CD</span><span class="stag">Postgres</span><span class="stag">ClickHouse</span><span class="stag">Hadoop</span></div></div>
+      <div><div class="cat-lbl">Visualization</div><div class="stags"><span class="stag">Tableau</span><span class="stag">Power BI</span><span class="stag">Qlik Sense</span><span class="stag">Excel (Pivot/Macros)</span><span class="stag">Matplotlib</span><span class="stag">Seaborn</span></div></div>
     </div>
   </div>
 </section>
@@ -387,30 +393,48 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
 <!-- ═══ PROJECTS ═══ -->
 <section id="projects">
   <div class="sec-hd"><div class="sec-tag">Projects</div><div class="sec-line"></div></div>
-  <h2 class="rv">Selected Work</h2>
+  <h2 class="rv">Research Projects</h2>
   <br/><br/>
-  <div class="proj-grid">
+  <div class="proj-grid" style="grid-template-columns: repeat(3, 1fr);">
     <div class="pcard rv">
       <div class="parrow">↗</div>
       <div class="pnum">01 — COMPUTER VISION</div>
-      <div class="ptitle">Agricultural Animal Intrusion Detection</div>
-      <p class="pdesc">YOLOv5 + CNN ensemble with hardware-integrated microcontroller pipeline. Automated deterrents (sirens, ultrasonic) for real-world precision agriculture.</p>
-      <div class="ptags"><span class="ptag">YOLOv5</span><span class="ptag">CNN</span><span class="ptag">Arduino</span><span class="ptag">IoT</span></div>
-      <div class="pbadge" style="color:var(--orange);">🏆 2nd Place · National Hackathon · BIOGECKO Published</div>
+      <div class="ptitle">Safeguarding Agricultural Lands from Animal Intrusion</div>
+      <p class="pdesc">YOLOv5 + CNN ensemble with automated data reconciliation system and hardware-integrated prototype for real-world deterrent responses in precision agriculture.</p>
+      <div class="pstats">
+        <div class="pstat"><span>Accuracy:</span> 90%</div>
+        <div class="pstat"><span>False Pos. ↓:</span> 30%</div>
+        <div class="pstat"><span>Reliability ↑:</span> 25%</div>
+      </div>
+      <div class="ptags"><span class="ptag">YOLOv5</span><span class="ptag">CNN</span><span class="ptag">Computer Vision</span><span class="ptag">IoT</span><span class="ptag">Hardware Integration</span></div>
+      <div class="pbadge" style="color:var(--orange);">🏆 2nd Place · National Hackathon (500+ teams) · BIOGECKO Published</div>
+      <a href="https://github.com/AjaykumarBalakannan/Framland_Protection" target="_blank" class="plink">View on GitHub ↗</a>
     </div>
     <div class="pcard rv">
       <div class="parrow">↗</div>
-      <div class="pnum">02 — TIME SERIES</div>
+      <div class="pnum">02 — TIME SERIES FORECASTING</div>
       <div class="ptitle">Bitcoin Price Forecasting Pipeline</div>
-      <p class="pdesc">End-to-end ARIMA + XGBoost forecasting with automated ingestion, validation, and Qlik Sense dashboards for real-time volatility insights.</p>
-      <div class="ptags"><span class="ptag">ARIMA</span><span class="ptag">XGBoost</span><span class="ptag">Qlik Sense</span><span class="ptag">SQL</span></div>
+      <p class="pdesc">End-to-end forecasting pipeline with real-time Bitcoin data collection, ARIMA and XGBoost models, automated ETL workflows, and interactive Qlik Sense dashboards.</p>
+      <div class="pstats">
+        <div class="pstat"><span>Accuracy:</span> 85%</div>
+        <div class="pstat"><span>Manual Effort ↓:</span> 40%</div>
+        <div class="pstat"><span>Real-time:</span> Yes</div>
+      </div>
+      <div class="ptags"><span class="ptag">ARIMA</span><span class="ptag">XGBoost</span><span class="ptag">Time Series</span><span class="ptag">Qlik Sense</span><span class="ptag">Python</span><span class="ptag">SQL</span></div>
+      <a href="https://github.com/causify-ai/tutorials/tree/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense/DATA605/Spring2025/projects/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense" target="_blank" class="plink">View on GitHub ↗</a>
     </div>
     <div class="pcard rv">
       <div class="parrow">↗</div>
-      <div class="pnum">03 — RISK ASSESSMENT</div>
-      <div class="ptitle">Space Debris Risk Assessment via ML</div>
-      <p class="pdesc">ML-driven orbital debris collision risk pipeline with multi-platform dashboards in Tableau, Qlik Sense, and Jupyter for real-time visibility.</p>
-      <div class="ptags"><span class="ptag">XGBoost</span><span class="ptag">Tableau</span><span class="ptag">Jupyter</span><span class="ptag">Python</span></div>
+      <div class="pnum">03 — DATA ANALYTICS</div>
+      <div class="ptitle">Multifamily Real Estate Analytics Pipeline</div>
+      <p class="pdesc">End-to-end analytics pipeline for real estate portfolio management featuring automated Python ETL, SQLite database, Power BI dashboards, and comprehensive reporting system for multifamily properties.</p>
+      <div class="pstats">
+        <div class="pstat"><span>Phases:</span> 5-Stage</div>
+        <div class="pstat"><span>Reports:</span> Automated</div>
+        <div class="pstat"><span>Stack:</span> Python/SQL/BI</div>
+      </div>
+      <div class="ptags"><span class="ptag">Python</span><span class="ptag">SQL</span><span class="ptag">Power BI</span><span class="ptag">ETL</span><span class="ptag">Real Estate</span><span class="ptag">Analytics</span></div>
+      <a href="https://github.com/AjaykumarBalakannan/RealEstateModelling" target="_blank" class="plink">View on GitHub ↗</a>
     </div>
   </div>
 </section>
@@ -426,14 +450,14 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
       <div class="eschool">University of Maryland</div>
       <div class="edate">Expected May 2026 · Maryland, MD</div>
       <div class="egpa">GPA: 3.78 / 4.0</div>
-      <div class="ecourses">NLP · Machine Learning · Big Data Systems · Deep Learning</div>
+      <div class="ecourses">Natural Language Processing · Machine Learning · Big Data Systems · Deep Learning</div>
     </div>
     <div class="ecard rv">
       <div class="edeg">B.Tech — Electrical &amp; Electronics Engineering</div>
       <div class="eschool">Sri Krishna College of Engineering &amp; Technology</div>
       <div class="edate">Aug 2020 – May 2024 · Coimbatore, India</div>
       <div class="egpa">CGPA: 8.4 / 10.0</div>
-      <div class="ecourses">Microcontrollers · Power System Analysis · Python · ML in Energy Systems</div>
+      <div class="ecourses">Microcontrollers · Power System Analysis · Python · Machine Learning in Energy Systems</div>
     </div>
   </div>
 </section>
@@ -441,11 +465,12 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
 <!-- ═══ CONTACT ═══ -->
 <section id="contact">
   <div class="con-h rv">Let's Build<br/><span style="color:var(--cyan)">Together.</span></div>
-  <p class="con-sub rv">Open to full-time roles, internships, and research in data science, ML engineering, and analytics.</p>
+  <p class="con-sub rv">Open to full-time roles, internships, and research collaborations in data science, ML engineering, and analytics.</p>
   <div class="con-links rv">
     <a href="mailto:ajayport@umd.edu" class="con-link">✉ ajayport@umd.edu</a>
     <a href="tel:2404380604" class="con-link">☎ 240-438-0604</a>
-    <a href="https://linkedin.com" target="_blank" class="con-link">in LinkedIn</a>
+    <a href="https://www.linkedin.com/in/ajaykumar-balakannan/" target="_blank" class="con-link">in LinkedIn ↗</a>
+    <a href="https://github.com/AjaykumarBalakannan" target="_blank" class="con-link">GitHub ↗</a>
   </div>
 </section>
 
@@ -453,7 +478,7 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
 
 <script>
 // ═══════════════════════════════════════════════
-// CURSOR  — uses transform so no layout thrash
+// CURSOR
 // ═══════════════════════════════════════════════
 (function(){
   const dot = document.getElementById('cur-dot');
@@ -526,20 +551,18 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
   const msgs = [
     'K-Means · assigning points to nearest centroid',
     'K-Means · updating cluster centroids via mean',
-    'K-Means · checking convergence condition',
     'Gradient Descent · computing ∂L/∂w numerically',
     'Gradient Descent · w ← w − α · ∂L/∂w',
-    'Gradient Descent · navigating bowl-shaped loss surface',
     'Logistic Regression · sigmoid( w·x + b )',
-    'Decision Boundary · separating spiral classes live',
-    'Neural Network · signals propagating forward through layers',
-    'Voronoi regions · coloring nearest-centroid zones',
-    'Contour lines · iso-loss curves on loss surface',
-    'Spiral dataset · classic non-linearly separable benchmark',
-    'Anomaly Detection · Isolation Forest · HBOS · KNN · OCSVM',
+    'Anomaly Detection · Isolation Forest on 15M+ records',
+    'PyCaret Pipelines · reducing false positives by 35%',
     'Time Series · ARIMA + XGBoost ensemble forecasting',
-    'Computer Vision · YOLOv5 + CNN object detection pipeline',
-    'NLP · sentiment analysis · hypothesis testing on survey data',
+    'Computer Vision · YOLOv5 + CNN object detection',
+    'NLP · sentiment analysis on 10+ years of survey data',
+    'GenAI · LLM-powered workflows saving 15+ hours weekly',
+    'AWS Deployment · salary modeling across 40K+ zip codes',
+    'SQL ETL · improving scheduling efficiency by 25%',
+    'Tableau Dashboards · real-time insights for decision making',
   ];
   const track = document.getElementById('ttrack');
   let html = '';
@@ -551,7 +574,7 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
 // TYPEWRITER
 // ═══════════════════════════════════════════════
 (function(){
-  const titles = ['Data Scientist','ML Engineer','Anomaly Detection Specialist','Time Series Forecaster','Data Pipeline Architect','NLP Practitioner'];
+  const titles = ['Data Scientist','ML Engineer','Anomaly Detection Specialist','Time Series Forecaster','Data Pipeline Architect','GenAI Developer'];
   let ti = 0, ci = 0, deleting = false;
   const el = document.getElementById('tw');
 
@@ -640,18 +663,15 @@ document.querySelectorAll('.demo-tab').forEach(tab => {
 
   function draw(){
     ctx.clearRect(0, 0, W, H);
-    // voronoi bg
     for (let x = 0; x < W; x += 8) for (let y = 0; y < H; y += 8){
       let best = 0, bd = Infinity;
       centroids.forEach((c,k)=>{ const d=(x-c.x)**2+(y-c.y)**2; if(d<bd){bd=d;best=k;} });
       ctx.fillStyle = COLS[best] + '0a'; ctx.fillRect(x, y, 8, 8);
     }
-    // points
     pts.forEach((p, i) => {
       ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
       ctx.fillStyle = COLS[assign[i]] + 'cc'; ctx.fill();
     });
-    // centroids
     centroids.forEach((c, k) => {
       ctx.beginPath(); ctx.arc(c.x, c.y, 11, 0, Math.PI*2);
       ctx.strokeStyle = COLS[k]; ctx.lineWidth = 2; ctx.stroke();
@@ -676,7 +696,6 @@ document.querySelectorAll('.demo-tab').forEach(tab => {
   cv.addEventListener('click', () => { running = false; setTimeout(() => { running = true; reset(); runStep(); }, 50); });
   window.addEventListener('resize', () => { setSize(); draw(); });
 
-  // defer until layout paint
   setTimeout(() => { setSize(); reset(); draw(); running = true; setTimeout(runStep, 500); }, 150);
 })();
 
@@ -785,7 +804,6 @@ function startDT(){
   function setSize(){ W = cv.width = cv.offsetWidth || cv.parentElement.offsetWidth || 400; H = cv.height = 260; }
   setSize();
 
-  // Two-class spiral
   const data = [];
   for (let i = 0; i < 80; i++){
     const t = i/80*Math.PI*3, r = t*.15;
@@ -816,7 +834,6 @@ function startDT(){
       const r = Math.round(0 + 168*p), g = Math.round(212 - 127*p), bl = Math.round(255 - 8*p);
       ctx.fillStyle = `rgba(${r},${g},${bl},.11)`; ctx.fillRect(px, py, RES, RES);
     }
-    // boundary line
     ctx.beginPath(); let first = true;
     for (let px = 0; px < W; px += 2){
       if (Math.abs(W2) < 1e-6) continue;
@@ -826,7 +843,6 @@ function startDT(){
       first = false;
     }
     ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5; ctx.stroke();
-    // points
     data.forEach(p => {
       ctx.beginPath(); ctx.arc(p.x*W, p.y*H, 4, 0, Math.PI*2);
       ctx.fillStyle = p.c===0 ? 'rgba(0,212,255,.75)' : 'rgba(168,85,247,.75)';
@@ -855,7 +871,6 @@ function startDT(){
 // ═══════════════════════════════════════════════
 (function(){
   const els = document.querySelectorAll('.rv');
-  // start hidden
   els.forEach(el => { el.style.opacity='0'; el.style.transform='translateY(20px)'; });
 
   const io = new IntersectionObserver(entries => {
@@ -872,7 +887,7 @@ function startDT(){
 })();
 
 // ═══════════════════════════════════════════════
-// STAT CELLS — underline sweep
+// STAT CELLS
 // ═══════════════════════════════════════════════
 setTimeout(() => {
   document.querySelectorAll('.stat-cell').forEach((c, i) => {
