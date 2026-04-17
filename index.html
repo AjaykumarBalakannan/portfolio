@@ -14,8 +14,9 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.7;overflow-x:hidden;cursor:none;}
-*{cursor:none!important;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.7;overflow-x:hidden;}
+a{cursor:pointer!important;}
+*:not(a){cursor:none!important;}
 
 /* ── CURSOR ── */
 #cur-dot{
@@ -197,11 +198,12 @@ h2{font-family:var(--display);font-size:clamp(26px,3.5vw,46px);font-weight:800;c
 .pcard{
   background:var(--panel);border:1px solid var(--border);
   padding:26px;position:relative;overflow:hidden;transition:all .22s;
+  pointer-events:auto;
 }
-.pcard::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(0,212,255,.05),transparent 60%);opacity:0;transition:opacity .3s;}
+.pcard::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(0,212,255,.05),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none;}
 .pcard:hover{border-color:var(--cyan);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4);}
 .pcard:hover::before{opacity:1;}
-.parrow{position:absolute;top:18px;right:18px;color:var(--border2);font-size:13px;transition:all .2s;}
+.parrow{position:absolute;top:18px;right:18px;color:var(--border2);font-size:13px;transition:all .2s;pointer-events:none;z-index:1;}
 .pcard:hover .parrow{color:var(--cyan);transform:translate(2px,-2px);}
 .pnum{font-size:9px;color:var(--text);opacity:.4;letter-spacing:.15em;margin-bottom:10px;}
 .ptitle{font-family:var(--display);font-size:15px;font-weight:700;color:#fff;margin-bottom:9px;line-height:1.3;padding-right:20px;}
@@ -212,8 +214,8 @@ h2{font-family:var(--display);font-size:clamp(26px,3.5vw,46px);font-weight:800;c
 .ptags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;}
 .ptag{font-size:9px;padding:2px 8px;background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.18);color:var(--green);}
 .pbadge{margin-top:10px;font-size:9px;}
-.plink{display:inline-block;margin-top:12px;padding:6px 14px;font-size:9px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);color:var(--cyan);text-decoration:none;transition:all .2s;letter-spacing:.05em;}
-.plink:hover{background:rgba(0,212,255,.15);border-color:var(--cyan);}
+.plink{display:inline-block;margin-top:12px;padding:6px 14px;font-size:9px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);color:var(--cyan);text-decoration:none;transition:all .2s;letter-spacing:.05em;cursor:pointer!important;pointer-events:auto!important;position:relative;z-index:10;}
+.plink:hover{background:rgba(0,212,255,.15);border-color:var(--cyan);transform:translateY(-1px);}
 
 /* ── EDUCATION ── */
 .edu-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
@@ -408,7 +410,7 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
       </div>
       <div class="ptags"><span class="ptag">YOLOv5</span><span class="ptag">CNN</span><span class="ptag">Computer Vision</span><span class="ptag">IoT</span><span class="ptag">Hardware Integration</span></div>
       <div class="pbadge" style="color:var(--orange);">🏆 2nd Place · National Hackathon (500+ teams) · BIOGECKO Published</div>
-      <a href="https://github.com/AjaykumarBalakannan/Framland_Protection" target="_blank" class="plink">View on GitHub ↗</a>
+      <a href="https://github.com/AjaykumarBalakannan/Framland_Protection" target="_blank" rel="noopener noreferrer" class="plink">View on GitHub ↗</a>
     </div>
     <div class="pcard rv">
       <div class="parrow">↗</div>
@@ -421,7 +423,7 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
         <div class="pstat"><span>Real-time:</span> Yes</div>
       </div>
       <div class="ptags"><span class="ptag">ARIMA</span><span class="ptag">XGBoost</span><span class="ptag">Time Series</span><span class="ptag">Qlik Sense</span><span class="ptag">Python</span><span class="ptag">SQL</span></div>
-      <a href="https://github.com/causify-ai/tutorials/tree/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense/DATA605/Spring2025/projects/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense" target="_blank" class="plink">View on GitHub ↗</a>
+      <a href="https://github.com/causify-ai/tutorials/tree/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense/DATA605/Spring2025/projects/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense" target="_blank" rel="noopener noreferrer" class="plink">View on GitHub ↗</a>
     </div>
     <div class="pcard rv">
       <div class="parrow">↗</div>
@@ -434,7 +436,7 @@ footer{border-top:1px solid var(--border);text-align:center;padding:20px 48px 50
         <div class="pstat"><span>Stack:</span> Python/SQL/BI</div>
       </div>
       <div class="ptags"><span class="ptag">Python</span><span class="ptag">SQL</span><span class="ptag">Power BI</span><span class="ptag">ETL</span><span class="ptag">Real Estate</span><span class="ptag">Analytics</span></div>
-      <a href="https://github.com/AjaykumarBalakannan/RealEstateModelling" target="_blank" class="plink">View on GitHub ↗</a>
+      <a href="https://github.com/AjaykumarBalakannan/RealEstateModelling" target="_blank" rel="noopener noreferrer" class="plink">View on GitHub ↗</a>
     </div>
   </div>
 </section>
