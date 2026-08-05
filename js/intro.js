@@ -1,4 +1,4 @@
-// 3D cinematic intro — a climber hangs on a rope, waves hello, then yanks it so a
+// 3D cinematic intro. A climber hangs on a rope, waves hello, then yanks it so a
 // stack of bricks on the top beam tumbles off with physics and converges into the page.
 // Real-time WebGL via three.js (self-hosted, no CDN). ~one puppet, ~40 rigid bricks.
 
@@ -23,6 +23,7 @@ let clock, raf=null, running=false, startT=0, phase='idle';
 let shakeAmt=0, camBase=new THREE.Vector3();
 const GRAV=-15, GROUND_Y=-3.2;
 const LOOK=new THREE.Vector3(-0.7,3.9,0);
+const HEAD_YAW=0.37; // aims the forward-facing face toward the camera's actual angle
 const SLOW=Math.max(1,+(new URLSearchParams(location.search).get('slow')||1)); // debug: ?slow=6
 
 // timeline markers (seconds)
@@ -45,14 +46,47 @@ function buildMan(){
   // hips
   const hips = capsule(.4,.28,matP); hips.position.y=.5; g.add(hips);
 
-  // head + hair
-  const head = new THREE.Group(); head.position.set(.1,2.15,0);
-  const skull=sphere(.42,matSk); head.add(skull);
-  const hair=sphere(.45,matH); hair.scale.set(1,.8,1); hair.position.set(-.05,.16,-.02); head.add(hair);
-  const fringe=sphere(.30,matH); fringe.scale.set(1,.5,.7); fringe.position.set(.12,.28,.28); head.add(fringe);
-  const nose=sphere(.07,matSk); nose.position.set(.42,-.02,.05); head.add(nose);
-  const eyeMat=makeMat(0x2a2118,{r:.4});
-  const eye1=sphere(.05,eyeMat); eye1.position.set(.38,.05,.16); head.add(eye1);
+  // head + face — built facing +Z, angled toward the camera with HEAD_YAW
+  const head = new THREE.Group(); head.position.set(.1,2.18,0);
+  const skull=sphere(.47,matSk); head.add(skull);
+
+  // ears
+  const earMat=matSk;
+  const earL=sphere(.09,earMat); earL.scale.set(.6,1,.8); earL.position.set(-.44,-.02,.02); head.add(earL);
+  const earR=sphere(.09,earMat); earR.scale.set(.6,1,.8); earR.position.set(.44,-.02,.02); head.add(earR);
+
+  // hair — covers crown + back, leaves the face (+Z, front) clear
+  const hair=sphere(.50,matH); hair.scale.set(1,.82,1); hair.position.set(0,.17,-.06); head.add(hair);
+  const fringe=sphere(.30,matH); fringe.scale.set(1.05,.55,.8); fringe.position.set(0,.30,.30); head.add(fringe);
+  const sideL=sphere(.18,matH); sideL.position.set(-.36,.05,.08); head.add(sideL);
+  const sideR=sphere(.18,matH); sideR.position.set(.36,.05,.08); head.add(sideR);
+
+  // eyes: white sclera + dark pupil, symmetric, front-facing
+  const scleraMat=makeMat(0xfaf3e6,{r:.35});
+  const pupilMat=makeMat(0x231a12,{r:.3});
+  const browMat=matH;
+  [-1,1].forEach(side=>{
+    const sclera=sphere(.085,scleraMat); sclera.scale.set(1,1.15,.6);
+    sclera.position.set(side*.185,.06,.40); head.add(sclera);
+    const pupil=sphere(.045,pupilMat); pupil.position.set(side*.185,.055,.465); head.add(pupil);
+    const glint=sphere(.015,makeMat(0xffffff,{r:.1})); glint.position.set(side*.185+.015,.075,.485); head.add(glint);
+    const brow=new THREE.Mesh(new THREE.BoxGeometry(.16,.03,.03),browMat);
+    brow.position.set(side*.185,.175,.42); brow.rotation.z=side*-.12; head.add(brow);
+  });
+
+  // nose — small cone, apex pointing forward (+Z)
+  const nose=new THREE.Mesh(new THREE.ConeGeometry(.06,.15,10),matSk);
+  nose.rotation.x=Math.PI/2; nose.position.set(0,-.04,.46); head.add(nose);
+
+  // mouth — a warm little smile arc
+  const mouth=new THREE.Mesh(new THREE.TorusGeometry(.10,.02,8,16,Math.PI),makeMat(0x8a4a3e,{r:.55}));
+  mouth.rotation.z=Math.PI; mouth.position.set(0,-.19,.42); head.add(mouth);
+  // cheeks — a little warmth
+  [-1,1].forEach(side=>{
+    const cheek=sphere(.07,makeMat(0xe8996b,{r:.7}));
+    cheek.position.set(side*.30,-.12,.34); cheek.scale.set(1,.7,.5); head.add(cheek);
+  });
+
   g.add(head);
 
   // helper to build an arm: shoulder group -> upper -> elbow group -> fore + hand
@@ -86,7 +120,7 @@ function buildMan(){
   armR.sh.rotation.set(0,0,-2.55); armR.el.rotation.z=-.15;   // higher hand
   armL.sh.rotation.set(0,0, 2.35); armL.el.rotation.z=.35;    // lower hand
 
-  joints={torso,head,armR,armL,legR,legL,eye1};
+  joints={torso,head,armR,armL,legR,legL};
   return g;
 }
 
@@ -138,11 +172,11 @@ function buildScene(){
   scene.background=new THREE.Color(COL.ink);
   scene.fog=new THREE.Fog(COL.ink,14,30);
 
-  camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,.1,100);
-  camera.position.set(2.2,3.5,15.5); camBase.copy(camera.position);
+  camera=new THREE.PerspectiveCamera(46,innerWidth/innerHeight,.1,100);
+  camera.position.set(1.6,3.9,10.8); camBase.copy(camera.position);
   camera.lookAt(LOOK);
 
-  // lighting — warm key + cool fill + soft ambient
+  // lighting: warm key, cool fill, soft ambient
   const hemi=new THREE.HemisphereLight(0xfff1d8,0x2a2018,.55); scene.add(hemi);
   const key=new THREE.DirectionalLight(0xffd9a0,2.1);
   key.position.set(6,12,8); key.castShadow=true;
@@ -172,8 +206,8 @@ function animateMan(t){
   // gentle hang bob + look-around
   man.position.y = 2.4 + Math.sin(t*1.8)*0.05;
   const looking = t<TL.pull;
-  j.head.rotation.y = looking ? Math.sin(t*0.9)*0.55 : lerp(j.head.rotation.y,0,.1);
-  j.head.rotation.z = looking ? Math.sin(t*1.3)*0.08 : 0;
+  j.head.rotation.y = looking ? HEAD_YAW + Math.sin(t*0.9)*0.4 : lerp(j.head.rotation.y,HEAD_YAW,.1);
+  j.head.rotation.z = looking ? Math.sin(t*1.3)*0.06 : 0;
   j.torso.rotation.y = looking ? Math.sin(t*0.7)*0.12 : 0;
 
   // WAVE with the left (outer) hand between waveStart..waveEnd
@@ -260,24 +294,29 @@ function setConvergeTargets(){
 // ---------- main loop ----------
 function tick(){
   if(!running) return;
-  const t=(performance.now()-startT)/1000/SLOW;
-  const dt=Math.min(clock.getDelta(),0.05)/SLOW;
+  try{
+    const t=(performance.now()-startT)/1000/SLOW;
+    const dt=Math.min(clock.getDelta(),0.05)/SLOW;
 
-  animateMan(t);
-  if(phase==='fall'||phase==='converge') stepPhysics(dt);
-  rope.rotation.z=Math.sin(t*4)*0.006;
+    animateMan(t);
+    if(phase==='fall'||phase==='converge') stepPhysics(dt);
+    rope.rotation.z=Math.sin(t*4)*0.006;
 
-  // camera shake decays
-  if(shakeAmt>0){
-    camera.position.set(camBase.x+(Math.random()-.5)*shakeAmt,
-                        camBase.y+(Math.random()-.5)*shakeAmt,
-                        camBase.z+(Math.random()-.5)*shakeAmt*0.4);
-    camera.lookAt(LOOK);
-    shakeAmt*=0.9;
+    if(shakeAmt>0){
+      camera.position.set(camBase.x+(Math.random()-.5)*shakeAmt,
+                          camBase.y+(Math.random()-.5)*shakeAmt,
+                          camBase.z+(Math.random()-.5)*shakeAmt*0.4);
+      camera.lookAt(LOOK);
+      shakeAmt*=0.9;
+    }
+
+    renderer.render(scene,camera);
+    raf=requestAnimationFrame(tick);
+  }catch(err){
+    console.error('3D intro crashed mid-run, skipping to page:',err);
+    finish();
+    document.body.classList.add('reveal');
   }
-
-  renderer.render(scene,camera);
-  raf=requestAnimationFrame(tick);
 }
 
 function schedule(){
@@ -300,18 +339,24 @@ function finish(){
 }
 
 function start(){
-  document.body.classList.add('cinema'); document.body.classList.remove('reveal');
-  host.style.display='block'; host.classList.remove('done');
-  hello.classList.remove('show','hide'); replay.hidden=true;
-  if(loading) loading.style.display='';
+  try{
+    document.body.classList.add('cinema'); document.body.classList.remove('reveal');
+    host.style.display='block'; host.classList.remove('done');
+    hello.classList.remove('show','hide'); replay.hidden=true;
+    if(loading) loading.style.display='';
 
-  // fresh scene each run (simple + reliable for replay)
-  bricks=[];
-  if(renderer){ renderer.dispose(); }
-  buildScene();
-  clock=new THREE.Clock(); startT=performance.now(); phase='intro'; running=true; shakeAmt=0;
-  schedule();
-  raf=requestAnimationFrame(tick);
+    bricks=[];
+    if(renderer){ renderer.dispose(); }
+    buildScene();
+    clock=new THREE.Clock(); startT=performance.now(); phase='intro'; running=true; shakeAmt=0;
+    schedule();
+    raf=requestAnimationFrame(tick);
+  }catch(err){
+    console.error('3D intro failed, skipping to page:',err);
+    running=false; if(raf)cancelAnimationFrame(raf);
+    document.body.classList.add('cinema','reveal');
+    host.style.display='none'; replay.hidden=false;
+  }
 }
 
 function skip(){
