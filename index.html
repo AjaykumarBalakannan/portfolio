@@ -14,12 +14,17 @@
 <body>
 <div class="grain"></div>
 
-<!-- ===== 3D CINEMATIC INTRO (WebGL) ===== -->
-<div class="intro" id="intro">
+<!-- ===== INTERACTIVE PARTICLE GATE (WebGL) ===== -->
+<div class="gate" id="gate">
   <canvas id="scene"></canvas>
-  <div class="hello">Hello</div>
-  <div class="loading">rendering scene…</div>
-  <button class="skip" id="skip">skip intro ↦</button>
+  <div class="gate-copy" id="gateCopy">
+    <div class="gk">Data Scientist · Dallas, TX</div>
+    <h1 class="gt">Ajaykumar <em>Balakannan</em></h1>
+    <p class="gs">Production ML, NLP &amp; LLM-orchestrated systems. Move your cursor.</p>
+    <button class="enter" id="enter">Enter portfolio ↓</button>
+  </div>
+  <div class="hint" id="hint">drag to orbit · click to pulse</div>
+  <button class="skip" id="skip">skip ↦</button>
 </div>
 <button class="replay" id="replay" hidden>↺ replay intro</button>
 

@@ -12,21 +12,29 @@ body{background:var(--ink);color:var(--bone);font-family:var(--sans);font-size:1
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
 a{color:inherit;} img{display:block;max-width:100%;}
 
-/* ===== WEBGL CINEMATIC INTRO ===== */
-.intro{position:fixed;inset:0;z-index:900;background:var(--ink);overflow:hidden;}
-.intro.done{opacity:0;pointer-events:none;transition:opacity .6s ease;}
-#scene{position:absolute;inset:0;width:100%;height:100%;display:block;}
-.hello{
-  position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:3;pointer-events:none;
-  font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(58px,12vw,132px);
-  color:rgba(255,255,255,.95);letter-spacing:-.02em;text-shadow:0 3px 50px rgba(255,255,255,.22),0 0 2px rgba(255,255,255,.35);
-  opacity:0;transition:opacity .5s ease,transform .5s ease;
-}
-.hello.show{opacity:1;}
-.hello.hide{opacity:0;transform:translate(-50%,-64%) scale(.92);}
-.skip{position:absolute;bottom:20px;right:22px;z-index:5;font-family:var(--mono);font-size:12px;color:var(--muted);background:transparent;border:1px solid var(--ink-3);border-radius:100px;padding:7px 15px;cursor:pointer;transition:all .2s;}
+/* ===== INTERACTIVE PARTICLE GATE (WebGL) ===== */
+.gate{position:fixed;inset:0;z-index:900;overflow:hidden;background:
+  radial-gradient(120% 90% at 50% 42%, #2c2318 0%, #221c17 46%, #191410 100%);}
+.gate.done{opacity:0;pointer-events:none;transition:opacity .8s ease;}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;}
+.gate-copy{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;text-align:center;
+  width:min(90vw,760px);pointer-events:none;opacity:0;transition:opacity .8s ease,transform .8s ease;}
+.gate-copy.show{opacity:1;}
+.gate.leaving .gate-copy{opacity:0;transform:translate(-50%,-58%);}
+.gate-copy .gk{font-family:var(--mono);font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--ochre);margin-bottom:20px;}
+.gate-copy .gt{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.94;
+  font-size:clamp(44px,8.5vw,108px);color:var(--bone-2);text-shadow:0 4px 60px rgba(25,20,16,.9);}
+.gate-copy .gt em{font-style:italic;font-weight:500;color:var(--ochre);}
+.gate-copy .gs{margin-top:18px;font-size:clamp(14px,1.6vw,18px);color:var(--bone);opacity:.82;text-shadow:0 2px 30px rgba(25,20,16,.9);}
+.enter{pointer-events:auto;margin-top:34px;font-family:var(--mono);font-size:13px;letter-spacing:.06em;color:var(--ink);
+  background:var(--ochre);border:none;border-radius:100px;padding:13px 26px;cursor:pointer;transition:transform .2s,box-shadow .2s;
+  box-shadow:0 10px 40px -10px rgba(224,161,46,.6);}
+.enter:hover{transform:translateY(-2px);box-shadow:0 16px 50px -10px rgba(224,161,46,.75);}
+.hint{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);z-index:3;font-family:var(--mono);font-size:11px;
+  letter-spacing:.16em;color:var(--muted);opacity:0;transition:opacity .8s ease;pointer-events:none;}
+.hint.show{opacity:.7;}
+.skip{position:absolute;bottom:22px;right:24px;z-index:5;font-family:var(--mono);font-size:12px;color:var(--muted);background:transparent;border:1px solid var(--ink-3);border-radius:100px;padding:7px 15px;cursor:pointer;transition:all .2s;}
 .skip:hover{color:var(--bone);border-color:var(--muted);}
-.loading{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);z-index:4;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.14em;}
 .replay{position:fixed;bottom:16px;right:16px;z-index:40;font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(43,36,25,.85);border:1px solid var(--ink-3);border-radius:100px;padding:8px 14px;cursor:pointer;transition:all .2s;}
 .replay:hover{color:var(--ochre);border-color:var(--ochre);}
 

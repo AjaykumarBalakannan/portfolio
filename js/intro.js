@@ -1,379 +1,219 @@
-// 3D cinematic intro. A climber hangs on a rope, waves hello, then yanks it so a
-// stack of bricks on the top beam tumbles off with physics and converges into the page.
-// Real-time WebGL via three.js (self-hosted, no CDN). ~one puppet, ~40 rigid bricks.
+// Interactive particle gate. Thousands of GPU points assemble into drifting
+// clusters (a nod to embeddings / k-means), orbit with real depth, react to the
+// cursor, then burst apart to reveal the page. Real-time WebGL via three.js.
 
 import * as THREE from '../libs/three.module.min.js';
 
-const host   = document.getElementById('intro');
+const gate   = document.getElementById('gate');
 const canvas = document.getElementById('scene');
-const hello  = document.querySelector('.hello');
-const loading= document.querySelector('.loading');
-const skipBtn= document.getElementById('skip');
+const copy   = document.getElementById('gateCopy');
+const hint   = document.getElementById('hint');
+const enterB = document.getElementById('enter');
+const skipB  = document.getElementById('skip');
 const replay = document.getElementById('replay');
 const RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
 
-// ---- palette (matches the site) ----
-const BRICK_COLORS = [0xe0a12e,0x3a8975,0xbc5a34,0xece2cf,0x7d4a54,0xc8802f];
-const COL = { ink:0x221c17, jacket:0x3b414d, pants:0xd8c9a2, shoe:0x24242e,
-              skin:0xe7b489, hair:0x593a23, rope:0x9c6d3c, beam:0x4a3a2a };
+// warm palette -> point colors (kept a touch dim; additive blending brightens them)
+const PAL = [[0.78,0.55,0.16],[0.20,0.50,0.42],[0.70,0.33,0.19],[0.80,0.74,0.60],[0.46,0.28,0.33],[0.72,0.47,0.20]];
 
-let renderer, scene, camera;
-let man, joints, rope, beam, bricks=[], ground;
-let clock, raf=null, running=false, startT=0, phase='idle';
-let shakeAmt=0, camBase=new THREE.Vector3();
-const GRAV=-15, GROUND_Y=-3.2;
-const LOOK=new THREE.Vector3(-0.7,3.9,0);
-const HEAD_YAW=0.37; // aims the forward-facing face toward the camera's actual angle
-const SLOW=Math.max(1,+(new URLSearchParams(location.search).get('slow')||1)); // debug: ?slow=6
+let renderer, scene, camera, points, mat, group, clock;
+let raf=null, running=false, startT=0, leaving=false, timers=[];
+let mouse={x:0,y:0}, rotTarget={x:0,y:0}, rot={x:0,y:0}, pulse=0;
 
-// timeline markers (seconds)
-const TL = { hello:0.45, waveStart:0.7, waveEnd:1.7, pull:2.0, release:2.4,
-             converge:3.95, reveal:4.55, fade:4.7, end:5.35 };
-let domTimers=[];
+const N = innerWidth<640 ? 8000 : 16000;
+const CLUSTERS = 7;
 
-function makeMat(color, opts={}){ const {r,m,...rest}=opts; return new THREE.MeshStandardMaterial({ color, roughness:r??0.72, metalness:m??0.02, ...rest }); }
-function capsule(radius,len,mat){ const m=new THREE.Mesh(new THREE.CapsuleGeometry(radius,len,6,14),mat); m.castShadow=true; return m; }
-function sphere(radius,mat){ const m=new THREE.Mesh(new THREE.SphereGeometry(radius,20,16),mat); m.castShadow=true; return m; }
+function gauss(s){ // small gaussian via central-limit
+  return ((Math.random()+Math.random()+Math.random())/3-0.5)*2*s;
+}
 
-// ---------- build the climber as a jointed puppet ----------
-function buildMan(){
-  const g = new THREE.Group();
-  const matJ=makeMat(COL.jacket), matP=makeMat(COL.pants), matS=makeMat(COL.shoe,{r:.5}),
-        matSk=makeMat(COL.skin,{r:.6}), matH=makeMat(COL.hair,{r:.8});
+function buildPoints(){
+  const g = new THREE.BufferGeometry();
+  const target  = new Float32Array(N*3);
+  const scatter = new Float32Array(N*3);
+  const color   = new Float32Array(N*3);
+  const rand    = new Float32Array(N);
 
-  // torso (leans slightly toward the rope)
-  const torso = capsule(.42,.95,matJ); torso.position.y=1.15; torso.rotation.z=-.12; g.add(torso);
-  // hips
-  const hips = capsule(.4,.28,matP); hips.position.y=.5; g.add(hips);
-
-  // head + face — built facing +Z, angled toward the camera with HEAD_YAW
-  const head = new THREE.Group(); head.position.set(.1,2.18,0);
-  const skull=sphere(.47,matSk); head.add(skull);
-
-  // ears
-  const earMat=matSk;
-  const earL=sphere(.09,earMat); earL.scale.set(.6,1,.8); earL.position.set(-.44,-.02,.02); head.add(earL);
-  const earR=sphere(.09,earMat); earR.scale.set(.6,1,.8); earR.position.set(.44,-.02,.02); head.add(earR);
-
-  // hair — covers crown + back, leaves the face (+Z, front) clear
-  const hair=sphere(.50,matH); hair.scale.set(1,.82,1); hair.position.set(0,.17,-.06); head.add(hair);
-  const fringe=sphere(.30,matH); fringe.scale.set(1.05,.55,.8); fringe.position.set(0,.30,.30); head.add(fringe);
-  const sideL=sphere(.18,matH); sideL.position.set(-.36,.05,.08); head.add(sideL);
-  const sideR=sphere(.18,matH); sideR.position.set(.36,.05,.08); head.add(sideR);
-
-  // eyes: white sclera + dark pupil, symmetric, front-facing
-  const scleraMat=makeMat(0xfaf3e6,{r:.35});
-  const pupilMat=makeMat(0x231a12,{r:.3});
-  const browMat=matH;
-  [-1,1].forEach(side=>{
-    const sclera=sphere(.085,scleraMat); sclera.scale.set(1,1.15,.6);
-    sclera.position.set(side*.185,.06,.40); head.add(sclera);
-    const pupil=sphere(.045,pupilMat); pupil.position.set(side*.185,.055,.465); head.add(pupil);
-    const glint=sphere(.015,makeMat(0xffffff,{r:.1})); glint.position.set(side*.185+.015,.075,.485); head.add(glint);
-    const brow=new THREE.Mesh(new THREE.BoxGeometry(.16,.03,.03),browMat);
-    brow.position.set(side*.185,.175,.42); brow.rotation.z=side*-.12; head.add(brow);
-  });
-
-  // nose — small cone, apex pointing forward (+Z)
-  const nose=new THREE.Mesh(new THREE.ConeGeometry(.06,.15,10),matSk);
-  nose.rotation.x=Math.PI/2; nose.position.set(0,-.04,.46); head.add(nose);
-
-  // mouth — a warm little smile arc
-  const mouth=new THREE.Mesh(new THREE.TorusGeometry(.10,.02,8,16,Math.PI),makeMat(0x8a4a3e,{r:.55}));
-  mouth.rotation.z=Math.PI; mouth.position.set(0,-.19,.42); head.add(mouth);
-  // cheeks — a little warmth
-  [-1,1].forEach(side=>{
-    const cheek=sphere(.07,makeMat(0xe8996b,{r:.7}));
-    cheek.position.set(side*.30,-.12,.34); cheek.scale.set(1,.7,.5); head.add(cheek);
-  });
-
-  g.add(head);
-
-  // helper to build an arm: shoulder group -> upper -> elbow group -> fore + hand
-  function arm(side){ // side -1 left, +1 right
-    const sh=new THREE.Group(); sh.position.set(side*.34,1.62,.05);
-    const upper=capsule(.16,.6,matJ); upper.position.y=-.3; sh.add(upper);
-    const el=new THREE.Group(); el.position.y=-.62; sh.add(el);
-    const fore=capsule(.14,.55,matJ); fore.position.y=-.28; el.add(fore);
-    const hand=sphere(.15,matSk); hand.position.y=-.58; el.add(hand);
-    g.add(sh);
-    return {sh,el,hand};
+  // cluster centers spread evenly on a sphere (golden-angle spiral -> balanced, centered)
+  const centers=[]; const golden=Math.PI*(3-Math.sqrt(5));
+  for(let k=0;k<CLUSTERS;k++){
+    const y=1-(k/(CLUSTERS-1))*2;            // -1..1
+    const r=Math.sqrt(1-y*y), th=golden*k, rad=1.7;
+    centers.push([Math.cos(th)*r*rad, y*rad*0.82, Math.sin(th)*r*rad]);
   }
-  const armR=arm(1), armL=arm(-1);
-
-  // helper to build a leg (bent, climbing pose)
-  function leg(side){
-    const hip=new THREE.Group(); hip.position.set(side*.2,.35,.05);
-    const thigh=capsule(.19,.6,matP); thigh.position.y=-.32; hip.add(thigh);
-    const knee=new THREE.Group(); knee.position.y=-.64; hip.add(knee);
-    const shin=capsule(.16,.55,matP); shin.position.y=-.3; knee.add(shin);
-    const shoe=new THREE.Mesh(new THREE.BoxGeometry(.26,.18,.5),matS); shoe.castShadow=true; shoe.position.set(0,-.62,.14); knee.add(shoe);
-    g.add(hip);
-    return {hip,knee};
+  for(let i=0;i<N;i++){
+    const k=(Math.random()*CLUSTERS)|0, c=centers[k];
+    const spread = 0.28 + Math.random()*0.34;
+    target[i*3]   = c[0]+gauss(spread);
+    target[i*3+1] = c[1]+gauss(spread);
+    target[i*3+2] = c[2]+gauss(spread);
+    // start scattered on a big shell for the "assemble" intro
+    const a=Math.random()*Math.PI*2, b=Math.acos(2*Math.random()-1), r=5+Math.random()*4;
+    scatter[i*3]   = r*Math.sin(b)*Math.cos(a);
+    scatter[i*3+1] = r*Math.cos(b);
+    scatter[i*3+2] = r*Math.sin(b)*Math.sin(a);
+    const col=PAL[k%PAL.length], v=0.75+Math.random()*0.45;
+    color[i*3]=col[0]*v; color[i*3+1]=col[1]*v; color[i*3+2]=col[2]*v;
+    rand[i]=Math.random();
   }
-  const legR=leg(1), legL=leg(-1);
-  // pose legs bent up (climbing)
-  legR.hip.rotation.x=-.9; legR.knee.rotation.x=1.4;
-  legL.hip.rotation.x=-.5; legL.knee.rotation.x=1.1;
-
-  // arms up gripping the rope overhead (staggered like a climber)
-  armR.sh.rotation.set(0,0,-2.55); armR.el.rotation.z=-.15;   // higher hand
-  armL.sh.rotation.set(0,0, 2.35); armL.el.rotation.z=.35;    // lower hand
-
-  joints={torso,head,armR,armL,legR,legL};
+  g.setAttribute('aTarget', new THREE.BufferAttribute(target,3));
+  g.setAttribute('aScatter',new THREE.BufferAttribute(scatter,3));
+  g.setAttribute('aColor',  new THREE.BufferAttribute(color,3));
+  g.setAttribute('aRand',   new THREE.BufferAttribute(rand,1));
+  g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(N*3),3)); // required slot
   return g;
 }
 
-// ---------- rope + top beam + brick stack ----------
-function buildRig(){
-  const ropeX=-2.15;
-  // rope as a tube along a gently bent curve
-  const curve=new THREE.CatmullRomCurve3([
-    new THREE.Vector3(ropeX+.15,9.5,0), new THREE.Vector3(ropeX+.05,6,0),
-    new THREE.Vector3(ropeX,3,.1), new THREE.Vector3(ropeX-.05,-1.5,0)
-  ]);
-  rope=new THREE.Mesh(new THREE.TubeGeometry(curve,40,.075,8,false),
-        makeMat(COL.rope,{r:.85}));
-  rope.castShadow=true; scene.add(rope);
-
-  // top beam the rope hangs from + bricks rest on
-  beam=new THREE.Group();
-  const bar=new THREE.Mesh(new THREE.BoxGeometry(4.4,.5,1.1),makeMat(COL.beam,{r:.9}));
-  bar.castShadow=true; bar.receiveShadow=true; beam.add(bar);
-  beam.position.set(ropeX-.2,7.5,0); scene.add(beam);
-
-  // brick wall stacked on the beam
-  const cols=7, rows=4, S=.62, gap=S*1.02;
-  const x0=beam.position.x-((cols-1)*gap)/2, y0=7.85+S/2, z0=0;
-  let i=0;
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-    const s=S*(0.9+Math.random()*0.12);
-    const mat=makeMat(BRICK_COLORS[i%BRICK_COLORS.length],{r:.6});
-    const mesh=new THREE.Mesh(new THREE.BoxGeometry(s,s,s),mat);
-    mesh.castShadow=true; mesh.receiveShadow=true;
-    // brick-lay offset every other row
-    const offset=(r%2)?gap/2:0;
-    mesh.position.set(x0+c*gap+offset-(r%2?gap/2:0), y0+r*gap, z0+(Math.random()-.5)*.2);
-    mesh.userData={ v:new THREE.Vector3(), w:new THREE.Vector3(), mode:'rest',
-                    half:s/2, tpos:new THREE.Vector3(), tquat:new THREE.Quaternion(), fade:1 };
-    scene.add(mesh); bricks.push(mesh); i++;
-  }
-}
+const VERT = `
+  uniform float uTime, uProgress, uBurst, uSize, uPixel, uPulse;
+  attribute vec3 aTarget, aScatter, aColor; attribute float aRand;
+  varying vec3 vColor; varying float vAlpha;
+  void main(){
+    float p = uProgress;
+    vec3 pos = mix(aScatter, aTarget, p);
+    float t = uTime*0.28 + aRand*6.2831;
+    float amp = 0.05 + uPulse*0.55;
+    pos.x += sin(t)*amp;
+    pos.y += cos(t*1.1)*amp;
+    pos.z += sin(t*0.7)*amp;
+    pos += normalize(aTarget+0.0001) * uBurst * (3.5 + aRand*4.0);
+    vColor = aColor;
+    vec4 mv = modelViewMatrix * vec4(pos,1.0);
+    float size = uSize*(0.55+aRand*0.9)*(1.0+uPulse*0.6);
+    gl_PointSize = size * uPixel * (1.0 / -mv.z);
+    gl_Position = projectionMatrix * mv;
+    vAlpha = 1.0 - uBurst;
+  }`;
+const FRAG = `
+  precision mediump float;
+  varying vec3 vColor; varying float vAlpha;
+  void main(){
+    vec2 c = gl_PointCoord - 0.5;
+    float d = length(c);
+    float a = pow(smoothstep(0.5,0.0,d), 1.5);
+    float core = smoothstep(0.16,0.0,d);
+    vec3 col = vColor + core*0.6;
+    gl_FragColor = vec4(col, a*vAlpha);
+    if(gl_FragColor.a < 0.01) discard;
+  }`;
 
 function buildScene(){
-  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.setSize(innerWidth,innerHeight);
-  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
-  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-  scene=new THREE.Scene();
-  scene.background=new THREE.Color(COL.ink);
-  scene.fog=new THREE.Fog(COL.ink,14,30);
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x191410, 0.12);
 
-  camera=new THREE.PerspectiveCamera(46,innerWidth/innerHeight,.1,100);
-  camera.position.set(1.6,3.9,10.8); camBase.copy(camera.position);
-  camera.lookAt(LOOK);
+  camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 100);
+  camera.position.set(0,0,6.4);
 
-  // lighting: warm key, cool fill, soft ambient
-  const hemi=new THREE.HemisphereLight(0xfff1d8,0x2a2018,.55); scene.add(hemi);
-  const key=new THREE.DirectionalLight(0xffd9a0,2.1);
-  key.position.set(6,12,8); key.castShadow=true;
-  key.shadow.mapSize.set(2048,2048);
-  key.shadow.camera.near=1; key.shadow.camera.far=40;
-  key.shadow.camera.left=-12; key.shadow.camera.right=12;
-  key.shadow.camera.top=14; key.shadow.camera.bottom=-8;
-  key.shadow.bias=-0.0004; scene.add(key);
-  const fill=new THREE.DirectionalLight(0x9fc4ff,.5); fill.position.set(-8,4,6); scene.add(fill);
-  const rim=new THREE.DirectionalLight(0xffb066,.7); rim.position.set(-4,6,-8); scene.add(rim);
-
-  // ground to catch shadows
-  ground=new THREE.Mesh(new THREE.PlaneGeometry(60,60),
-          new THREE.MeshStandardMaterial({color:0x1a140f,roughness:1}));
-  ground.rotation.x=-Math.PI/2; ground.position.y=GROUND_Y; ground.receiveShadow=true; scene.add(ground);
-
-  buildRig();
-  man=buildMan(); man.position.set(-2.7,2.4,0); scene.add(man);
-}
-
-// ---------- animation helpers ----------
-const easeInOut=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
-function lerp(a,b,t){return a+(b-a)*t;}
-
-function animateMan(t){
-  const j=joints;
-  // gentle hang bob + look-around
-  man.position.y = 2.4 + Math.sin(t*1.8)*0.05;
-  const looking = t<TL.pull;
-  j.head.rotation.y = looking ? HEAD_YAW + Math.sin(t*0.9)*0.4 : lerp(j.head.rotation.y,HEAD_YAW,.1);
-  j.head.rotation.z = looking ? Math.sin(t*1.3)*0.06 : 0;
-  j.torso.rotation.y = looking ? Math.sin(t*0.7)*0.12 : 0;
-
-  // WAVE with the left (outer) hand between waveStart..waveEnd
-  if(t>TL.waveStart && t<TL.waveEnd){
-    const w=(t-TL.waveStart)/(TL.waveEnd-TL.waveStart);
-    const ease=Math.sin(Math.min(w,1)*Math.PI);           // rise then settle
-    j.armL.sh.rotation.z = 2.35 + ease*0.9;               // lift arm out
-    j.armL.el.rotation.z = 0.35 - ease*0.5 + Math.sin(t*12)*0.35*ease; // waggle forearm
-    j.armL.sh.rotation.x = -ease*0.3;
-  } else if(t>=TL.waveEnd && t<TL.pull){
-    // return the hand to the rope
-    const b=Math.min((t-TL.waveEnd)/0.3,1);
-    j.armL.sh.rotation.z = lerp(2.35+0.9,2.35,b);
-    j.armL.el.rotation.z = lerp(j.armL.el.rotation.z,0.35,b);
-    j.armL.sh.rotation.x = lerp(j.armL.sh.rotation.x,0,b);
-  }
-
-  // PULL: both arms yank down, body climbs up a touch
-  if(t>=TL.pull){
-    const p=easeInOut(Math.min((t-TL.pull)/0.5,1));
-    j.armR.sh.rotation.z = -2.55 + p*0.55;
-    j.armL.sh.rotation.z =  2.35 - p*0.55;
-    j.armR.el.rotation.z = -.15 - p*0.4;
-    j.armL.el.rotation.z =  .35 + p*0.4;
-    man.position.y += p*0.35;
-    j.legR.hip.rotation.x = -0.9 - p*0.4;   // knees tuck on the pull
-    j.legL.hip.rotation.x = -0.5 - p*0.4;
-  }
-}
-
-function releaseBricks(){
-  bricks.forEach(b=>{
-    b.userData.mode='fall';
-    // tip off the beam toward the camera + downward, with spin
-    b.userData.v.set((Math.random()-.4)*2.2, 1+Math.random()*2, 2+Math.random()*3);
-    b.userData.w.set((Math.random()-.5)*8,(Math.random()-.5)*8,(Math.random()-.5)*8);
+  mat = new THREE.ShaderMaterial({
+    uniforms:{ uTime:{value:0}, uProgress:{value:0}, uBurst:{value:0},
+               uSize:{value:15.0}, uPixel:{value:Math.min(devicePixelRatio,2)}, uPulse:{value:0} },
+    vertexShader:VERT, fragmentShader:FRAG,
+    transparent:true, depthWrite:false, blending:THREE.AdditiveBlending
   });
-  // give the beam a little kick too
-  beam.userData={kick:0.35};
+
+  group = new THREE.Group();
+  points = new THREE.Points(buildPoints(), mat);
+  points.frustumCulled=false;
+  group.add(points); scene.add(group);
 }
 
-function stepPhysics(dt){
-  const q=new THREE.Quaternion();
-  bricks.forEach(b=>{
-    const u=b.userData;
-    if(u.mode==='fall'){
-      u.v.y += GRAV*dt;
-      b.position.addScaledVector(u.v,dt);
-      // integrate spin
-      q.setFromEuler(new THREE.Euler(u.w.x*dt,u.w.y*dt,u.w.z*dt));
-      b.quaternion.premultiply(q);
-      // floor
-      if(b.position.y < GROUND_Y+u.half){
-        b.position.y=GROUND_Y+u.half;
-        u.v.y*=-0.34; u.v.x*=0.62; u.v.z*=0.62; u.w.multiplyScalar(0.55);
-        if(Math.abs(u.v.y)<1.2)u.v.y=0;
-      }
-    } else if(u.mode==='converge'){
-      b.position.lerp(u.tpos,0.16);
-      b.quaternion.slerp(u.tquat,0.16);
-      if(b.position.distanceTo(u.tpos)<0.25){ u.fade-=dt*2.2; }
-      if(u.fade<1){ b.material.transparent=true; b.material.opacity=Math.max(u.fade,0); if(u.fade<=0)b.visible=false; }
-    }
-  });
-  if(beam.userData&&beam.userData.kick){ beam.rotation.z=Math.sin(performance.now()*0.02)*beam.userData.kick; beam.userData.kick*=0.92; }
-}
+const easeOut = t => 1-Math.pow(1-t,3);
 
-// map each brick to a point over the hero mosaic so the pile "becomes" the page
-function setConvergeTargets(){
-  const tiles=[...document.querySelectorAll('.mosaic .tile')]
-    .map(t=>t.getBoundingClientRect()).filter(r=>r.width>4);
-  const v=new THREE.Vector3();
-  bricks.forEach(b=>{
-    const r = tiles.length? tiles[(Math.random()*tiles.length)|0] : {left:innerWidth*.3,top:innerHeight*.4,width:innerWidth*.4,height:200};
-    const px=r.left+Math.random()*r.width, py=r.top+Math.random()*r.height;
-    const ndcX=(px/innerWidth)*2-1, ndcY=-(py/innerHeight)*2+1;
-    v.set(ndcX,ndcY,0.6).unproject(camera);           // a world point over that tile
-    b.userData.tpos.copy(v);
-    b.userData.tquat.identity();
-    b.userData.mode='converge';
-  });
-}
-
-// ---------- main loop ----------
 function tick(){
   if(!running) return;
   try{
-    const t=(performance.now()-startT)/1000/SLOW;
-    const dt=Math.min(clock.getDelta(),0.05)/SLOW;
+    const t=(performance.now()-startT)/1000;
+    mat.uniforms.uTime.value = t;
+    // assemble over 1.8s
+    mat.uniforms.uProgress.value = Math.min(easeOut(t/1.8), 1);
+    // click pulse decays
+    pulse *= 0.94; mat.uniforms.uPulse.value = pulse;
 
-    animateMan(t);
-    if(phase==='fall'||phase==='converge') stepPhysics(dt);
-    rope.rotation.z=Math.sin(t*4)*0.006;
-
-    if(shakeAmt>0){
-      camera.position.set(camBase.x+(Math.random()-.5)*shakeAmt,
-                          camBase.y+(Math.random()-.5)*shakeAmt,
-                          camBase.z+(Math.random()-.5)*shakeAmt*0.4);
-      camera.lookAt(LOOK);
-      shakeAmt*=0.9;
-    }
+    // parallax: ease group rotation toward cursor, plus slow auto-spin
+    rot.x += (rotTarget.x - rot.x)*0.05;
+    rot.y += (rotTarget.y - rot.y)*0.05;
+    group.rotation.x = rot.x;
+    group.rotation.y = rot.y + t*0.08;
 
     renderer.render(scene,camera);
     raf=requestAnimationFrame(tick);
   }catch(err){
-    console.error('3D intro crashed mid-run, skipping to page:',err);
-    finish();
-    document.body.classList.add('reveal');
+    console.error('particle gate crashed, revealing page:',err);
+    finish(); document.body.classList.add('reveal');
   }
 }
 
-function schedule(){
-  domTimers.forEach(clearTimeout); domTimers=[];
-  const at=(s,fn)=>domTimers.push(setTimeout(fn,s*1000*SLOW));
-  at(TL.hello,   ()=>{ if(loading)loading.style.display='none'; hello.classList.add('show'); });
-  at(TL.pull,    ()=>{ hello.classList.add('hide'); });
-  at(TL.release, ()=>{ phase='fall'; shakeAmt=0.5; releaseBricks(); });
-  at(TL.converge,()=>{ phase='converge'; setConvergeTargets(); });
-  at(TL.reveal,  ()=>{ document.body.classList.add('reveal'); });
-  at(TL.fade,    ()=>{ host.classList.add('done'); });
-  at(TL.end,     ()=>{ finish(); });
+function reveal(){
+  if(leaving) return; leaving=true;
+  gate.classList.add('leaving');
+  // burst the points outward, then fade the gate + build the page
+  const t0=performance.now();
+  (function burst(){
+    const k=Math.min((performance.now()-t0)/900,1);
+    if(mat) mat.uniforms.uBurst.value = easeOut(k);
+    if(k<1 && running){ requestAnimationFrame(burst); }
+  })();
+  timers.push(setTimeout(()=>{ document.body.classList.add('reveal'); }, 500));
+  timers.push(setTimeout(()=>{ gate.classList.add('done'); }, 650));
+  timers.push(setTimeout(finish, 1250));
 }
 
 function finish(){
   running=false; if(raf)cancelAnimationFrame(raf);
-  host.style.display='none'; replay.hidden=false;
-  // free GPU memory
-  renderer.dispose();
+  gate.style.display='none'; replay.hidden=false;
+  if(renderer) renderer.dispose();
 }
 
 function start(){
   try{
     document.body.classList.add('cinema'); document.body.classList.remove('reveal');
-    host.style.display='block'; host.classList.remove('done');
-    hello.classList.remove('show','hide'); replay.hidden=true;
-    if(loading) loading.style.display='';
+    gate.style.display=''; gate.classList.remove('done','leaving');
+    copy.classList.remove('show'); hint.classList.remove('show');
+    replay.hidden=true; leaving=false; pulse=0; rot={x:0,y:0}; rotTarget={x:0,y:0};
 
-    bricks=[];
-    if(renderer){ renderer.dispose(); }
+    if(renderer) renderer.dispose();
     buildScene();
-    clock=new THREE.Clock(); startT=performance.now(); phase='intro'; running=true; shakeAmt=0;
-    schedule();
+    startT=performance.now(); running=true;
     raf=requestAnimationFrame(tick);
+    timers.push(setTimeout(()=>copy.classList.add('show'), 700));
+    timers.push(setTimeout(()=>hint.classList.add('show'), 1400));
   }catch(err){
-    console.error('3D intro failed, skipping to page:',err);
-    running=false; if(raf)cancelAnimationFrame(raf);
-    document.body.classList.add('cinema','reveal');
-    host.style.display='none'; replay.hidden=false;
+    console.error('3D gate failed, skipping to page:',err);
+    running=false; document.body.classList.add('cinema','reveal');
+    gate.style.display='none'; replay.hidden=false;
   }
 }
 
-function skip(){
-  domTimers.forEach(clearTimeout); domTimers=[];
-  running=false; if(raf)cancelAnimationFrame(raf);
-  document.body.classList.add('cinema','reveal');
-  host.classList.add('done');
-  setTimeout(()=>{ host.style.display='none'; replay.hidden=false; if(renderer)renderer.dispose(); },500);
+// ---- interaction ----
+function onMove(cx,cy){
+  mouse.x=(cx/innerWidth)*2-1; mouse.y=(cy/innerHeight)*2-1;
+  rotTarget.y = mouse.x*0.5;
+  rotTarget.x = mouse.y*0.35;
 }
+addEventListener('mousemove',e=>onMove(e.clientX,e.clientY));
+addEventListener('touchmove',e=>{ if(e.touches[0]) onMove(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
+canvas.addEventListener('pointerdown',()=>{ pulse=1; });
+
+enterB.addEventListener('click',reveal);
+skipB.addEventListener('click',()=>{ // skip = instant, no burst
+  timers.forEach(clearTimeout); timers=[];
+  running=false; if(raf)cancelAnimationFrame(raf);
+  document.body.classList.add('cinema','reveal'); gate.classList.add('done');
+  setTimeout(()=>{ gate.style.display='none'; replay.hidden=false; if(renderer)renderer.dispose(); },500);
+});
+replay.addEventListener('click',start);
 
 addEventListener('resize',()=>{
   if(!renderer)return;
   camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth,innerHeight);
+  mat.uniforms.uPixel.value=Math.min(devicePixelRatio,2);
 });
-skipBtn.addEventListener('click',skip);
-replay.addEventListener('click',start);
 
-if(RM){ host.style.display='none'; document.body.classList.add('cinema','reveal'); replay.hidden=false; }
+if(RM){ gate.style.display='none'; document.body.classList.add('cinema','reveal'); replay.hidden=false; }
 else { start(); }
