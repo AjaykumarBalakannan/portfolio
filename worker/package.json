@@ -7,7 +7,10 @@
   "main": "index.js",
   "scripts": {
     "deploy": "wrangler deploy",
-    "tail": "wrangler tail"
+    "tail": "wrangler tail",
+    "logs": "wrangler d1 execute portfolio-chat-logs --remote --json --command \"SELECT asked_at, session, turn, question, answer, country FROM turns ORDER BY id DESC LIMIT 40\" | python3 ../scripts/format_chats.py",
+    "logs:today": "wrangler d1 execute portfolio-chat-logs --remote --json --command \"SELECT asked_at, session, turn, question, answer, country FROM turns WHERE date(asked_at) = date('now') ORDER BY id DESC\" | python3 ../scripts/format_chats.py",
+    "logs:count": "wrangler d1 execute portfolio-chat-logs --remote --json --command \"SELECT COUNT(*) AS total_turns, COUNT(DISTINCT session) AS conversations, MAX(asked_at) AS latest FROM turns\" | python3 ../scripts/format_chats.py"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0"
