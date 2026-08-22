@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 
-# wrangler build/state; the GEMINI_API_KEY secret lives in Cloudflare, never here
+# wrangler build/state and local secrets; the real secrets live in Cloudflare
+node_modules/
 worker/.wrangler/
 .dev.vars

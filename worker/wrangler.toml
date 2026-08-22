@@ -1,9 +1,17 @@
 name = "portfolio-rag"
 main = "index.js"
 compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
 
-# Set the secret before first deploy (never put it in this file):
-#   npx wrangler secret put GEMINI_API_KEY
+# Two secrets, set once each before the first deploy. Never put them in this
+# file -- it's tracked in git.
+#   npx wrangler secret put GEMINI_API_KEY      # embeddings (aistudio.google.com/apikey)
+#   npx wrangler secret put ANTHROPIC_API_KEY   # answers    (console.anthropic.com)
 #
 # Deploy:
+#   npm install
 #   npx wrangler deploy
+#
+# Run the real Worker locally on :8787 (which is what js/ask.js targets from
+# localhost) with the same two keys in worker/.dev.vars -- gitignored:
+#   npx wrangler dev

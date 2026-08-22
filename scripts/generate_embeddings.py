@@ -64,12 +64,18 @@ def main() -> None:
     vectors = []
     for i, chunk in enumerate(chunks, 1):
         vec = embed(api_key, chunk["text"], "RETRIEVAL_DOCUMENT")
-        vectors.append({
+        entry = {
             "id": chunk["id"],
             "source": chunk.get("source", ""),
             "text": chunk["text"],
             "embedding": vec,
-        })
+        }
+        # Pinned chunks ride along on every question regardless of similarity, so
+        # the persona always knows who it is. Carried through here rather than
+        # hardcoded in the Worker, so resume_chunks.json stays the only source.
+        if chunk.get("pin"):
+            entry["pin"] = True
+        vectors.append(entry)
         print(f"  [{i}/{len(chunks)}] {chunk['id']} -> {len(vec)} dims")
         time.sleep(0.2)  # stay well under free-tier rate limits
 
