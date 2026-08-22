@@ -234,21 +234,15 @@
   </button>
   <div class="askw-panel" id="askPanel" hidden>
     <div class="askw-head">
-      <span>Ask about my work</span>
+      <span>Chat with Ajay</span>
       <button class="askw-close" id="askClose" type="button" aria-label="Close">&times;</button>
     </div>
-    <p class="ask-lede">Grounded in my real projects and resume — ask something about me.</p>
-    <div class="ask-chips" id="askChips">
-      <button class="ask-chip" type="button">What did you build at Canaria?</button>
-      <button class="ask-chip" type="button">Tell me about TravelGenie</button>
-      <button class="ask-chip" type="button">What certifications do you have?</button>
-    </div>
-    <div class="ask-dots" id="askDots"><span></span><span></span><span></span></div>
-    <div class="ask-answer" id="askAnswer"></div>
+    <div class="ask-log" id="askLog" role="log" aria-live="polite" aria-label="Conversation with Ajay"></div>
     <form class="ask-form" id="askForm">
-      <input class="ask-input" id="askInput" type="text" maxlength="300" autocomplete="off" placeholder="Ask about my work…"/>
-      <button class="ask-submit" id="askSubmit" type="submit">Ask</button>
+      <input class="ask-input" id="askInput" type="text" maxlength="300" autocomplete="off" placeholder="Say something…"/>
+      <button class="ask-submit" id="askSubmit" type="submit">Send</button>
     </form>
+    <p class="ask-note">An AI answering as me, from my real resume and projects. Chats are saved so I can see what people ask.</p>
   </div>
 </div>
 

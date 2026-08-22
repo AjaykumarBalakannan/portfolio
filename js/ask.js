@@ -21,9 +21,15 @@ const closeBtn = document.getElementById('askClose');
 const form = document.getElementById('askForm');
 const input = document.getElementById('askInput');
 const submit = document.getElementById('askSubmit');
-const chips = document.getElementById('askChips');
-const dots = document.getElementById('askDots');
-const answer = document.getElementById('askAnswer');
+const log = document.getElementById('askLog');
+
+// Conversation state. `history` is what gets replayed to the Worker so the model
+// can follow a back-and-forth; `session` ties the turns together in the chat log
+// on the backend. Both are per panel-open and die with the page.
+const GREETING = "Hey, this is Ajay :) How are you doing today?";
+const history = [];
+const session = Math.random().toString(36).slice(2) + Date.now().toString(36);
+let greeted = false;
 
 // ---------- rocket-flight-to-launcher intro ----------
 // Full-viewport orthographic camera, 1 world unit = 1 CSS px, origin top-left
@@ -320,6 +326,17 @@ function openPanel() {
   launcher.setAttribute('aria-expanded', 'true');
   launcher.classList.remove('blink'); // stop nagging once they've engaged
   setTimeout(() => input.focus(), 150);
+
+  // Open the conversation ourselves rather than waiting to be asked something.
+  // Held back until the panel has finished animating in so the bubble doesn't
+  // arrive mid-transition, and only ever once per page load.
+  if (!greeted) {
+    greeted = true;
+    setTimeout(() => {
+      addMessage('them', GREETING);
+      history.push({ role: 'assistant', content: GREETING });
+    }, 420);
+  }
 }
 function closePanel() {
   panel.classList.remove('show');
@@ -339,52 +356,88 @@ document.addEventListener('click', (e) => {
   if (!panel.hidden && !document.getElementById('askw').contains(e.target)) closePanel();
 });
 
+// ---------- transcript ----------
+
+// textContent throughout, never innerHTML: the reply is model output and the
+// question is visitor input, so neither is ever treated as markup.
+function addMessage(who, text) {
+  const el = document.createElement('div');
+  el.className = `ask-msg ${who}`;
+  el.textContent = text;
+  log.appendChild(el);
+  scrollToEnd();
+  return el;
+}
+
+function showTyping() {
+  const el = document.createElement('div');
+  el.className = 'ask-typing';
+  el.innerHTML = '<span></span><span></span><span></span>';
+  log.appendChild(el);
+  scrollToEnd();
+  return el;
+}
+
+// Only auto-scroll when the reader is already at the bottom. If they've scrolled
+// up to re-read something, a streaming reply shouldn't yank them back down.
+function scrollToEnd(force = true) {
+  const nearBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 60;
+  if (force || nearBottom) log.scrollTop = log.scrollHeight;
+}
+
 // ---------- ask / streaming ----------
 
 async function ask(question) {
   submit.disabled = true;
-  answer.classList.remove('show', 'error');
-  answer.textContent = '';
-  dots.classList.add('show');
+  input.value = '';
+  addMessage('me', question);
+
+  const typing = showTyping();
+  let bubble = null;
 
   try {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question }),
+      body: JSON.stringify({ question, history, session }),
     });
     if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
-    let first = true;
+    let full = '';
+
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
-      if (first) { dots.classList.remove('show'); answer.classList.add('show'); first = false; }
-      answer.textContent += decoder.decode(value, { stream: true });
+      const chunk = decoder.decode(value, { stream: true });
+      if (!chunk) continue;
+      // Swap the dots for a real bubble the moment the first token lands, so the
+      // reply grows in place instead of appearing all at once at the end.
+      if (!bubble) { typing.remove(); bubble = addMessage('them', ''); }
+      full += chunk;
+      bubble.textContent = full;
+      scrollToEnd(false);
     }
-    if (first) { dots.classList.remove('show'); answer.classList.add('show'); }
+
+    if (!bubble) { typing.remove(); bubble = addMessage('them', full || '...'); }
+
+    history.push({ role: 'user', content: question });
+    history.push({ role: 'assistant', content: full });
   } catch (err) {
-    dots.classList.remove('show');
-    answer.classList.add('show', 'error');
-    answer.textContent = "Couldn't reach the assistant just now. Best to reach out directly through the contact section below.";
+    typing.remove();
+    if (bubble) bubble.remove();
+    addMessage('error', "Couldn't reach me just now. The contact section below is the surest way through.");
     console.warn('ask widget error:', err);
   } finally {
     submit.disabled = false;
+    input.focus();
   }
 }
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   const q = input.value.trim();
-  if (!q) return;
+  if (!q || submit.disabled) return;
   ask(q);
-});
-
-chips?.addEventListener('click', (e) => {
-  const chip = e.target.closest('.ask-chip');
-  if (!chip) return;
-  input.value = chip.textContent;
-  ask(chip.textContent);
 });

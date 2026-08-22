@@ -3,6 +3,16 @@ main = "index.js"
 compatibility_date = "2026-08-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Conversation log. Schema lives in schema.sql; apply it with
+#   npx wrangler d1 execute portfolio-chat-logs --remote --file=schema.sql
+# Read your chats back with
+#   npx wrangler d1 execute portfolio-chat-logs --remote \
+#     --command "SELECT asked_at, question, answer FROM turns ORDER BY id DESC LIMIT 20"
+[[d1_databases]]
+binding = "CHATS"
+database_name = "portfolio-chat-logs"
+database_id = "d496b1d4-bdeb-4209-91c2-a4b79827d3f7"
+
 # Two secrets, set once each before the first deploy. Never put them in this
 # file -- it's tracked in git.
 #   npx wrangler secret put GEMINI_API_KEY      # embeddings (aistudio.google.com/apikey)
