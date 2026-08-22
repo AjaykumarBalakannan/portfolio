@@ -43,15 +43,48 @@ function corsHeaders(origin) {
 async function fetchVectors() {
   const cache = caches.default;
   const cacheKey = new Request(VECTORS_URL);
-  let res = await cache.match(cacheKey);
-  if (res) return res.json();
 
-  res = await fetch(VECTORS_URL, { cf: { cacheTtl: VECTORS_CACHE_SECONDS } });
+  const hit = await cache.match(cacheKey);
+  if (hit) {
+    try {
+      return await hit.json();
+    } catch {
+      // A previous deploy could cache a non-JSON body (e.g. GitHub Pages' 404
+      // page, if the site was pushed after the Worker went live). Drop the bad
+      // entry and refetch rather than serving it until the TTL expires.
+      await cache.delete(cacheKey);
+    }
+  }
+
+  // No cf.cacheTtl here: it caches by URL regardless of status, so one 404
+  // during setup would pin the error page at the edge for the full TTL. The
+  // caches.default entry written below is the only layer we want.
+  const res = await fetch(VECTORS_URL, { cf: { cacheEverything: false } });
   if (!res.ok) throw new Error(`Failed to fetch vectors.json: HTTP ${res.status}`);
-  const cloned = res.clone();
-  cloned.headers.set("Cache-Control", `public, max-age=${VECTORS_CACHE_SECONDS}`);
-  await cache.put(cacheKey, cloned);
-  return res.json();
+
+  const body = await res.text();
+  let parsed;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    throw new Error(
+      `vectors.json was not JSON (origin sent ${res.headers.get("content-type")}) -- ` +
+        `check that ${VECTORS_URL} is published`
+    );
+  }
+
+  // Built fresh rather than cloning the fetch response, whose headers are
+  // immutable -- .set() on them throws.
+  await cache.put(
+    cacheKey,
+    new Response(body, {
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": `public, max-age=${VECTORS_CACHE_SECONDS}`,
+      },
+    })
+  );
+  return parsed;
 }
 
 async function embedQuery(question, apiKey) {
