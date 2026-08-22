@@ -11,8 +11,12 @@
 // EDIT THIS before deploying: your live GitHub Pages URL for data/vectors.json.
 const VECTORS_URL = "https://ajaykumarbalakannan.github.io/portfolio/data/vectors.json";
 
-// EDIT THIS: which origins may call this Worker from a browser.
+// Which origins may call this Worker from a browser. The custom domain is the
+// canonical site; the github.io copy is kept working too. Both apex and www are
+// listed because each is a distinct Origin to the browser's CORS check.
 const ALLOWED_ORIGINS = [
+  "https://ajaykumarbalakannan.com",
+  "https://www.ajaykumarbalakannan.com",
   "https://ajaykumarbalakannan.github.io",
   "http://localhost:8899", // local dev server used while building the site
 ];
