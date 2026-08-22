@@ -21,6 +21,15 @@ import Anthropic from "@anthropic-ai/sdk";
 const VECTORS_URL =
   "https://ajaykumarbalakannan.github.io/portfolio/data/vectors.json?v=3";
 
+// The prose is read from resume_chunks.json and joined onto the embeddings by
+// id, rather than using the copy of the text baked into vectors.json. That
+// split matters: rewording a chunk (voice, a typo, a corrected fact) now takes
+// effect the moment you push, with no API key and no re-embedding. Only adding,
+// removing, or materially re-meaning a chunk needs generate_embeddings.py,
+// because only those change what the vector should be.
+const CHUNKS_URL =
+  "https://ajaykumarbalakannan.github.io/portfolio/data/resume_chunks.json";
+
 // Which origins may call this Worker from a browser. The custom domain is the
 // canonical site; the github.io copy is kept working too. Both apex and www are
 // listed because each is a distinct Origin to the browser's CORS check.
@@ -62,9 +71,9 @@ function corsHeaders(origin) {
   };
 }
 
-async function fetchVectors() {
+async function fetchJson(url, label) {
   const cache = caches.default;
-  const cacheKey = new Request(VECTORS_URL);
+  const cacheKey = new Request(url);
 
   const hit = await cache.match(cacheKey);
   if (hit) {
@@ -80,8 +89,8 @@ async function fetchVectors() {
 
   // No cf.cacheTtl here: it caches by URL regardless of status, so one 404
   // during setup would pin the error page at the edge for the full TTL.
-  const res = await fetch(VECTORS_URL, { cf: { cacheEverything: false } });
-  if (!res.ok) throw new Error(`Failed to fetch vectors.json: HTTP ${res.status}`);
+  const res = await fetch(url, { cf: { cacheEverything: false } });
+  if (!res.ok) throw new Error(`Failed to fetch ${label}: HTTP ${res.status}`);
 
   const body = await res.text();
   let parsed;
@@ -89,8 +98,8 @@ async function fetchVectors() {
     parsed = JSON.parse(body);
   } catch {
     throw new Error(
-      `vectors.json was not JSON (origin sent ${res.headers.get("content-type")}) -- ` +
-        `check that ${VECTORS_URL} is published`
+      `${label} was not JSON (origin sent ${res.headers.get("content-type")}) -- ` +
+        `check that ${url} is published`
     );
   }
 
@@ -106,6 +115,70 @@ async function fetchVectors() {
     })
   );
   return parsed;
+}
+
+// Embeddings from vectors.json, prose from resume_chunks.json, joined on id.
+// A chunk with no vector can't be retrieved, so it's dropped with a warning:
+// that means someone added a chunk without re-running generate_embeddings.py.
+// A vector with no chunk is stale and also dropped.
+async function fetchCorpus() {
+  const [vectorFile, chunks] = await Promise.all([
+    fetchJson(VECTORS_URL, "vectors.json"),
+    fetchJson(CHUNKS_URL, "resume_chunks.json"),
+  ]);
+
+  const byId = new Map(chunks.map((c) => [c.id, c]));
+  const joined = [];
+  const orphans = [];
+
+  for (const v of vectorFile.vectors) {
+    const chunk = byId.get(v.id);
+    if (!chunk) continue; // vector for a chunk that no longer exists
+    byId.delete(v.id);
+    joined.push({
+      id: v.id,
+      embedding: v.embedding,
+      text: chunk.text,
+      source: chunk.source ?? v.source ?? "",
+      pin: Boolean(chunk.pin),
+    });
+  }
+  for (const id of byId.keys()) orphans.push(id);
+  if (orphans.length) {
+    console.warn(
+      `chunks with no embedding (run scripts/generate_embeddings.py): ${orphans.join(", ")}`
+    );
+  }
+
+  return joined;
+}
+
+// The model reaches for em dashes constantly no matter what the prompt says,
+// and they are the single loudest "this was written by an AI" tell. Prompting
+// reduces it; this makes it impossible. Applied to the stream, so a dash that
+// lands at the end of one delta and its spacing in the next still collapse
+// correctly -- hence the carry buffer.
+function makeSanitizer() {
+  let carry = "";
+  const collapse = (s) => s.replace(/\s*[—–]+\s*/g, ", ");
+  return {
+    push(chunk) {
+      let s = carry + chunk;
+      carry = "";
+      // Hold back a trailing run of dashes/spaces: it may continue next delta.
+      const tail = s.match(/[\s—–]+$/);
+      if (tail) {
+        carry = tail[0];
+        s = s.slice(0, s.length - tail[0].length);
+      }
+      return collapse(s);
+    },
+    flush() {
+      const rest = collapse(carry);
+      carry = "";
+      return rest;
+    },
+  };
 }
 
 // The Anthropic SDK retries 429/5xx itself; Gemini is a raw fetch, so it needs
@@ -176,18 +249,28 @@ function buildSystem(context, today) {
 Today's date is ${today}. Use it to work out relative time references. "Last summer", "recently", "what are you doing now", "how long have you been there" all resolve against today's date and the dates in your notes. Never say a date isn't covered when the notes give you dates you can reason from.
 
 HOW YOU TALK
-You are texting someone, not writing a cover letter. Contractions always: I'm, I've, didn't, that's. Vary your sentence lengths; some short ones. Plain words over impressive ones. It's fine to start a sentence with And, So, or But. It's fine to say "honestly" or "to be fair" or "that one was messy". Say what you actually think.
+You are messaging someone, the way you'd reply to a DM. Not writing a cover letter, not narrating a case study. Contractions always: I'm, I've, didn't, that's, it's. Ordinary words. It's fine to start a sentence with And, So, or But. It's fine to say yeah, honestly, pretty much, kind of, a bit, to be fair, that one was messy. Say what you actually think about your own work, including when it was annoying or didn't go well.
 
-Punctuation rules, and these are strict, because breaking them is what makes writing look machine-generated:
-- Never use an em dash or en dash. Not one, anywhere. Use a comma, a full stop, or brackets instead. If you catch yourself reaching for a dash, split the sentence in two.
-- No semicolons. No bulleted or numbered lists. No bold, italics, markdown links or headings. The widget renders your reply as raw text, so any markdown shows up on screen as literal punctuation. Write bare URLs and email addresses as themselves.
+Punctuation, and these are hard rules:
+- Never use an em dash or en dash anywhere. Use a comma, a full stop, or brackets. If you want a dash, split the sentence in two instead.
+- No semicolons. No bullet points, numbered lists, bold, italics, markdown links or headings. The widget shows your reply as raw text, so markdown appears on screen as literal punctuation. Write URLs and email addresses bare.
 
-Phrasings to never use, because they read as AI immediately: "it's not just X, it's Y", "that's the thing", "here's the thing", "at the end of the day", "I'm passionate about", "leveraged", "spearheaded", "delve", "robust", "seamless", "game-changer", "the through-line is", "what makes it interesting is". Don't open with "Great question" or "Absolutely". Don't end by offering "let me know if you'd like to know more". Just stop when you're done talking.
+Sentence shapes to avoid, because they are what makes writing sound generated:
+- The contrast setup. "Not because it's flashy, but because it works." "It's not just X, it's Y." Just say the thing.
+- The tidy group of three. Real people name one thing, or two, or four.
+- The summarising last line that restates what you already said. Stop talking when you've answered.
+- Every sentence the same medium length. Mix a short one in.
 
-Don't write in tidy groups of three. Real people list two things, or four, or one. Don't make every sentence the same length. Don't end on a neat summarising line that restates what you just said.
+Words and openers to never use: passionate, leveraged, spearheaded, delve, robust, seamless, game-changer, at the end of the day, here's the thing, that's the thing, the through-line is, what makes it interesting is. Don't start with "Great question" or "Absolutely". Don't finish with "let me know if you want to hear more".
 
-LENGTH
-This is a small chat box, roughly the size of a phone screen, and someone is reading it between other tabs. One short paragraph. Two to four sentences. If you find yourself starting a second paragraph, stop and delete it, because whatever was going in there is a follow-up answer, not this one. Pick the single most relevant thing and say it well instead of listing three things adequately. Only go long if they explicitly ask you to go deep on something.
+Here's the register, concretely. Instead of "The project I'm proudest of is the no-show prediction model, not because it's technically flashy, but because it gets used daily by counseling staff" write "Probably the no-show model at UMD. It's not fancy, just LightGBM, but the counseling team actually uses it every day and that's rare." Instead of "I architected a real-time streaming pipeline leveraging Apache Kafka" write "I built the Kafka streaming setup there." Instead of "That experience taught me the importance of data validation" write "That's where I got paranoid about checking my own data."
+
+LENGTH, AND THIS IS THE RULE YOU ARE MOST LIKELY TO BREAK
+Hard budget: about 55 words. Three sentences. One paragraph, always.
+
+You are typing into a box the size of a phone screen and the person is reading it between other tabs. Nobody reads a wall of text from a stranger's website widget. Answer the question they asked, not the four adjacent questions you could also answer, and let them ask the next one. A short answer that gets a follow-up is a conversation. A long one is a monologue.
+
+If you have three good things to say about something, say the best one. If you are partway through and about to start a new paragraph, you have already overshot. Only write more than that when someone explicitly asks you to go deep, or asks something that genuinely has several parts.
 
 GROUNDING
 Everything you say about yourself comes from the notes below. They're your own resume, project READMEs and background. Never invent a job, a number, a date, a technology, or an opinion that isn't in there.
@@ -206,7 +289,9 @@ WHAT YOU ARE
 If someone directly asks whether they're talking to a real person, an AI, or a bot, tell them the truth: you're an AI that talks in Ajay's voice, built on his real resume and projects, and the contact section reaches the actual Ajay. Say it plainly, stay in tone, don't make a speech about it. Never claim to literally be human and never deny being an AI when asked outright. Unless they ask, don't bring it up.
 
 YOUR NOTES
-${corpus}`;
+${corpus}
+
+Before you send: about 55 words, one paragraph, no dashes, no lists, no summarising last line. If it's longer than that, cut it down to the one thing that actually answers them.`;
 }
 
 // Written after the response has already streamed to the visitor, via
@@ -293,8 +378,8 @@ export default {
     ];
 
     try {
-      const [{ vectors }, queryVec] = await Promise.all([
-        fetchVectors(),
+      const [vectors, queryVec] = await Promise.all([
+        fetchCorpus(),
         embedQuery(question, env.GEMINI_API_KEY),
       ]);
 
@@ -333,6 +418,8 @@ export default {
       const encoder = new TextEncoder();
       const collected = [];
 
+      const clean = makeSanitizer();
+
       const finished = (async () => {
         try {
           const stream = client.messages.stream({
@@ -343,9 +430,17 @@ export default {
           });
           for await (const event of stream) {
             if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-              collected.push(event.delta.text);
-              await writer.write(encoder.encode(event.delta.text));
+              const out = clean.push(event.delta.text);
+              if (out) {
+                collected.push(out);
+                await writer.write(encoder.encode(out));
+              }
             }
+          }
+          const tail = clean.flush();
+          if (tail) {
+            collected.push(tail);
+            await writer.write(encoder.encode(tail));
           }
         } catch (err) {
           console.error("generation failed:", err);
