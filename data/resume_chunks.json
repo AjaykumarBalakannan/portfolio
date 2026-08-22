@@ -1,0 +1,117 @@
+[
+  {
+    "id": "about-summary",
+    "source": "resume + portfolio",
+    "text": "Ajaykumar Balakannan is a Data Scientist based in Dallas, TX, currently completing a Master's in Data Science at the University of Maryland (expected May 2026, GPA 3.74/4.0). He has production experience building ML, NLP, and LLM-orchestrated AI systems across large-scale operational and workforce datasets, driving 25-35% efficiency gains through predictive modeling, agentic AI pipelines, and BI dashboards adopted by senior stakeholders. He is open to full-time data science, ML engineering, and analytics roles."
+  },
+  {
+    "id": "education-umd",
+    "source": "resume + portfolio",
+    "text": "Master's in Data Science, University of Maryland, College Park, MD. Expected May 2026. GPA 3.74/4.0 (one internal document lists 3.78/4.0 from an earlier term). Relevant coursework: Natural Language Processing, Machine Learning, Big Data Systems, Deep Learning."
+  },
+  {
+    "id": "education-skcet",
+    "source": "resume + portfolio",
+    "text": "Bachelor of Technology in Electrical and Electronics Engineering, Sri Krishna College of Engineering and Technology, Coimbatore, India. Aug 2020 - May 2024. CGPA 8.4/10.0. Relevant coursework: Microcontrollers, Power System Analysis, Python, Machine Learning in Energy Systems."
+  },
+  {
+    "id": "work-umd",
+    "source": "resume + portfolio",
+    "text": "Data Scientist (also held as Graduate Research/Teaching role), University of Maryland Counseling Center, College Park, MD. Sep 2024 - Present. Built a Random Forest + LightGBM no-show prediction model with SHAP explainability on student counseling appointment records; it triggers automated outreach and lifted resource utilization by 25%. Applied Sentence-Transformers (SetFit) and BERTopic to classify 4,000+ pieces of student feedback from e-forms and audio transcripts, surfacing sentiment and service themes the counseling staff now act on. Engineered Python, DuckDB, and SQL pipelines ingesting 12+ years of operational records into version-controlled data models, the backbone for the models and KPI reporting. Automated data-refresh workflows behind Tableau and Power BI dashboards (utilization, cancellations, peak demand), cutting manual reporting turnaround by 60%. Also applied hypothesis testing and sentiment analysis on 10+ years of student survey data, helping administrators secure budget increases for two consecutive quarters, and supported resource-allocation discussions that cut redundant resources by 20%."
+  },
+  {
+    "id": "work-canaria",
+    "source": "resume + portfolio + Version-1-anomaly repo",
+    "text": "Data Science Intern, Canaria Inc., New York, NY. May 2025 - Aug 2025. Built v0 statistical models and v1 PyCaret pipelines (Isolation Forest, KNN, HBOS, COPOD, OCSVM) on 15M+ job-market records, containerized with Docker, reducing false-positive anomaly flags by 35% in production. Developed a LightGBM/Random Forest/Gradient Boosting salary prediction model across 40,000+ US zip codes, segmented by SOC code x location x seniority/experience, wired into an MLflow-tracked, auto-recalibrating ClickHouse pipeline for real-time forecasting; deployed on AWS, boosting client trust and adding 10+ new clients. Used PyOD and Cleanlab automated validation over the same 15M+ distributed records to catch statistical outliers. Designed Polars and PySpark ingestion pipelines across 3 cloud systems (ClickHouse, PostgreSQL, AWS S3) to keep job-market data clean for downstream analytics. Also designed LLM-powered GenAI workflows for unstructured text, automating summarization and reporting, saving 15+ analyst hours weekly."
+  },
+  {
+    "id": "work-aastrazen",
+    "source": "resume + portfolio",
+    "text": "Data & Analytics Engineer, AastraZen Technologies, Chennai, India. Mar 2023 - Jul 2024. Fine-tuned a Hugging Face DistilBERT model for automated support-ticket categorization and built a semantic search feature using a vector database, cutting manual ticket triage time by 45% across client support workflows. Migrated a legacy client database to a hybrid MongoDB + PostgreSQL architecture with dbt-managed transformation layers, improving query throughput by 40% and enabling real-time reporting for a mid-market client. Architected a real-time data streaming pipeline using Apache Kafka feeding a centralized AWS S3 data lake, supporting concurrent analytics workloads across 5+ client accounts at 99.5% uptime."
+  },
+  {
+    "id": "skills-summary",
+    "source": "resume + portfolio",
+    "text": "Technical skills: AI & Machine Learning - LLM orchestration (Claude, MCP), Generative AI, LightGBM, XGBoost, SHAP, Isolation Forest, ARIMA, SetFit, BERTopic, DistilBERT, Scikit-learn, PyCaret, HBOS, COPOD, OCSVM, Random Forest, Gradient Boosting, SVM. Data Platforms & Warehousing: Snowflake, ClickHouse, PostgreSQL, Databricks, Redshift, MongoDB, DuckDB, AWS (S3, EC2), MLflow, dbt, Kafka. Languages & Processing: Python, SQL, R, Pandas, NumPy, Polars, PySpark, PyOD, Cleanlab, MATLAB. Visualization & Reporting: Tableau, Power BI, Qlik Sense, Sigma, Quarto & Jupyter, KPI tracking, root cause analysis. Data engineering & cloud: Docker, Apache Spark, Hadoop, Azure, Git/CI-CD, relational data modeling."
+  },
+  {
+    "id": "cert-aws-saa",
+    "source": "Credly (verified)",
+    "text": "Certification: AWS Certified Solutions Architect - Associate (SAA-C03), issued by Amazon Web Services Training and Certification to Ajaykumar Balakannan. Verifiable at https://www.credly.com/badges/a27d9d8a-3fbb-45ec-a576-86c943074d35."
+  },
+  {
+    "id": "cert-pl300",
+    "source": "Microsoft Learn",
+    "text": "Certification: Microsoft Certified: Power BI Data Analyst Associate (PL-300), issued by Microsoft. Credential page: https://learn.microsoft.com/en-us/users/ajaykumarbalakannan-2262/credentials/bdc6daa31e1d313b."
+  },
+  {
+    "id": "cert-additional",
+    "source": "Internships-And-Credentials GitHub repo",
+    "text": "Additional certifications and training (earlier in his education, mostly 2021-2022): Celonis Academy - Process Automation Bootcamp (Foundational), issued 07-09-2022, verifiable at credly.com/go/KN5UxdSW. Google Data Analytics Professional Certificate (Coursera, 8 courses covering spreadsheets, SQL, Tableau, R, and the full data analysis lifecycle), completed Feb 17, 2025, verifiable at coursera.org/verify/professional-cert/KD5MOZ1GQKG4. MathWorks Training Services - Machine Learning Onramp, 100% completion, 07 September 2022. Automation Anywhere University - 'Building Scalable Bots Using Automation 360' (RPA), completed 10/08/2021. Udemy - 'Python for Beginners' by Bharath Thippireddy, 13.5 hours, completed Aug 18, 2022."
+  },
+  {
+    "id": "project-travelgenie",
+    "source": "resume + portfolio + TravelGenie GitHub README",
+    "text": "TravelGenie - AI travel planning system (Dec 2025, github.com/AjaykumarBalakannan/TravelGenie). A trip planner that coordinates flights, hotels, events, weather, currency, and traffic data through one request instead of ten browser tabs. Architecture: seven standalone MCP (Model Context Protocol) servers - Flight, Hotel, Event, Geocoder, Weather, Finance, and Traffic & Crowd - each doing one job, orchestrated by Claude which chains their outputs (e.g. geocode a location, then search flights/hotels near it, then check weather for those dates). Flight/hotel/event data comes from SerpAPI; Open-Meteo and OpenStreetMap need no API key. Ships as a Streamlit web UI and a Slack bot, can also run as MCP servers directly inside Claude Desktop. Deployable via Docker or AWS (ECS Fargate + DynamoDB + Secrets Manager + CloudWatch, provisioned via CloudFormation). Benchmarked AWS EC2 versus ECS Fargate under sustained and stress load testing with 50-100 concurrent users: ECS Fargate matched EC2's 460 RPS throughput using roughly 50% less compute. MIT licensed."
+  },
+  {
+    "id": "project-farmland",
+    "source": "Framland_Protection GitHub README + resume + portfolio + BIOGECKO publication",
+    "text": "Farmland wildlife intrusion detection (Mar 2023, github.com/AjaykumarBalakannan/Framland_Protection). An AI-powered, non-lethal alternative to electric fencing and chemical repellents for keeping wildlife off farmland. Pipeline: a camera continuously monitors the farmland; YOLOv3 performs real-time animal detection (about 90% accuracy) with non-maximum suppression to filter redundant boxes; a secondary validation stage (a CNN for species verification plus a Random Forest to filter false positives) cuts false alarms by about 40%; validated detections trigger an Arduino controller that activates non-lethal deterrents matched to the animal type (sound for nocturnal animals, light for herbivores like deer, water sprinklers for medium-sized animals); every detection is logged (image, species, time, location) for conservation and census use. The README's own 'want to improve' section lists upgrading to YOLOv5 as future work - YOLOv3 is what was actually implemented and demoed, though some later materials (the portfolio site's project tag, one resume version) list it as YOLOv5. Won 2nd place among 500+ teams and $300 at the National Technocraft Hackathon (Technocraft Booth Project Competition 2022-23, held at COEP - College of Engineering Pune, 2nd May 2023), and the work was published in BIOGECKO (Vol 12, Issue 03, 2023) on YOLO-based AI detection and automated deterrents. A hardware prototype was built and tested alongside the software pipeline."
+  },
+  {
+    "id": "project-bitcoin",
+    "source": "resume + portfolio",
+    "text": "Bitcoin price forecasting (2025, Qlik Sense tutorial project under causify-ai/tutorials, TutorTask146). End-to-end pipeline: live BTC price data collection, ARIMA and XGBoost forecasting models achieving around 85% predictive accuracy, automated ingestion/validation/transformation workflows, and interactive Qlik Sense dashboards giving real-time visibility into volatility and market drivers. Cut manual reporting effort by about 40%."
+  },
+  {
+    "id": "project-sageventures",
+    "source": "RealEstateModelling GitHub README + portfolio",
+    "text": "Sage Ventures - multifamily real estate analytics pipeline (2025, github.com/AjaykumarBalakannan/RealEstateModelling). A self-built, portfolio demonstration project simulating the data infrastructure, reporting, and BI of a multifamily real estate portfolio (built to demonstrate SQL/Python/Power BI/Excel skills for a Junior Data Analyst-type role; the underlying data is synthetic, generated with the Faker library, not real client data). One-command pipeline (run_pipeline.py) with five phases: generate_data.py builds a SQLite DB and raw CSVs; feature_engineering.py creates 15+ engineered features; adhoc_analysis.py produces 5 business reports; excel_report.py builds a 7-sheet Excel workbook; visualize.py generates 10 automated charts. Data model: properties -> units -> tenants -> rent_roll, plus properties -> maintenance and properties -> occupancy_monthly. Stack: Python, SQLite, SQL, Pandas, openpyxl, Matplotlib, Power BI. Illustrative findings from the simulated portfolio: average occupancy 67% against a 93% target, annual loss-to-lease of $2.14M, $19,864 in current delinquency exposure, and 533 open maintenance tickets past SLA."
+  },
+  {
+    "id": "project-canaria-anomaly-system",
+    "source": "Version-1-anomaly GitHub README",
+    "text": "CANARIA Anomaly Detection System (github.com/AjaykumarBalakannan/Version-1-anomaly) - a comprehensive job-market anomaly detection system, closely related to his Canaria Inc. internship work, identifying unusual patterns in job posting data at three granularities: US level (geo_level x source), state level (state x source), and SOC/occupation level (SOC code x source). Pipeline: parquet files are read in configurable batches (default 50,000 rows), cleaned and validated, then stored in MongoDB under a rolling window (configurable, default 45 days) so models keep adapting to recent data without unbounded storage growth. Feature engineering generates 18 engineered features per record: rolling statistics over 7/14/28 days, temporal features (day-of-week, week, month), statistical measures (z-scores, MAD), and expanding-window long-term patterns. The model layer is a 7-model ensemble: PyCaret's Isolation Forest, KNN, and SVM, plus PyOD's HBOS, COPOD, OCSVM, and CBLOF; scores are averaged for robust detection and compared against per-segment, quantile-based thresholds with cooldown logic to prevent alert spam. Output is CSV results with scores plus logging and performance monitoring."
+  },
+  {
+    "id": "project-resume-optimiser",
+    "source": "Resume_Optimiser GitHub README (this is the outreach-automation project)",
+    "text": "Resume Optimiser & Outreach Automation (github.com/AjaykumarBalakannan/Resume_Optimiser) - two tools in one repo, actively developed. (1) A Resume Optimizer CLI (resume_api.py): paste a job description in, get back a tailored one-page LaTeX resume, a cover-letter paragraph, and an email draft, generated via the Claude API and compiled with pdflatex. (2) An Outreach web app (Next.js): upload a contacts CSV, attach a resume, write one email template, preview every personalized message, and send the whole batch through Gmail (OAuth). It also integrates with Apollo.io to search and reveal contacts at a target company (leadership + role-matched tiers) and writes a bespoke, AI-personalized outreach paragraph per contact using Claude Haiku plus a free web-search cascade (Tavily/Exa/Brave) for real context about each person, with guardrails that reject generic-AI-sounding phrasing and casual/unprofessional tone and retry with a correction. Cost and usage are tracked per call (tokens, cache hits, USD) and surfaced in an analytics view."
+  },
+  {
+    "id": "project-budgetplay",
+    "source": "BudgetPlay GitHub README",
+    "text": "BudgetPlay (github.com/AjaykumarBalakannan/BudgetPlay) - a participatory budgeting simulator built for an Anthropic Hackathon (Track #3: Governance & Accessibility). Lets a user explore how a city-sized budget is allocated, move sliders to rebalance spending across categories, read a Claude-generated plain-language impact narrative explaining the tradeoffs of their reallocation, and optionally submit their proposed budget as a 'vote' grouped by region. A companion 'Government Pulse' dashboard aggregates submissions so community averages can be compared against the official (illustrative, not real) budget, with percentage-point shifts by category and short recommendation blurbs for leaders. Stack: Node.js + Express backend, static frontend (Tailwind, Chart.js, vanilla JS), Anthropic Messages API for the impact-narrative endpoint. The budget data itself is explicitly sample/educational, not an official government budget."
+  },
+  {
+    "id": "coursework-sentiment-rnn",
+    "source": "Sentiment-Analysis GitHub README (UMD coursework)",
+    "text": "Comparative analysis of RNN architectures for sentiment classification (UMD coursework, github.com/AjaykumarBalakannan/Sentiment-Analysis). Systematically implements and compares plain RNN, LSTM, and Bidirectional LSTM on the IMDb movie review dataset, varying activation functions (sigmoid, ReLU, tanh), optimizers (Adam, SGD, RMSprop), sequence lengths (25/50/100 words), and gradient clipping on/off, to study how each choice affects sentiment classification performance."
+  },
+  {
+    "id": "coursework-ngram",
+    "source": "N_Gram_Modelling GitHub README (UMD coursework)",
+    "text": "N-gram language modeling and evaluation (UMD coursework, github.com/AjaykumarBalakannan/N_Gram_Modelling). Implements and evaluates Maximum Likelihood Estimation n-gram language models (unigram through 4-gram) on the Penn Treebank dataset, studying the trade-offs between n-gram order and the role of smoothing/backoff techniques in handling data sparsity, including perplexity evaluation and text generation."
+  },
+  {
+    "id": "coursework-gunviolence-nlp",
+    "source": "Comparative_Analysis_HW5 GitHub README (UMD coursework)",
+    "text": "Comparative analysis of gun violence coverage across news outlets (UMD NLP coursework, github.com/AjaykumarBalakannan/Comparative_Analysis_HW5). Uses NLP techniques (including coreference resolution via spaCy) to analyze how CNN, Fox News, The New York Times, and The Wall Street Journal portray victims and shooters across gun violence incidents, using a dataset of 100 articles (25 per outlet)."
+  },
+  {
+    "id": "activities-hackathon",
+    "source": "resume + portfolio + BIOGECKO + COEP certificate",
+    "text": "Hackathon: 2nd place among 500+ teams and a $300 prize at the National Technocraft Hackathon (Technocraft Booth Project Competition 2022-23, hosted by the Alumni Association of College of Engineering Pune and the COEP Charitable Foundation USA, held 2nd May 2023), for the farmland wildlife intrusion detection project (team project during his B.Tech at Sri Krishna College of Engineering and Technology). Findings were subsequently published in BIOGECKO, Vol 12, Issue 03, 2023 (a New Zealand herpetology/biology journal), on YOLO-based AI detection and automated deterrents."
+  },
+  {
+    "id": "activities-workshop-internship",
+    "source": "resume + Internships-And-Credentials repo",
+    "text": "Workshop: 'PRAYATNA' by Microsoft and Walmart at IIT Chennai, India, May 2022 - a 2-day hands-on workshop on web and app development (HTML/CSS, JavaScript, responsive design). Internship: web development internship/industrial project at Denshi Solutions (Erode, India), 04/04/2023 - 05/06/2023, as part of a 9-student team from Sri Krishna College of Engineering and Technology's final-year Electrical and Electronics Engineering program, contributing to product development and web build-out."
+  },
+  {
+    "id": "contact",
+    "source": "portfolio",
+    "text": "Contact: email ajayport2@gmail.com, phone 240-438-0604, LinkedIn linkedin.com/in/ajaykumar-balakannan, GitHub github.com/AjaykumarBalakannan. Based in Dallas, TX; open to relocation or remote. Open to full-time data science, ML engineering, and analytics roles."
+  }
+]

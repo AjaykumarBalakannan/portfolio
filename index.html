@@ -33,7 +33,7 @@
   <ul class="nav-links">
     <li><a href="#work">Work</a></li><li><a href="#skills">Skills</a></li>
     <li><a href="#projects">Projects</a></li><li><a href="#education">Education</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="#certs">Certs</a></li><li><a href="#contact">Contact</a></li>
   </ul>
   <a href="#contact" class="avail">Open to work</a>
 </nav>
@@ -83,7 +83,10 @@
   <div class="eyebrow rv">Work</div>
   <h2 class="title rv">Where I've shipped</h2>
   <div class="job rv">
-    <div><div class="when">Sep 2024 – Present</div><div class="org">University of Maryland</div><div class="place">College Park, MD</div></div>
+    <div><div class="when">Sep 2024 – Present</div>
+      <div class="orgrow"><span class="mark logo"><img src="assets/logo-umd.svg" alt="University of Maryland logo"/></span>
+        <div><div class="org">University of Maryland</div><div class="place">College Park, MD</div></div>
+      </div></div>
     <div><h3>Data Scientist</h3>
       <ul>
         <li>Built a no-show prediction model (<b>Random Forest + LightGBM</b>, SHAP for the "why") on counseling appointment records. It triggers automated outreach and lifted resource utilization by <b>25%</b>.</li>
@@ -95,7 +98,10 @@
     </div>
   </div>
   <div class="job rv">
-    <div><div class="when">May 2025 – Aug 2025</div><div class="org">Canaria Inc.</div><div class="place">New York, NY</div></div>
+    <div><div class="when">May 2025 – Aug 2025</div>
+      <div class="orgrow"><span class="mark s2" aria-hidden="true">Ca</span>
+        <div><div class="org">Canaria Inc.</div><div class="place">New York, NY</div></div>
+      </div></div>
     <div><h3>Data Science Intern</h3>
       <ul>
         <li>Trained a <b>LightGBM</b> salary model across 40K+ US zip codes, using SOC codes, seniority, and company features, wired into an <b>MLflow</b>-tracked, auto-recalibrating ClickHouse pipeline for real-time forecasts.</li>
@@ -106,7 +112,10 @@
     </div>
   </div>
   <div class="job rv">
-    <div><div class="when">Mar 2023 – Jul 2024</div><div class="org">AastraZen Technologies</div><div class="place">Chennai, India</div></div>
+    <div><div class="when">Mar 2023 – Jul 2024</div>
+      <div class="orgrow"><span class="mark s2" aria-hidden="true">AZ</span>
+        <div><div class="org">AastraZen Technologies</div><div class="place">Chennai, India</div></div>
+      </div></div>
     <div><h3>Data &amp; Analytics Engineer</h3>
       <ul>
         <li>Fine-tuned <b>DistilBERT</b> to auto-categorize support tickets and added vector semantic search, dropping manual triage by <b>45%</b>.</li>
@@ -126,7 +135,7 @@
     <div class="stackcard rv"><h4>AI &amp; Machine Learning</h4>
       <div class="tags"><span>LLM Orchestration (Claude, MCP)</span><span>Generative AI</span><span>LightGBM</span><span>XGBoost</span><span>SHAP</span><span>Isolation Forest</span><span>ARIMA</span><span>SetFit</span><span>BERTopic</span><span>DistilBERT</span><span>Scikit-learn</span></div></div>
     <div class="stackcard teal rv"><h4>Data Platforms &amp; Warehousing</h4>
-      <div class="tags"><span>Snowflake</span><span>ClickHouse</span><span>PostgreSQL</span><span>Databricks</span><span>Redshift</span><span>MongoDB</span><span>DuckDB</span><span>AWS (S3, EC2, SAA-C03)</span><span>MLflow</span><span>dbt</span><span>Kafka</span></div></div>
+      <div class="tags"><span>Snowflake</span><span>ClickHouse</span><span>PostgreSQL</span><span>Databricks</span><span>Redshift</span><span>MongoDB</span><span>DuckDB</span><span>AWS (S3, EC2)</span><span>MLflow</span><span>dbt</span><span>Kafka</span></div></div>
     <div class="stackcard clay rv"><h4>Languages &amp; Processing</h4>
       <div class="tags"><span>Python</span><span>SQL</span><span>R</span><span>Pandas</span><span>NumPy</span><span>Polars</span><span>PySpark</span><span>PyOD</span><span>Cleanlab</span></div></div>
     <div class="stackcard bone rv"><h4>Visualization &amp; Reporting</h4>
@@ -139,27 +148,27 @@
   <div class="eyebrow rv">Projects</div>
   <h2 class="title rv">Things I built to find out if I could</h2>
   <div class="projgrid">
-    <div class="proj rv"><div class="ptop"><span class="cat">Agentic AI</span><span class="yr">Dec 2025</span></div>
+    <div class="proj rv edge"><div class="ptop"><span class="cat">Agentic AI</span><span class="yr">Dec 2025</span></div>
       <h3>TravelGenie: AI travel planner</h3>
       <p>An agentic trip planner that orchestrates 7 MCP servers through Claude, pulling live flights, hotels, and events via SerpAPI into a single request. I load-tested EC2 against ECS Fargate at 50 to 100 concurrent users; Fargate matched EC2's 460 RPS on half the compute.</p>
       <div class="ptags"><span>Claude</span><span>MCP</span><span>SerpAPI</span><span>AWS ECS / EC2</span><span>Load Testing</span></div>
-      <a class="go" href="https://github.com/AjaykumarBalakannan" target="_blank" rel="noopener">View on GitHub →</a></div>
-    <div class="proj rv"><div class="ptop"><span class="cat">Computer Vision</span><span class="yr">Mar 2023</span></div>
+      <a class="go" href="https://github.com/AjaykumarBalakannan" target="_blank" rel="noopener">View on GitHub <span class="arw">→</span></a></div>
+    <div class="proj rv edge"><div class="ptop"><span class="cat">Computer Vision</span><span class="yr">Mar 2023</span></div>
       <h3>Farmland wildlife intrusion detection</h3>
       <p>A YOLO computer-vision pipeline that flags wildlife intrusions on farmland in real time and fires the alert automatically, so no one is stuck watching a monitor. It handles multi-class classification straight off live camera feeds.</p>
       <div class="badge">★ 2nd of 500+ teams · National Technocraft Hackathon · published in BIOGECKO (Vol 12, Iss 03, 2023)</div>
       <div class="ptags"><span>YOLOv5</span><span>CNN</span><span>Python</span><span>IoT</span></div>
-      <a class="go" href="https://github.com/AjaykumarBalakannan/Framland_Protection" target="_blank" rel="noopener">View on GitHub →</a></div>
-    <div class="proj rv"><div class="ptop"><span class="cat">Time Series</span><span class="yr">2025</span></div>
+      <a class="go" href="https://github.com/AjaykumarBalakannan/Framland_Protection" target="_blank" rel="noopener">View on GitHub <span class="arw">→</span></a></div>
+    <div class="proj rv edge"><div class="ptop"><span class="cat">Time Series</span><span class="yr">2025</span></div>
       <h3>Bitcoin price forecasting</h3>
       <p>End-to-end pipeline: live BTC data collection, ARIMA + XGBoost models, automated ETL, and interactive Qlik Sense dashboards. Landed around 85% accuracy and cut the manual work by 40%.</p>
       <div class="ptags"><span>ARIMA</span><span>XGBoost</span><span>Qlik Sense</span><span>Python</span></div>
-      <a class="go" href="https://github.com/causify-ai/tutorials/tree/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense/DATA605/Spring2025/projects/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense" target="_blank" rel="noopener">View on GitHub →</a></div>
-    <div class="proj rv"><div class="ptop"><span class="cat">Analytics</span><span class="yr">2025</span></div>
+      <a class="go" href="https://github.com/causify-ai/tutorials/tree/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense/DATA605/Spring2025/projects/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense" target="_blank" rel="noopener">View on GitHub <span class="arw">→</span></a></div>
+    <div class="proj rv edge"><div class="ptop"><span class="cat">Analytics</span><span class="yr">2025</span></div>
       <h3>Sage Ventures: multifamily analytics</h3>
       <p>Python and SQL analytics over a multifamily portfolio, quantifying $2.1M+ of loss-to-lease and a 26-point occupancy gap across properties, units, and rent rolls, with automated Excel and Power BI reporting for stakeholders.</p>
       <div class="ptags"><span>Python</span><span>SQL</span><span>Power BI</span><span>Excel</span></div>
-      <a class="go" href="https://github.com/AjaykumarBalakannan/RealEstateModelling" target="_blank" rel="noopener">View on GitHub →</a></div>
+      <a class="go" href="https://github.com/AjaykumarBalakannan/RealEstateModelling" target="_blank" rel="noopener">View on GitHub <span class="arw">→</span></a></div>
   </div>
 </section>
 
@@ -168,12 +177,38 @@
   <div class="eyebrow rv">Education</div>
   <h2 class="title rv">Where I learned it</h2>
   <div class="edugrid">
-    <div class="edu rv"><h3>Master's in Data Science</h3><div class="sch">University of Maryland</div>
+    <div class="edu rv"><div class="orgrow" style="margin-top:0"><span class="mark logo"><img src="assets/logo-umd.svg" alt="University of Maryland logo"/></span>
+        <div><h3>Master's in Data Science</h3><div class="sch">University of Maryland</div></div></div>
       <div class="dt">May 2026 · Maryland</div><div class="grade">GPA 3.74 / 4.0</div>
       <div class="crs">Natural Language Processing · Machine Learning · Big Data Systems · Deep Learning</div></div>
-    <div class="edu t2 rv"><h3>B.Tech, Electrical &amp; Electronics Engineering</h3><div class="sch">Sri Krishna College of Engineering &amp; Technology</div>
+    <div class="edu t2 rv"><div class="orgrow" style="margin-top:0"><span class="mark logo crest"><img src="assets/logo-skcet.png" alt="Sri Krishna College of Engineering and Technology logo"/></span>
+        <div><h3>B.Tech, Electrical &amp; Electronics Engineering</h3><div class="sch">Sri Krishna College of Engineering &amp; Technology</div></div></div>
       <div class="dt">Aug 2020 – May 2024 · Coimbatore, India</div><div class="grade">CGPA 8.4 / 10.0</div>
       <div class="crs">Microcontrollers · Power System Analysis · Python · ML in Energy Systems</div></div>
+  </div>
+</section>
+
+<!-- ===== CERTIFICATIONS ===== -->
+<section id="certs">
+  <div class="eyebrow rv">Certifications</div>
+  <h2 class="title rv">Verified credentials</h2>
+  <div class="certgrid">
+    <a class="cert rv edge" href="https://www.credly.com/badges/a27d9d8a-3fbb-45ec-a576-86c943074d35" target="_blank" rel="noopener">
+      <span class="mark badge"><img src="assets/cert-aws-saa.png" alt="AWS Certified Solutions Architect Associate badge"/></span>
+      <div>
+        <h3>AWS Certified Solutions Architect – Associate</h3>
+        <div class="issuer">Amazon Web Services · SAA-C03</div>
+        <span class="verify">Verify on Credly <span class="arw">↗</span></span>
+      </div>
+    </a>
+    <a class="cert rv edge" href="https://learn.microsoft.com/en-us/users/ajaykumarbalakannan-2262/credentials/bdc6daa31e1d313b" target="_blank" rel="noopener">
+      <span class="mark logo"><img src="assets/logo-microsoft.svg" alt="Microsoft logo"/></span>
+      <div>
+        <h3>Microsoft Certified: Power BI Data Analyst Associate</h3>
+        <div class="issuer">Microsoft · PL-300</div>
+        <span class="verify">Verify on Microsoft Learn <span class="arw">↗</span></span>
+      </div>
+    </a>
   </div>
 </section>
 
@@ -191,7 +226,34 @@
 
 <footer>Ajaykumar Balakannan · Data Scientist · Dallas, TX</footer>
 
+<!-- ===== ASK WIDGET (floating, RAG chat) ===== -->
+<div class="askw" id="askw">
+  <canvas id="askRocket" class="askw-flight" aria-hidden="true"></canvas>
+  <button class="askw-launcher" id="askLauncher" type="button" aria-label="Ask about my work" aria-expanded="false" hidden>
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v10c0 .83-.67 1.5-1.5 1.5H9l-4 4v-4H5.5C4.67 17 4 16.33 4 15.5v-10Z" fill="currentColor"/><circle cx="8.5" cy="10.5" r="1.15" fill="var(--ink)"/><circle cx="12" cy="10.5" r="1.15" fill="var(--ink)"/><circle cx="15.5" cy="10.5" r="1.15" fill="var(--ink)"/></svg>
+  </button>
+  <div class="askw-panel" id="askPanel" hidden>
+    <div class="askw-head">
+      <span>Ask about my work</span>
+      <button class="askw-close" id="askClose" type="button" aria-label="Close">&times;</button>
+    </div>
+    <p class="ask-lede">Grounded in my real projects and resume — ask something about me.</p>
+    <div class="ask-chips" id="askChips">
+      <button class="ask-chip" type="button">What did you build at Canaria?</button>
+      <button class="ask-chip" type="button">Tell me about TravelGenie</button>
+      <button class="ask-chip" type="button">What certifications do you have?</button>
+    </div>
+    <div class="ask-dots" id="askDots"><span></span><span></span><span></span></div>
+    <div class="ask-answer" id="askAnswer"></div>
+    <form class="ask-form" id="askForm">
+      <input class="ask-input" id="askInput" type="text" maxlength="300" autocomplete="off" placeholder="Ask about my work…"/>
+      <button class="ask-submit" id="askSubmit" type="submit">Ask</button>
+    </form>
+  </div>
+</div>
+
 <script type="module" src="js/intro.js"></script>
 <script src="js/site.js"></script>
+<script type="module" src="js/ask.js"></script>
 </body>
 </html>

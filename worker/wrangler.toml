@@ -1,0 +1,9 @@
+name = "portfolio-rag"
+main = "index.js"
+compatibility_date = "2026-08-01"
+
+# Set the secret before first deploy (never put it in this file):
+#   npx wrangler secret put GEMINI_API_KEY
+#
+# Deploy:
+#   npx wrangler deploy

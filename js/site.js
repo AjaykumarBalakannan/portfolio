@@ -13,8 +13,21 @@
   setTimeout(tick,4800);
 })();
 
-// scroll reveal for the sections below the hero
+// scroll reveal for the sections below the hero.
+// Cards inside a group are numbered so they emerge one after another instead of
+// the whole grid landing in one hit — the delay itself lives in CSS (--i).
 (function(){
+  // Accent is stamped here rather than via CSS :nth-of-type, which counts every
+  // sibling div (the eyebrow and heading included) and so shifts the whole colour
+  // run the moment anything is added above the cards.
+  const PALETTE=['--a1','--a2','--a3','--a4'];
+  ['.job','.stackcard','.proj','.edu','.cert'].forEach(sel=>{
+    document.querySelectorAll(sel).forEach((el,i)=>{
+      el.style.setProperty('--i',i);
+      if(!el.style.getPropertyValue('--accent'))
+        el.style.setProperty('--accent',`var(${PALETTE[i%PALETTE.length]})`);
+    });
+  });
   const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
   document.querySelectorAll('.rv').forEach(el=>io.observe(el));
 })();
