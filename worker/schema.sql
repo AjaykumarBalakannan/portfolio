@@ -25,3 +25,30 @@ CREATE TABLE IF NOT EXISTS turns (
 
 CREATE INDEX IF NOT EXISTS turns_session_idx ON turns (session, turn);
 CREATE INDEX IF NOT EXISTS turns_asked_at_idx ON turns (asked_at DESC);
+
+-- One row per conversation, so counting visitors doesn't mean COUNT(DISTINCT
+-- session) over the turn log, and so there's somewhere to hang per-visitor
+-- facts: where they came from, how long they stayed, whether we've pinged
+-- Slack about them yet.
+--
+-- `network` is Cloudflare's asOrganization. On a home connection it's an ISP
+-- ("Charter Communications Inc"); on a corporate network it's often the
+-- employer's own name, which is the single most interesting field here.
+CREATE TABLE IF NOT EXISTS sessions (
+  session        TEXT PRIMARY KEY,          -- matches turns.session
+  started_at     TEXT NOT NULL,             -- ISO 8601 UTC, first message
+  last_at        TEXT NOT NULL,             -- ISO 8601 UTC, most recent message
+  turn_count     INTEGER NOT NULL DEFAULT 0,
+  country        TEXT,
+  city           TEXT,
+  region         TEXT,
+  timezone       TEXT,                      -- IANA, renders the visitor's local time
+  network        TEXT,                      -- cf.asOrganization
+  first_question TEXT,
+  notified_start INTEGER NOT NULL DEFAULT 0,-- 1 = "new chat" posted to Slack
+  notified_end   INTEGER NOT NULL DEFAULT 0 -- 1 = transcript posted to Slack
+);
+
+CREATE INDEX IF NOT EXISTS sessions_started_idx ON sessions (started_at DESC);
+-- Drives the cron sweep that looks for conversations that have gone quiet.
+CREATE INDEX IF NOT EXISTS sessions_pending_idx ON sessions (notified_end, last_at);

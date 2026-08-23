@@ -58,6 +58,15 @@ const MAX_HISTORY_TURNS = 12; // keep the prompt bounded on long conversations
 const MAX_ANSWER_TOKENS = 600;
 const VECTORS_CACHE_SECONDS = 600;
 
+// A conversation is "over" once it has been quiet this long; the cron sweep
+// then posts the transcript. DIGEST_BATCH caps how many it formats per run,
+// because cron invocations on the Workers free plan get 10ms of CPU. Network
+// waiting does not count against that, but string building does.
+const SESSION_IDLE_MINUTES = 5;
+const DIGEST_BATCH = 5;
+const SLACK_BLOCK_LIMIT = 2900; // Slack caps a text block at 3000
+
+
 const REFUSAL =
   "I can only answer questions about my own work and background. For anything else, the contact section below is the best way to reach me.";
 
@@ -294,6 +303,122 @@ ${corpus}
 Before you send: about 55 words, one paragraph, no dashes, no lists, no summarising last line. If it's longer than that, cut it down to the one thing that actually answers them.`;
 }
 
+// Everything Cloudflare will tell us about where the request came from. All of
+// it is best-effort: a VPN or a corporate proxy moves the apparent location,
+// and any field can be missing. Treated as a hint throughout, never a fact.
+function visitorFrom(request) {
+  const cf = request.cf ?? {};
+  return {
+    country: cf.country ?? null,
+    city: cf.city ?? null,
+    region: cf.region ?? null,
+    timezone: cf.timezone ?? null,
+    network: cf.asOrganization ?? null,
+  };
+}
+
+function placeOf(v) {
+  const parts = [v.city, v.region, v.country].filter(Boolean);
+  return parts.length ? parts.join(", ") : "location unknown";
+}
+
+// The visitor's own wall clock, which is far more useful than UTC for judging
+// whether someone was browsing at 2am. Workers ship full ICU, so named zones
+// work; still guarded because the header is attacker-controlled in principle.
+function localTimeOf(v, whenISO) {
+  if (!v.timezone) return null;
+  try {
+    return new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      weekday: "short",
+      timeZone: v.timezone,
+    }).format(new Date(whenISO));
+  } catch {
+    return null;
+  }
+}
+
+// Fire-and-forget. Always called inside ctx.waitUntil and always swallowing its
+// own errors: a Slack outage, a revoked webhook or a malformed block must never
+// surface to someone mid-conversation. No-ops when the secret is unset, which
+// keeps `wrangler dev` quiet.
+async function notifySlack(env, text, blocks) {
+  if (!env.SLACK_WEBHOOK_URL) return false;
+  try {
+    const res = await fetch(env.SLACK_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, blocks }),
+    });
+    if (!res.ok) {
+      console.error(`slack post failed: HTTP ${res.status} ${await res.text()}`);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("slack post threw:", err);
+    return false;
+  }
+}
+
+function mrkdwn(text) {
+  return { type: "section", text: { type: "mrkdwn", text: text.slice(0, SLACK_BLOCK_LIMIT) } };
+}
+
+// Records the conversation and reports whether this was its opening message.
+//
+// Two plain statements rather than ON CONFLICT DO UPDATE or RETURNING: both are
+// SQLite features D1 does not document, and INSERT OR IGNORE reporting
+// changes===1 only on a real insert is core behaviour that will not move. The
+// seed row starts at turn_count 0 so the unconditional UPDATE lands it on 1.
+async function upsertSession(env, session, visitor, whenISO, question) {
+  if (!env.CHATS) return false;
+  try {
+    const seed = await env.CHATS.prepare(
+      `INSERT OR IGNORE INTO sessions
+         (session, started_at, last_at, turn_count, country, city, region,
+          timezone, network, first_question)
+       VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        session, whenISO, whenISO, visitor.country, visitor.city,
+        visitor.region, visitor.timezone, visitor.network, question
+      )
+      .run();
+
+    await env.CHATS.prepare(
+      `UPDATE sessions SET last_at = ?, turn_count = turn_count + 1 WHERE session = ?`
+    )
+      .bind(whenISO, session)
+      .run();
+
+    return seed.meta?.changes === 1;
+  } catch (err) {
+    console.error("session upsert failed:", err);
+    return false;
+  }
+}
+
+async function announceNewChat(env, session, visitor, whenISO, question) {
+  // Lets Ajay mute his own testing without touching code, by setting
+  // IGNORE_NETWORK in wrangler.toml to his ISP.
+  if (env.IGNORE_NETWORK && visitor.network === env.IGNORE_NETWORK) return;
+
+  const local = localTimeOf(visitor, whenISO);
+  const lines = [
+    `*Someone started chatting with your site*`,
+    `${placeOf(visitor)}${local ? ` at ${local} their time` : ""}`,
+    visitor.network ? `on ${visitor.network}` : null,
+    ``,
+    `> ${question}`,
+    ``,
+    `_session \`${session}\`_`,
+  ].filter((l) => l !== null);
+
+  await notifySlack(env, `New chat from ${placeOf(visitor)}`, [mrkdwn(lines.join("\n"))]);
+}
+
 // Written after the response has already streamed to the visitor, via
 // ctx.waitUntil, so logging never adds latency and a D1 hiccup can't break a
 // conversation.
@@ -323,7 +448,153 @@ async function logTurn(env, row) {
   }
 }
 
+// Single place that records a turn: the row in `turns`, the rolled-up row in
+// `sessions`, and the Slack ping if this opened a new conversation. Callers hand
+// the whole thing to ctx.waitUntil, so none of it is on the visitor's critical
+// path and any failure inside is logged rather than surfaced.
+async function recordTurn(env, row, visitor) {
+  const isNew = await upsertSession(env, row.session, visitor, row.asked_at, row.question);
+  await logTurn(env, row);
+  if (isNew) {
+    await announceNewChat(env, row.session, visitor, row.asked_at, row.question);
+    try {
+      await env.CHATS?.prepare(`UPDATE sessions SET notified_start = 1 WHERE session = ?`)
+        .bind(row.session)
+        .run();
+    } catch (err) {
+      console.error("could not mark notified_start:", err);
+    }
+  }
+}
+
+function humanGap(fromISO, toISO) {
+  const ms = new Date(toISO) - new Date(fromISO);
+  if (!Number.isFinite(ms) || ms < 0) return "";
+  const mins = Math.round(ms / 60000);
+  if (mins < 1) return "under a minute";
+  if (mins < 60) return `${mins} min`;
+  return `${Math.floor(mins / 60)}h ${mins % 60}m`;
+}
+
+// Posts the full back and forth for conversations that have gone quiet, then
+// marks them done. Runs on the cron trigger rather than at request time because
+// there is no other way to notice that someone has stopped typing.
+async function sendPendingTranscripts(env) {
+  if (!env.CHATS) return;
+
+  // No webhook yet: retire whatever is pending instead of letting a backlog
+  // pile up. Otherwise the first thing that happens after SLACK_WEBHOOK_URL is
+  // finally set is a burst of transcripts from before anyone was watching.
+  if (!env.SLACK_WEBHOOK_URL) {
+    try {
+      await env.CHATS.prepare(
+        `UPDATE sessions SET notified_end = 1 WHERE notified_end = 0`
+      ).run();
+    } catch (err) {
+      console.error("could not retire pending digests:", err);
+    }
+    return;
+  }
+
+  const cutoff = new Date(Date.now() - SESSION_IDLE_MINUTES * 60_000).toISOString();
+  let pending;
+  try {
+    pending = await env.CHATS.prepare(
+      `SELECT session, started_at, last_at, turn_count, country, city, region,
+              timezone, network
+         FROM sessions
+        WHERE notified_end = 0
+          AND turn_count > 0
+          AND last_at < ?
+          AND last_at > datetime('now', '-1 day')
+        ORDER BY last_at ASC
+        LIMIT ?`
+    )
+      .bind(cutoff, DIGEST_BATCH)
+      .all();
+  } catch (err) {
+    console.error("digest sweep query failed:", err);
+    return;
+  }
+
+  for (const row of pending.results ?? []) {
+    if (env.IGNORE_NETWORK && row.network === env.IGNORE_NETWORK) {
+      await markDigested(env, row.session);
+      continue;
+    }
+
+    let turns;
+    try {
+      turns = await env.CHATS.prepare(
+        `SELECT turn, question, answer FROM turns
+          WHERE session = ? ORDER BY turn ASC, id ASC`
+      )
+        .bind(row.session)
+        .all();
+    } catch (err) {
+      console.error(`could not read turns for ${row.session}:`, err);
+      continue;
+    }
+
+    const visitor = {
+      country: row.country, city: row.city, region: row.region,
+      timezone: row.timezone, network: row.network,
+    };
+    const local = localTimeOf(visitor, row.started_at);
+
+    const header = [
+      `*Conversation finished* -- ${row.turn_count} ${row.turn_count === 1 ? "message" : "messages"}` +
+        `, ${humanGap(row.started_at, row.last_at)}`,
+      `${placeOf(visitor)}${local ? `, started ${local} their time` : ""}`,
+      row.network ? `on ${row.network}` : null,
+    ].filter(Boolean).join("\n");
+
+    // Built line by line so it can stop cleanly at Slack's block limit instead
+    // of being chopped mid-sentence.
+    const lines = [];
+    let used = 0;
+    let shown = 0;
+    for (const t of turns.results ?? []) {
+      const block = `*them:* ${t.question}\n*you:* ${t.answer ?? "(no answer, generation failed)"}`;
+      if (used + block.length > SLACK_BLOCK_LIMIT) break;
+      lines.push(block);
+      used += block.length + 2;
+      shown++;
+    }
+    const dropped = (turns.results?.length ?? 0) - shown;
+    if (dropped > 0) {
+      lines.push(`_...and ${dropped} more. Full transcript: npm run logs_`);
+    }
+    lines.push(`_session \`${row.session}\`_`);
+
+    const ok = await notifySlack(env, `Conversation finished (${placeOf(visitor)})`, [
+      mrkdwn(header),
+      { type: "divider" },
+      mrkdwn(lines.join("\n\n")),
+    ]);
+    // Left unmarked on failure so the next tick retries; the 1-day floor in the
+    // query above stops a permanently broken webhook retrying forever.
+    if (ok) await markDigested(env, row.session);
+  }
+}
+
+async function markDigested(env, session) {
+  try {
+    await env.CHATS.prepare(`UPDATE sessions SET notified_end = 1 WHERE session = ?`)
+      .bind(session)
+      .run();
+  } catch (err) {
+    console.error(`could not mark ${session} digested:`, err);
+  }
+}
+
 export default {
+  // Cron trigger (see wrangler.toml). Sweeps for conversations that have gone
+  // quiet and posts their transcripts.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(sendPendingTranscripts(env));
+  },
+
   async fetch(request, env, ctx) {
     const origin = request.headers.get("Origin") || "";
 
@@ -366,7 +637,8 @@ export default {
 
     const started = Date.now();
     const askedAt = new Date().toISOString();
-    const country = request.cf?.country ?? null;
+    const visitor = visitorFrom(request);
+    const country = visitor.country;
     const priorTurns = history.filter((m) => m.role === "user").length;
 
     const messages = [
@@ -390,7 +662,7 @@ export default {
       // would be worse than paying for a cheap call the prompt then refuses.
       if (priorTurns === 0 && bestScore < MIN_SIMILARITY) {
         ctx.waitUntil(
-          logTurn(env, {
+          recordTurn(env, {
             session,
             turn: priorTurns + 1,
             asked_at: askedAt,
@@ -401,7 +673,7 @@ export default {
             retrieved: "",
             country,
             ms: Date.now() - started,
-          })
+          }, visitor)
         );
         return new Response(REFUSAL, {
           headers: { ...corsHeaders(origin), "Content-Type": "text/plain; charset=utf-8" },
@@ -455,7 +727,7 @@ export default {
 
       ctx.waitUntil(
         finished.then(() =>
-          logTurn(env, {
+          recordTurn(env, {
             session,
             turn: priorTurns + 1,
             asked_at: askedAt,
@@ -466,7 +738,7 @@ export default {
             retrieved: retrieved.map((m) => m.id).join(","),
             country,
             ms: Date.now() - started,
-          })
+          }, visitor)
         )
       );
 
@@ -480,7 +752,7 @@ export default {
     } catch (err) {
       console.error(err);
       ctx.waitUntil(
-        logTurn(env, {
+        recordTurn(env, {
           session,
           turn: priorTurns + 1,
           asked_at: askedAt,
@@ -491,7 +763,7 @@ export default {
           retrieved: "",
           country,
           ms: Date.now() - started,
-        })
+        }, visitor)
       );
       return new Response("Something went wrong answering that. Try again shortly.", {
         status: 502,

@@ -4,5 +4,5 @@ __pycache__/
 
 # wrangler build/state and local secrets; the real secrets live in Cloudflare
 node_modules/
-worker/.wrangler/
+.wrangler/
 .dev.vars

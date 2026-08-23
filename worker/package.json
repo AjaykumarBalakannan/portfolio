@@ -10,7 +10,10 @@
     "tail": "wrangler tail",
     "logs": "wrangler d1 execute portfolio-chat-logs --remote --json --command \"SELECT asked_at, session, turn, question, answer, country FROM turns ORDER BY id DESC LIMIT 40\" | python3 ../scripts/format_chats.py",
     "logs:today": "wrangler d1 execute portfolio-chat-logs --remote --json --command \"SELECT asked_at, session, turn, question, answer, country FROM turns WHERE date(asked_at) = date('now') ORDER BY id DESC\" | python3 ../scripts/format_chats.py",
-    "logs:count": "wrangler d1 execute portfolio-chat-logs --remote --json --command \"SELECT COUNT(*) AS total_turns, COUNT(DISTINCT session) AS conversations, MAX(asked_at) AS latest FROM turns\" | python3 ../scripts/format_chats.py"
+    "logs:count": "wrangler d1 execute portfolio-chat-logs --remote --json --command \"SELECT COUNT(*) AS total_turns, COUNT(DISTINCT session) AS conversations, MAX(asked_at) AS latest FROM turns\" | python3 ../scripts/format_chats.py",
+    "visitors": "wrangler d1 execute portfolio-chat-logs --remote --json --command \"SELECT substr(started_at,1,16) AS started, city, region, country, network, turn_count AS turns, first_question FROM sessions ORDER BY started_at DESC LIMIT 40\" | python3 ../scripts/format_sessions.py",
+    "networks": "wrangler d1 execute portfolio-chat-logs --remote --json --command \"SELECT COALESCE(network,'(unknown)') AS network, COALESCE(city,'') AS city, COUNT(*) AS visits, SUM(turn_count) AS messages, MAX(substr(started_at,1,10)) AS last_seen FROM sessions GROUP BY network, city ORDER BY visits DESC, last_seen DESC\" | python3 ../scripts/format_sessions.py",
+    "stats": "wrangler d1 execute portfolio-chat-logs --remote --json --command \"SELECT substr(started_at,1,10) AS day, COUNT(*) AS conversations, SUM(turn_count) AS messages, COUNT(DISTINCT COALESCE(city,country)) AS places FROM sessions GROUP BY day ORDER BY day DESC LIMIT 30\" | python3 ../scripts/format_sessions.py"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0"

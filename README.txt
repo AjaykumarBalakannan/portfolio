@@ -126,6 +126,45 @@ ASK ABOUT MY WORK (chatbot)
   To add a fact: add an entry to data/resume_chunks.json, re-run step 2,
   commit+push both JSON files.
 
+  WHO IS TALKING TO IT
+  Every turn is logged to a Cloudflare D1 database (portfolio-chat-logs), and
+  every conversation gets one rolled-up row in a `sessions` table alongside it.
+  Nothing is stored locally; it all lives in Cloudflare and keeps accumulating
+  with your laptop shut.
+
+    cd worker
+    npm run logs        the last 40 turns, as a transcript
+    npm run logs:today  just today
+    npm run visitors    one line per conversation: when, where, network, turns
+    npm run networks    which networks people came from, most frequent first
+    npm run stats       conversations and messages per day
+
+  `networks` is the interesting one. Cloudflare reports the visitor's network
+  operator, which on a home connection is just an ISP, but on a corporate
+  network is frequently the company's own name.
+
+  SLACK NOTIFICATIONS
+  Two messages per visitor: one the moment a conversation starts (where they
+  are, what network, their local time, their first question), and one with the
+  full transcript once they have been quiet for five minutes. The second is
+  driven by a cron trigger that sweeps for finished conversations.
+
+  Setup:
+    1. api.slack.com/apps -> Create New App -> From scratch -> pick a workspace
+       -> Incoming Webhooks -> Activate -> Add New Webhook to Workspace -> pick
+       a channel -> copy the https://hooks.slack.com/... URL.
+    2. cd worker && npx wrangler secret put SLACK_WEBHOOK_URL
+
+  Until that secret exists the notification code is inert, so nothing breaks if
+  you never set it. To stop your own browsing from pinging the channel,
+  uncomment IGNORE_NETWORK in worker/wrangler.toml and set it to your ISP as
+  Cloudflare names it (check `npm run networks` for the exact string).
+
+  Notification volume is two per conversation by design, not one per message.
+  The cron sweep batches five conversations per run because cron invocations on
+  the Workers free plan get 10ms of CPU.
+
+
 THE INTRO
   Particles assemble into drifting clusters, react to your cursor (move to
   orbit, click to pulse), then burst apart when you hit "Enter portfolio"

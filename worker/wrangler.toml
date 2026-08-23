@@ -8,6 +8,19 @@ compatibility_flags = ["nodejs_compat"]
 # Read your chats back with
 #   npx wrangler d1 execute portfolio-chat-logs --remote \
 #     --command "SELECT asked_at, question, answer FROM turns ORDER BY id DESC LIMIT 20"
+# Sweeps for conversations that have gone quiet and posts their transcript to
+# Slack. Every 5 minutes; the free plan allows 5 cron triggers per account and
+# gives each invocation 10ms of CPU, which is why the sweep batches (see
+# DIGEST_BATCH in index.js).
+[triggers]
+crons = ["*/5 * * * *"]
+
+# Optional: set this to your own ISP (as Cloudflare names it, e.g. "Charter
+# Communications Inc") to stop your own testing pinging the channel. Leave it
+# out entirely to be notified about everything.
+# [vars]
+# IGNORE_NETWORK = "Charter Communications Inc"
+
 [[d1_databases]]
 binding = "CHATS"
 database_name = "portfolio-chat-logs"
@@ -25,3 +38,7 @@ database_id = "d496b1d4-bdeb-4209-91c2-a4b79827d3f7"
 # Run the real Worker locally on :8787 (which is what js/ask.js targets from
 # localhost) with the same two keys in worker/.dev.vars -- gitignored:
 #   npx wrangler dev
+
+# Slack incoming webhook for chat notifications. It is a credential (anyone
+# holding it can post to the channel), so it lives in the secret store:
+#   npx wrangler secret put SLACK_WEBHOOK_URL
