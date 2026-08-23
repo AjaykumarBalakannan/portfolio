@@ -43,6 +43,25 @@ ASK ABOUT MY WORK (chatbot)
     Gemini  embeds the question (Anthropic has no embedding endpoint)
     Claude  writes the answer (claude-haiku-4-5)
 
+  Why two: retrieval works by turning text into vectors and finding the nearest
+  ones, and it has to be the same model on both sides -- a chunk embedded by one
+  model and a question embedded by another land in unrelated spaces and the
+  scores mean nothing. Anthropic only generates text; there is no endpoint that
+  returns a vector. So the embedding half has to come from somewhere else.
+  Gemini got it because the key was already there and gemini-embedding-001 does
+  asymmetric retrieval (documents and queries embed differently, which helps).
+
+  A live alternative, if the Gemini dependency ever becomes annoying:
+  Cloudflare Workers AI hosts @cf/baai/bge-base-en-v1.5, which outputs the same
+  768 dimensions this pipeline already uses, on the same infrastructure the
+  Worker runs on. That would drop the second API key, remove the external call
+  to Google on every question (part of the ~1.1s before the first word appears),
+  and remove the last free tier that can rate-limit the bot. Its free
+  allocation is 10,000 neurons/day and a question costs about 0.016, so roughly
+  600,000 questions/day. The catch is that generate_embeddings.py would need to
+  call Cloudflare's API instead of running locally, and bge is a slightly weaker
+  model than Gemini's. Considered and deliberately deferred, not overlooked.
+
   Pieces:
   data/resume_chunks.json          the knowledge base (edit this to add/change facts)
   data/vectors.json                generated -- do not hand-edit (see below)
