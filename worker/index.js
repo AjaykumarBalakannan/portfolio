@@ -232,13 +232,22 @@ function cosineSimilarity(a, b) {
   return dot / (Math.sqrt(na) * Math.sqrt(nb));
 }
 
-// Pinned chunks (who I am, how I work, the timeline, how to reach me) are always
-// present: a persona that only sees the top-K fragments can answer "what did you
-// build at Canaria" but not "who are you", because identity is never the nearest
-// neighbour of anything. Retrieval adds the topical chunks on top.
-function selectContext(queryVec, vectors, k) {
+// Chunks that stay pinned for the whole conversation. The other pinned chunks
+// (about-summary, contact) are identity boilerplate: necessary to open with,
+// but re-injecting "based in Dallas, looking for data science roles" on every
+// single turn is what makes the bot repeat itself, because the model reads it
+// as fresh information each time. After the opening message the conversation
+// history carries identity, and retrieval will surface contact details again if
+// someone actually asks for them.
+const ALWAYS_PINNED = new Set(["persona-working-style", "timeline-overview"]);
+
+// Pinned chunks are present regardless of similarity: a persona that only sees
+// the top-K fragments can answer "what did you build at Canaria" but not "who
+// are you", because identity is never the nearest neighbour of anything.
+// Retrieval adds the topical chunks on top.
+function selectContext(queryVec, vectors, k, isOpening) {
   const scored = vectors.map((v) => ({ ...v, score: cosineSimilarity(queryVec, v.embedding) }));
-  const pinned = scored.filter((v) => v.pin);
+  const pinned = scored.filter((v) => v.pin && (isOpening || ALWAYS_PINNED.has(v.id)));
   const pinnedIds = new Set(pinned.map((v) => v.id));
   const retrieved = scored
     .filter((v) => !pinnedIds.has(v.id))
@@ -289,6 +298,8 @@ Numbers belong to the thing they're written under, and moving one is the easiest
 If the notes don't cover what someone asks, say so plainly in your own voice and point them at the contact section at the bottom of the page. Don't guess and don't pad.
 
 CONVERSATION
+Do not repeat yourself. Everything you have already said in this conversation is above; the person read it. If you have told them you're in Dallas, or that you're after data science and ML engineering roles, or given them your email, do not say it a second time unless they ask again. Answer only the new part of what they just asked and let the rest stand. A reply that re-states your last reply with one new sentence buried in it reads like a brochure, not a person.
+
 This is a real back and forth, and you opened it by saying hi and asking how they're doing, so short social replies are normal. If they say "good, you?" just answer like a person and steer gently toward what you can actually help with. You can ask a light follow-up question if it makes sense. Don't re-introduce yourself every message; you've already said hello.
 
 SCOPE
@@ -655,7 +666,9 @@ export default {
         embedQuery(question, env.GEMINI_API_KEY),
       ]);
 
-      const { context, bestScore, retrieved } = selectContext(queryVec, vectors, TOP_K);
+      const { context, bestScore, retrieved } = selectContext(
+        queryVec, vectors, TOP_K, priorTurns === 0
+      );
 
       // Gate the opening message only. Mid-conversation replies legitimately
       // score near zero ("yeah", "what about the other one") and refusing those
