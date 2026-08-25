@@ -5,12 +5,15 @@
      knowing where it landed. */
   --ink:#0b0b0c; --ink-2:#141416; --ink-3:#202023;
   --bone:#e8e8ea; --bone-2:#fbfbfc; --muted:#8d8d95;
-  /* Tonal blocks, previously named for hues. They carry the mosaic tiles and
-     display accents; in a monochrome scheme they separate by value instead. */
-  --tone-1:#e3e3e6; --tone-2:#b9b9c0; --tone-3:#94949c; --tone-4:#6f6f78;
-  /* Card edges + CTAs. --a1 is the primary; anything sitting on top of it is
-     --on-accent, which flips with the context the same way. */
-  --a1:#f4f4f5; --a2:#c8c8ce; --a3:#9e9ea6; --a4:#7c7c85;
+  /* Surfaces and body copy stay neutral -- that is what reads as black and
+     white. The colour lives in the accents: section labels, the italic in a
+     headline, card edges, the small print that points somewhere. Hues are the
+     intro's, so the page and the gate belong to each other: gold against the
+     deep blue, then aqua, coral and violet off the nebula. */
+  --tone-1:#f0bd6b; --tone-2:#5fd3c4; --tone-3:#f08a72; --tone-4:#a992f5;
+  /* Card edges + CTAs, a step brighter than the tones so dark text sitting on
+     top of them stays readable. --on-accent flips with the context. */
+  --a1:#f5c87e; --a2:#72dfd0; --a3:#f79a83; --a4:#b8a4ff;
   --on-accent:#0c0c0d;
   /* The chat is the one thing on the page that is not the page: it answers as a
      person. It gets its own colour, pulled from the blue-violet the intro's
@@ -435,11 +438,11 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
 .paper{
   --ink:#f1f1f0; --ink-2:#e7e7e6; --ink-3:#d6d6d5;
   --bone:#191919; --bone-2:#0a0a0a; --muted:#6b6b71;
-  /* The accents and tones invert too. They are used as text on light sections
-     (education, certs, skills) and as fills on dark ones, so a single fixed
-     value cannot serve both -- it would vanish into one or the other. */
-  --tone-1:#1c1c1e; --tone-2:#3a3a3f; --tone-3:#57575d; --tone-4:#75757c;
-  --a1:#151517; --a2:#38383d; --a3:#55555b; --a4:#73737a;
+  /* Same four hues, taken down until they hold against paper. They are text on
+     the light sections and fills on the dark ones, so the light-context values
+     above would either glare or vanish here. */
+  --tone-1:#8a5a10; --tone-2:#0e6b60; --tone-3:#a8412a; --tone-4:#5b3fb0;
+  --a1:#8a5a10; --a2:#0e6b60; --a3:#a8412a; --a4:#5b3fb0;
   --on-accent:#f4f4f5;
   color:var(--bone);
   position:relative;
@@ -463,7 +466,7 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
 .masthead{display:flex;align-items:baseline;justify-content:space-between;gap:20px;
   padding-bottom:12px;border-bottom:2px solid currentColor;margin-bottom:34px;}
 .masthead .mh-l,.masthead .mh-r{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;
-  text-transform:uppercase;color:var(--bone);opacity:.75;white-space:nowrap;}
+  text-transform:uppercase;color:var(--tone-1);opacity:.85;white-space:nowrap;}
 .masthead .mh-c{font-family:var(--serif);font-weight:900;font-size:15px;letter-spacing:.22em;
   text-transform:uppercase;color:var(--bone-2);}
 @media(max-width:760px){.masthead .mh-l,.masthead .mh-r{display:none;}
@@ -476,7 +479,7 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
      instead of running off the page. */
   font-size:clamp(40px,9.2vw,124px);color:var(--bone-2);margin:0;
   overflow-wrap:break-word;}
-.display em{font-style:italic;font-weight:900;}
+.display em{font-style:italic;font-weight:900;color:var(--tone-1);}
 .display-sub{font-family:var(--serif);font-style:italic;font-weight:500;
   font-size:clamp(15px,2.1vw,24px);color:var(--bone);opacity:.82;margin-top:14px;
   padding-bottom:22px;border-bottom:1px solid currentColor;}
@@ -487,7 +490,7 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
 @media(max-width:900px){.spread{grid-template-columns:1fr;}}
 
 .colhead{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;
-  color:var(--muted);padding-bottom:7px;border-bottom:1px solid currentColor;margin-bottom:16px;}
+  color:var(--tone-1);padding-bottom:7px;border-bottom:1px solid currentColor;margin-bottom:16px;}
 
 .prose p{font-size:15.5px;line-height:1.62;margin-bottom:13px;text-align:justify;
   hyphens:auto;color:var(--bone);}
@@ -505,13 +508,13 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
 .contents .ct{font-family:var(--serif);font-weight:700;font-size:17.5px;color:var(--bone-2);}
 .contents .cd{display:block;font-family:var(--sans);font-style:italic;font-weight:400;
   font-size:12.5px;color:var(--muted);margin-top:2px;}
-.contents .cp{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--muted);
+.contents .cp{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--tone-1);
   white-space:nowrap;}
 
 /* ── figure captions ──────────────────────────────────────────────────── */
 .fig{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--muted);
   margin-top:9px;}
-.fig b{font-family:var(--mono);font-style:normal;font-weight:500;font-size:10px;
+.fig b{font-family:var(--mono);font-style:normal;font-weight:500;font-size:10px;color:var(--tone-1);
   letter-spacing:.16em;text-transform:uppercase;}
 
 /* ── numbered project list (replaces the card grid) ───────────────────── */
@@ -723,10 +726,10 @@ footer{padding-bottom:86px;}
 .tw.br{display:block;margin-top:.06em;}
 .tb-t{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.94;
   font-size:clamp(30px,6.2vw,84px);color:var(--bone-2);margin:0 auto;max-width:16ch;}
-/* The second clause used to separate by hue. With one colour left it has to
-   separate by value instead -- dropped a step off white so the line still reads
-   as a subordinate clause rather than more of the same sentence. */
-.tb-t .tw:nth-child(n+5){font-size:.62em;color:var(--tone-2);}
+/* Gold rather than the aqua the other accents use: this line sits directly over
+   the earth, and a blue-green clause on a blue planet is the one pairing here
+   that would not separate. */
+.tb-t .tw:nth-child(n+5){font-size:.62em;color:var(--tone-1);}
 
 @media(prefers-reduced-motion:reduce){
   .tearzone{height:auto;}
