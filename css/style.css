@@ -562,18 +562,22 @@ footer{padding-bottom:86px;}
    ragged edge is regenerated per viewport instead of being frozen at one width.
    ═══════════════════════════════════════════════════════════════════════ */
 
-.tearzone{position:relative;height:230vh;background:#0d0b09;}
+/* This is a <section>, so it picks up the global max-width, auto margins and
+   88px padding meant for content sections. A runway needs none of that: it has
+   to be full-bleed and exactly as tall as the scroll it provides. */
+.tearzone{position:relative;height:230vh;background:#0d0b09;
+  max-width:none;width:100%;margin:0;padding:0;}
 .tearstage{position:sticky;top:0;height:100vh;overflow:hidden;}
 
 /* The front page has to fit one screen for the tear to read: you cannot rip a
    page you can only half see. */
-#hero.paper[data-sheet]{
+.paper[data-sheet]{
   position:absolute;inset:0;min-height:0;height:100vh;overflow:hidden;
   padding:76px clamp(20px,5vw,52px) 28px;
   max-width:none;margin:0;display:flex;flex-direction:column;
 }
-#hero.paper[data-sheet] .spread{margin-top:20px;flex:1;min-height:0;}
-#hero.paper[data-sheet]::before{width:100%;left:0;transform:none;}
+.paper[data-sheet] .spread{margin-top:20px;flex:1;min-height:0;}
+.paper[data-sheet]::before{width:100%;left:0;transform:none;}
 
 /* Tighter measure inside a fixed-height sheet. */
 [data-sheet] .display{font-size:clamp(34px,6.6vw,86px);}
@@ -625,7 +629,57 @@ footer{padding-bottom:86px;}
 @media(prefers-reduced-motion:reduce){
   .tearzone{height:auto;}
   .tearstage{position:static;height:auto;overflow:visible;}
-  #hero.paper[data-sheet]{position:static;height:auto;min-height:0;padding-bottom:72px;}
+  .paper[data-sheet]{position:static;height:auto;min-height:0;padding-bottom:72px;}
   .tearback{display:none;}
   .tearback-sky{animation:none;}
 }
+
+/* ── the earth ────────────────────────────────────────────────────────────
+   Sits behind the torn paper. Built from gradients rather than a texture so
+   there is no image to load behind a fold most visitors see for two seconds.
+   The landmasses are a wide repeating gradient panned horizontally, which
+   reads as rotation without a sphere-mapping trick.                        */
+.earth{position:absolute;left:50%;bottom:-42vmin;transform:translateX(-50%);
+  width:96vmin;height:96vmin;pointer-events:none;
+  opacity:calc(var(--reveal,0) * .95);transition:opacity .18s linear;}
+.earth-globe{position:absolute;inset:0;border-radius:50%;overflow:hidden;
+  background:
+    radial-gradient(circle at 32% 28%,#2d6ea8 0%,#1b4f80 38%,#10314f 72%,#081a2b 100%);
+  box-shadow:inset -26px -18px 60px rgba(0,0,0,.72),
+             inset 14px 10px 40px rgba(140,200,255,.16);}
+.earth-land{position:absolute;inset:-2%;opacity:.82;
+  background-repeat:repeat-x;background-size:50% 100%;
+  background-image:
+    radial-gradient(30% 22% at 12% 34%,rgba(74,124,72,.95) 0 60%,transparent 62%),
+    radial-gradient(16% 26% at 26% 62%,rgba(88,132,74,.92) 0 60%,transparent 62%),
+    radial-gradient(22% 16% at 40% 30%,rgba(96,138,80,.9) 0 60%,transparent 62%),
+    radial-gradient(12% 20% at 33% 80%,rgba(120,146,86,.85) 0 60%,transparent 62%),
+    radial-gradient(26% 18% at 46% 52%,rgba(80,120,70,.88) 0 60%,transparent 62%);
+  filter:blur(.4px);
+  animation:earthSpin 120s linear infinite;}
+/* Terminator: the limb falling into night. */
+.earth-night{position:absolute;inset:0;border-radius:50%;
+  background:linear-gradient(102deg,transparent 34%,rgba(4,10,18,.55) 62%,rgba(2,6,12,.9) 88%);}
+/* Atmosphere, brighter on the lit limb. */
+.earth-atmo{position:absolute;inset:-3.5%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 34% 30%,rgba(150,205,255,.30) 0 52%,transparent 66%);
+  box-shadow:0 0 90px 18px rgba(120,185,255,.18);}
+@keyframes earthSpin{to{background-position:-100% 0;}}
+
+/* The copy has to clear the globe. */
+.tearback-copy{padding-bottom:16vmin;}
+
+@media(prefers-reduced-motion:reduce){.earth-land{animation:none;}}
+@media(max-width:600px){.earth{width:130vmin;height:130vmin;bottom:-56vmin;}}
+
+/* Sound toggle. Deliberately quiet in the corner: it is an offer, not a
+   feature to advertise, and it sits above the pill nav rather than beside the
+   chat launcher. */
+.soundtoggle{position:fixed;left:18px;bottom:22px;z-index:70;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  color:rgba(236,226,207,.55);background:rgba(28,23,18,.82);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.10);border-radius:100px;padding:8px 13px;
+  cursor:pointer;transition:color .2s ease,border-color .2s ease;}
+.soundtoggle:hover{color:var(--bone-2);border-color:rgba(255,255,255,.24);}
+.soundtoggle[aria-pressed="true"]{color:var(--a1);border-color:rgba(232,173,63,.4);}
+@media(max-width:640px){.soundtoggle{left:12px;bottom:14px;font-size:9.5px;padding:7px 10px;}}

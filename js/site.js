@@ -174,3 +174,105 @@
   addEventListener('resize', update, { passive: true });
   update();
 })();
+
+// ── tear sound ─────────────────────────────────────────────────────────────
+// Synthesised, not a file: a paper rip is filtered noise with a fast attack and
+// a ragged amplitude, which Web Audio makes cheaply and which costs no request.
+//
+// Two constraints shape this. Browsers refuse audio until the user has
+// interacted, so the context is only created after the first gesture (entering
+// or skipping the intro both count). And unexpected sound on a portfolio
+// irritates as often as it delights, so it is off until asked for and the
+// toggle is remembered.
+(function () {
+  const zone = document.getElementById('tearzone');
+  if (!zone) return;
+
+  const KEY = 'ajay.tearSound';
+  let enabled = localStorage.getItem(KEY) === 'on';
+  let ctx = null;
+  let noiseBuf = null;
+  let lastAt = 0;
+  let lastProgress = 0;
+
+  const btn = document.createElement('button');
+  btn.className = 'soundtoggle';
+  btn.type = 'button';
+  render();
+  document.body.appendChild(btn);
+
+  function render() {
+    btn.textContent = enabled ? '♪ sound on' : '♪ sound off';
+    btn.setAttribute('aria-pressed', String(enabled));
+    btn.setAttribute('aria-label', enabled ? 'Turn tear sound off' : 'Turn tear sound on');
+  }
+
+  btn.addEventListener('click', () => {
+    enabled = !enabled;
+    localStorage.setItem(KEY, enabled ? 'on' : 'off');
+    render();
+    if (enabled) { prime(); rip(0.5); }   // confirm the choice audibly
+  });
+
+  function prime() {
+    if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    ctx = new AC();
+    // Two seconds of white noise, reused for every rip.
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+
+  // One short rip. `force` (0-1) comes from how fast the reader is scrolling,
+  // so a slow drag whispers and a flick actually tears.
+  function rip(force) {
+    if (!enabled || !ctx || ctx.state !== 'running') return;
+    const now = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noiseBuf;
+    src.playbackRate.value = 0.8 + Math.random() * 0.5;
+
+    // Paper is mostly high-mid; the bandpass is what stops it sounding like static.
+    const band = ctx.createBiquadFilter();
+    band.type = 'bandpass';
+    band.frequency.value = 2100 + Math.random() * 1600;
+    band.Q.value = 0.7;
+
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 900;
+
+    const gain = ctx.createGain();
+    const peak = Math.min(0.16, 0.03 + force * 0.15);
+    const dur = 0.07 + force * 0.1;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(peak, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+    src.connect(band); band.connect(hp); hp.connect(gain); gain.connect(ctx.destination);
+    src.start(now);
+    src.stop(now + dur + 0.02);
+  }
+
+  // Driven from the same scroll progress the tear uses, but throttled: a rip is
+  // a burst of many small fibre snaps, not one continuous tone.
+  addEventListener('scroll', () => {
+    if (!enabled) return;
+    prime();
+    const rect = zone.getBoundingClientRect();
+    const travel = zone.offsetHeight - window.innerHeight;
+    const t = Math.max(0, Math.min(1, -rect.top / travel));
+    const progress = Math.max(0, (t - 0.2) / 0.8);
+    if (progress <= 0 || progress >= 1) { lastProgress = progress; return; }
+
+    const delta = Math.abs(progress - lastProgress);
+    const now = performance.now();
+    if (delta > 0.004 && now - lastAt > 38) {
+      lastAt = now;
+      rip(Math.min(1, delta * 22));
+    }
+    lastProgress = progress;
+  }, { passive: true });
+})();
