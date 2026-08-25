@@ -162,6 +162,11 @@
     };
     lead.addEventListener('play', () => { follow.play().catch(() => {}); resync(); });
     lead.addEventListener('seeked', resync);
+    // The last frame is the one that stays on screen, so it has to match.
+    lead.addEventListener('ended', () => {
+      follow.pause();
+      follow.currentTime = lead.duration - 0.001;
+    });
     // Cheap and infrequent: drift accumulates slowly, and correcting it every
     // frame would cost more than the mismatch it fixes.
     setInterval(resync, 500);
@@ -242,6 +247,12 @@
     if (enabled) { prime(); rip(0.5); }   // confirm the choice audibly
   });
 
+  // Any genuine gesture unlocks audio; scroll alone does not count, which is why
+  // the toggle could read "on" and still be silent.
+  ['pointerdown', 'keydown', 'touchstart'].forEach((evt) =>
+    addEventListener(evt, () => { if (enabled) prime(); }, { passive: true })
+  );
+
   function prime() {
     if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -305,14 +316,55 @@
   }, { passive: true });
 })();
 
-// The plate video autoplays only when motion is welcome. Left to the markup,
-// `autoplay` would run regardless of the reduced-motion preference, and a
-// looping face is exactly the kind of movement that setting exists to stop.
-// Without it the poster still shows, so the plate is never empty.
+// ── entering the portfolio ─────────────────────────────────────────────────
+// Everything expensive waits for this: the portrait, the earth texture, and the
+// audio context. Previously the video played the moment the script ran, which
+// meant its 6.6 seconds elapsed behind the gate and it had already stopped by
+// the time anyone saw it, while its decode competed with the intro's frames.
 (function () {
-  if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-  document.querySelectorAll('.plate-video').forEach((v) => {
-    v.muted = true;               // belt and braces: iOS refuses inline autoplay otherwise
-    v.play().catch(() => {});     // a refused autoplay just leaves the poster
-  });
+  const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  let entered = false;
+
+  function playPortrait() {
+    if (reduced) return;
+    document.querySelectorAll('.plate-video').forEach((v) => {
+      v.muted = true;
+      v.currentTime = 0;
+      v.play().catch(() => {});   // a refused autoplay just leaves the poster
+    });
+  }
+
+  function enter() {
+    if (entered) return;
+    entered = true;
+    document.body.classList.add('entered');   // lets the earth texture paint
+    // One frame's grace so the gate's teardown paints before the video decode
+    // starts competing with it.
+    requestAnimationFrame(() => setTimeout(playPortrait, 260));
+  }
+
+  // The gate signals completion by unhiding the replay button on every exit
+  // path, so watching that catches enter, skip and the reduced-motion path
+  // without reaching into intro.js.
+  const replay = document.getElementById('replay');
+  if (!replay || !replay.hidden) enter();
+  else {
+    const mo = new MutationObserver(() => { if (!replay.hidden) { mo.disconnect(); enter(); } });
+    mo.observe(replay, { attributes: true, attributeFilter: ['hidden'] });
+    setTimeout(() => { mo.disconnect(); enter(); }, 12000);  // never strand the page
+  }
+
+  // Scrolling back up closes the tear. Reaching the top again is a return to the
+  // front page, so the portrait plays once more rather than sitting on a frozen
+  // last frame.
+  const zone = document.getElementById('tearzone');
+  if (zone) {
+    let wasOpen = false;
+    addEventListener('scroll', () => {
+      const t = -zone.getBoundingClientRect().top / (zone.offsetHeight - innerHeight);
+      const open = t > 0.35;
+      if (wasOpen && !open && entered) playPortrait();
+      wasOpen = open;
+    }, { passive: true });
+  }
 })();

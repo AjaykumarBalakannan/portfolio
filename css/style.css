@@ -632,7 +632,7 @@ footer{padding-bottom:86px;}
   will-change:opacity,transform;}
 .tw.br{display:block;margin-top:.06em;}
 .tb-t{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.94;
-  font-size:clamp(30px,6.2vw,84px);color:var(--bone-2);margin:0;max-width:16ch;}
+  font-size:clamp(30px,6.2vw,84px);color:var(--bone-2);margin:0 auto;max-width:16ch;}
 .tb-t .tw:nth-child(n+5){font-size:.62em;color:var(--a1);}
 
 @media(prefers-reduced-motion:reduce){
@@ -657,16 +657,18 @@ footer{padding-bottom:86px;}
              inset 16px 12px 44px rgba(140,200,255,.14);}
 /* NASA Blue Marble, equirectangular. Repeated on x and panned, so the map wraps
    seamlessly and reads as rotation without any 3D. */
+.entered .earth-land{background-image:url("../assets/earth-map.jpg");}
 .earth-land{position:absolute;inset:0;
-  background-image:url("../assets/earth-map.jpg");
   background-repeat:repeat-x;background-size:200% 100%;
+  /* Painted only once body.entered lands, so the decode does not compete with
+     the intro's animation frames. */
   animation:earthSpin 140s linear infinite;}
 /* The limb falling into night, plus a lit crescent, which is what actually
    sells a flat map as a sphere. */
 .earth-night{position:absolute;inset:0;border-radius:50%;
   background:
-    radial-gradient(circle at 30% 26%,transparent 0 44%,rgba(2,7,14,.42) 68%,rgba(1,4,9,.94) 100%),
-    linear-gradient(104deg,transparent 30%,rgba(3,8,16,.5) 64%,rgba(1,4,9,.9) 92%);}
+    radial-gradient(circle at 32% 28%,transparent 0 52%,rgba(2,7,14,.22) 74%,rgba(1,4,9,.72) 100%),
+    linear-gradient(104deg,transparent 44%,rgba(3,8,16,.26) 74%,rgba(1,4,9,.6) 96%);}
 .earth-atmo{position:absolute;inset:-4%;border-radius:50%;pointer-events:none;
   background:radial-gradient(circle at 32% 28%,rgba(150,205,255,.26) 0 50%,transparent 66%);
   box-shadow:0 0 100px 22px rgba(120,185,255,.20);}

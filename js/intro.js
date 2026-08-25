@@ -99,7 +99,13 @@ const FRAG = `
 
 function buildScene(){
   renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  // Capped at 1, not devicePixelRatio. This gate is purely fill-rate bound:
+  // measured on an M2, 6.7MP ran at 31fps, 2.5MP still dropped 13 frames in 192,
+  // and 1.6MP holds a locked 60 with 2. The particle count was never the
+  // problem. Soft additive blobs gain almost nothing from extra density, and a
+  // steady 60 is worth far more than crisper points, especially since a weaker
+  // machine than this one would fare worse.
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1));
   renderer.setSize(innerWidth,innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
@@ -111,7 +117,7 @@ function buildScene(){
 
   mat = new THREE.ShaderMaterial({
     uniforms:{ uTime:{value:0}, uProgress:{value:0}, uBurst:{value:0},
-               uSize:{value:15.0}, uPixel:{value:Math.min(devicePixelRatio,2)}, uPulse:{value:0} },
+               uSize:{value:15.0}, uPixel:{value:Math.min(devicePixelRatio,1)}, uPulse:{value:0} },
     vertexShader:VERT, fragmentShader:FRAG,
     transparent:true, depthWrite:false, blending:THREE.AdditiveBlending
   });
@@ -212,7 +218,7 @@ addEventListener('resize',()=>{
   if(!renderer)return;
   camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth,innerHeight);
-  mat.uniforms.uPixel.value=Math.min(devicePixelRatio,2);
+  mat.uniforms.uPixel.value=Math.min(devicePixelRatio,1);
 });
 
 if(RM){ gate.style.display='none'; document.body.classList.add('cinema','reveal'); replay.hidden=false; }
