@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Privacy Policy · Ajaykumar Balakannan</title>
+<meta name="description" content="Privacy policy for Outreach Program, a personal job-search tool built and used by Ajaykumar Balakannan."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,900&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --ink:#221c17; --ink-2:#2b2419; --ink-3:#332a1e;
+    --bone:#ece2cf; --bone-2:#f4eddd; --muted:#a2947b; --a1:#e8ad3f;
+    --serif:'Fraunces',Georgia,serif; --sans:'Hanken Grotesk',system-ui,sans-serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--bone);font-family:var(--sans);
+       font-size:15.5px;line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:760px;margin:0 auto;padding:56px 22px 90px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+           color:var(--a1);margin-bottom:14px}
+  h1{font-family:var(--serif);font-weight:900;letter-spacing:-.02em;line-height:1.05;
+     font-size:clamp(32px,5.5vw,52px);color:var(--bone-2);margin:0 0 10px}
+  .updated{color:var(--muted);font-size:13.5px;margin-bottom:38px}
+  h2{font-family:var(--serif);font-weight:900;font-size:21px;color:var(--bone-2);
+     margin:38px 0 10px;letter-spacing:-.01em}
+  p{margin:0 0 14px}
+  ul{margin:0 0 14px;padding-left:20px}
+  li{margin-bottom:7px}
+  a{color:var(--a1);text-decoration:none;border-bottom:1px solid rgba(232,173,63,.35)}
+  a:hover{border-bottom-color:var(--a1)}
+  .card{background:var(--ink-2);border:1px solid var(--ink-3);border-radius:12px;
+        padding:18px 20px;margin:22px 0}
+  .card p:last-child{margin-bottom:0}
+  strong{color:var(--bone-2)}
+  footer{margin-top:54px;padding-top:22px;border-top:1px solid var(--ink-3);
+         color:var(--muted);font-size:13px}
+  code{font-family:var(--mono);font-size:13px;color:var(--bone-2);
+       background:var(--ink-3);padding:1px 6px;border-radius:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Privacy</div>
+  <h1>Privacy Policy</h1>
+  <div class="updated">Outreach Program · Last updated 24 August 2026</div>
+
+  <div class="card">
+    <p><strong>The short version.</strong> Outreach Program is a personal tool I built for my
+    own job search. I am its only user. It reads my own Gmail to keep track of the jobs I have
+    applied to, and it sends emails from my own account. It has no other users, collects nothing
+    from anyone else, and sells nothing to anyone.</p>
+  </div>
+
+  <h2>Who this is</h2>
+  <p>Outreach Program is built and operated by Ajaykumar Balakannan as a private, personal
+  project. It is not a commercial product, it is not offered to the public, and there is no
+  company behind it. Contact:
+  <a href="mailto:ajayport2@gmail.com">ajayport2@gmail.com</a>.</p>
+
+  <h2>What data the app accesses</h2>
+  <p>The app requests the following Google account permissions, and only for accounts I own
+  and personally authorise:</p>
+  <ul>
+    <li><code>gmail.readonly</code> — to read messages in my own job-search mailbox, so that
+      application confirmations, rejections and interview requests can be recognised and
+      counted automatically.</li>
+    <li><code>gmail.send</code> — to send job-search emails from my own account, which I write
+      and approve individually before anything is sent.</li>
+    <li><code>drive.readonly</code> and <code>spreadsheets</code> — to read my own resume files
+      and contact lists.</li>
+    <li><code>openid</code>, <code>email</code>, <code>profile</code> — to confirm which of my
+      accounts is connected.</li>
+  </ul>
+
+  <h2>What it does with that data</h2>
+  <p>Email in my job-search mailbox is categorised (application received, rejection, interview
+  request, assessment, and so on) and a small amount of information is stored: the sender,
+  subject, a short preview, the company and role where those appear, and the time it arrived.
+  This is used to produce a private dashboard of my own job search and to alert me when
+  something needs a reply.</p>
+  <p>Message contents are processed by third-party model APIs (Google Gemini and Anthropic
+  Claude) purely to sort messages into those categories. No message is used to train any model
+  by these providers under their API terms.</p>
+
+  <h2>Where it is stored, and for how long</h2>
+  <p>Data is stored in a private Cloudflare D1 database and in local files on my own computer.
+  It is not shared with anyone, not published, not sold, and not used for advertising. There is
+  no analytics, no tracking and no third-party access.</p>
+  <p>I delete this data whenever I no longer need it, and the entire dataset can be destroyed by
+  deleting the database.</p>
+
+  <h2>People who email me</h2>
+  <p>If you are a recruiter or employer who has emailed me, your message is stored the same way
+  any email is stored in any inbox, plus a category label. If you would prefer I delete a message
+  you sent, email <a href="mailto:ajayport2@gmail.com">ajayport2@gmail.com</a> and I will remove
+  it.</p>
+
+  <h2>Google user data</h2>
+  <p>Outreach Program's use and transfer of information received from Google APIs adheres to the
+  <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google
+  API Services User Data Policy</a>, including the Limited Use requirements. Google user data is
+  never sold, never transferred for advertising, and never used for any purpose other than the
+  personal job-search features described above.</p>
+
+  <h2>Revoking access</h2>
+  <p>Access can be withdrawn at any time from
+  <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account
+  permissions</a>, which immediately stops the app from reading or sending anything.</p>
+
+  <h2>Changes</h2>
+  <p>If what the app does changes, this page changes with it, and the date at the top is
+  updated.</p>
+
+  <footer>
+    Ajaykumar Balakannan · <a href="/">ajaykumarbalakannan.com</a> ·
+    <a href="mailto:ajayport2@gmail.com">ajayport2@gmail.com</a>
+  </footer>
+
+</div>
+</body>
+</html>
