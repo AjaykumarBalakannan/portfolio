@@ -30,10 +30,13 @@
     <!-- Still a real button so it is focusable and announced, but styled as the
          instruction rather than a call to action: pressing Enter or scrolling is
          the intended way in, and the button is the accessible equivalent. -->
+    <!-- Two phrasings: a phone has no Enter key to press, so offering one is
+         an instruction that cannot be followed. CSS shows exactly one. -->
     <button class="enter" id="enter">
-      <span class="ek">Press <b>Enter</b></span>
+      <span class="ek ek-key">Press <b>Enter</b></span>
       <span class="edot"></span>
-      <span class="ek">or scroll to begin</span>
+      <span class="ek ek-key">or scroll to begin</span>
+      <span class="ek ek-touch">Scroll to begin</span>
     </button>
   </div>
   <div class="hint" id="hint">move the cursor to disturb the field · click to pulse</div>

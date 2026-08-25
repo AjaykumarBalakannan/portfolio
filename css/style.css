@@ -72,6 +72,7 @@ a{color:inherit;} img{display:block;max-width:100%;}
 .gate-copy .gt{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.94;
   font-size:clamp(44px,8.5vw,108px);color:var(--bone-2);text-shadow:0 4px 60px rgba(11,11,12,.9);}
 .gate-copy .gt em{font-style:italic;font-weight:500;color:var(--tone-1);}
+.ek-touch{display:none;}
 .gate-copy .gt{text-shadow:0 2px 34px rgba(0,0,0,.9),0 0 12px rgba(0,0,0,.6);}
 .gate-copy .gs{margin-top:18px;font-size:clamp(14px,1.6vw,18px);color:var(--bone);opacity:.82;text-shadow:0 2px 30px rgba(11,11,12,.9);}
 /* No longer a lozenge to click: the way in is Enter or a scroll, and this is
@@ -587,8 +588,6 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
   .pillnav{bottom:14px;}
   .pillnav a{padding:7px 11px;font-size:9.5px;letter-spacing:.1em;}
 }
-/* Clear the chat launcher, which lives bottom-right. */
-@media(max-width:640px){.pillnav{left:16px;right:76px;transform:none;justify-content:center;}}
 
 /* The pill nav is fixed bottom-centre, so the last thing on the page needs
    clearance or it sits under the pill. */
@@ -788,7 +787,6 @@ footer{padding-bottom:86px;}
   cursor:pointer;transition:color .2s ease,border-color .2s ease;}
 .soundtoggle:hover{color:var(--bone-2);border-color:rgba(255,255,255,.24);}
 .soundtoggle[aria-pressed="true"]{color:var(--a1);border-color:rgba(235,235,238,.4);}
-@media(max-width:640px){.soundtoggle{left:12px;bottom:14px;font-size:9.5px;padding:7px 10px;}}
 
 /* Grain on the clone would double the cost of the page's heaviest filter for a
    layer that is mostly hidden behind the tear. */
@@ -802,6 +800,13 @@ footer{padding-bottom:86px;}
    -- so anything placed level with either one lands on top of it. */
 .askw-callout{position:absolute;right:6px;bottom:134px;z-index:79;width:max-content;max-width:250px;
   text-align:right;pointer-events:none;
+  /* It is fixed to the corner while the page scrolls underneath, so it lands on
+     dark sections and light ones alike. Bare text with a shadow held up on the
+     dark and vanished on the paper; it needs its own ground, like every other
+     floating control on this page has. */
+  background:rgba(11,11,12,.84);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.10);border-radius:14px;
+  padding:12px 15px;box-shadow:0 16px 40px -18px rgba(0,0,0,.7);
   opacity:0;transform:translateY(10px) scale(.94);transform-origin:100% 100%;
   transition:opacity .5s cubic-bezier(.2,.8,.3,1),transform .5s cubic-bezier(.2,.8,.3,1);}
 .askw-callout.show{opacity:1;transform:none;}
@@ -809,7 +814,7 @@ footer{padding-bottom:86px;}
 .ac-k{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.26em;
   text-transform:uppercase;color:var(--chat);margin-bottom:5px;}
 .ac-t{display:block;font-family:var(--serif);font-weight:900;font-size:19px;line-height:1.12;
-  letter-spacing:-.01em;color:var(--bone-2);text-shadow:0 2px 22px rgba(0,0,0,.8);}
+  letter-spacing:-.01em;color:var(--bone-2);}
 .ac-t em{font-style:italic;color:var(--chat);}
 .ac-s{display:block;margin-top:5px;font-size:11.5px;color:var(--muted);}
 /* Each line arrives just behind the one above it, so the thought lands in the
@@ -843,3 +848,44 @@ footer{padding-bottom:86px;}
           transform:scale(1.09);}
 }
 @media(prefers-reduced-motion:reduce){.askw-launcher.blink{animation:none;}}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHONE
+   Five separate fixed elements share the bottom of the screen: pill nav,
+   sound toggle, chat launcher, replay pill and the callout. Each was
+   positioned against the viewport on its own, which is fine at 1440px where
+   there is room to be sloppy and collides at 390px where there is not.
+
+   So they are laid out here as one ladder, bottom upward, and the numbers
+   are chained deliberately -- each row clears the height of the one below
+   it rather than being picked to look right:
+
+     10px   pill nav, full width
+     62px   sound toggle (left) and chat launcher (right)
+     133px  replay pill, right      (clears the 61px launcher)
+     176px  callout                 (clears the 33px replay pill)
+   ═══════════════════════════════════════════════════════════════════════ */
+@media(max-width:640px){
+  .pillnav{left:10px;right:10px;bottom:10px;transform:none;justify-content:center;}
+
+  .soundtoggle{left:10px;bottom:62px;font-size:9.5px;padding:7px 10px;}
+
+  /* The launcher sits 12px above its container, so the container carries the
+     row height: 50 + 12 = 62, level with the sound toggle. */
+  .askw{right:12px;bottom:50px;}
+  .replay{bottom:133px;right:12px;}
+  /* Measured from .askw, which is already 50px up. */
+  .askw-callout{bottom:126px;right:2px;}
+
+  /* A 19px text link is not a tap target. The card link gets a real one, and
+     the row it sits in keeps its baseline across cards. */
+  .projrow .go{padding:11px 0;min-height:44px;align-items:center;}
+
+  /* Cursor copy on a device with no cursor, sitting under the skip button. */
+  .hint{display:none;}
+
+  /* Swap the entry instruction for one a phone can actually act on. */
+  .ek-key,.enter .edot{display:none;}
+  .ek-touch{display:inline;}
+}
