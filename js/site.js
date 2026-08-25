@@ -86,3 +86,36 @@
   }, { passive: true });
   update();
 })();
+
+// Drives the tear. The paper is masked with a centre band that widens as the
+// opening spread leaves the viewport, so the dark section behind shows through
+// a gap that grows into a split page.
+//
+// Scroll position rather than a CSS scroll-timeline: animation-timeline is
+// still Chromium-only, and this needs to behave the same in Safari, which is
+// where a good share of recruiters will open the site.
+(function () {
+  const hero = document.getElementById('hero');
+  if (!hero || !hero.classList.contains('paper')) return;
+  if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+
+  let ticking = false;
+  function update() {
+    const rect = hero.getBoundingClientRect();
+    // Starts once the spread's bottom edge reaches the lower third of the
+    // viewport, completes as it clears the top. Nothing happens on the way in.
+    const start = window.innerHeight * 0.66;
+    const progress = (start - rect.bottom) / start;
+    const t = Math.max(0, Math.min(1, progress));
+    // Eased so the first movement is gentle and the split accelerates.
+    hero.style.setProperty('--tear', (t * t).toFixed(4));
+  }
+
+  addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { update(); ticking = false; });
+  }, { passive: true });
+  addEventListener('resize', update, { passive: true });
+  update();
+})();

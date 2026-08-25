@@ -500,3 +500,97 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
 /* The pill nav is fixed bottom-centre, so the last thing on the page needs
    clearance or it sits under the pill. */
 footer{padding-bottom:86px;}
+
+/* ── the plate: a photograph that behaves like newsprint ──────────────────
+   The reference runs a looping video here, labelled "live motion portrait".
+   Same intent reached from a still: high-contrast duotone ink, a halftone dot
+   screen, drifting grain and a slow Ken Burns push. It reads as a printed
+   photograph that happens to be breathing, and needs no video file.        */
+.spread{grid-template-columns:1.05fr .8fr .85fr;}
+@media(max-width:1080px){.spread{grid-template-columns:1fr 1fr;}
+  .plate{grid-column:1 / -1;order:3;max-width:420px;}}
+@media(max-width:900px){.spread{grid-template-columns:1fr;}}
+
+.plate{margin:0;}
+.plate-img{position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.18);
+  background:var(--ink-2);aspect-ratio:4/5;}
+.plate-img img{width:100%;height:100%;object-fit:cover;display:block;
+  /* Newsprint ink: crushed to near-monochrome, then warmed back toward the
+     paper so it sits in the page rather than on it. */
+  filter:grayscale(1) contrast(1.28) brightness(1.04) sepia(.22);
+  transform:scale(1.06);
+  animation:plateDrift 26s ease-in-out infinite alternate;}
+
+/* Halftone dot screen. Multiply keeps the dots reading as ink on paper. */
+.plate-img::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle at center,rgba(23,19,14,.62) 0.9px,transparent 1.15px);
+  background-size:3.4px 3.4px;mix-blend-mode:multiply;opacity:.55;}
+
+/* Press grain, drifting so the print never sits perfectly still. */
+.plate-img::before{content:"";position:absolute;inset:-40%;z-index:2;pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'>\
+<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/>\
+</filter><rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
+  mix-blend-mode:multiply;opacity:.26;
+  animation:plateGrain 700ms steps(3) infinite;}
+
+@keyframes plateDrift{
+  from{transform:scale(1.06) translate3d(0,0,0);}
+  to{transform:scale(1.12) translate3d(-1.4%,-1.8%,0);}
+}
+@keyframes plateGrain{
+  0%{transform:translate3d(0,0,0);}
+  33%{transform:translate3d(-3%,2%,0);}
+  66%{transform:translate3d(2%,-3%,0);}
+  100%{transform:translate3d(0,0,0);}
+}
+@media(prefers-reduced-motion:reduce){
+  .plate-img img{animation:none;transform:scale(1.02);}
+  .plate-img::before{animation:none;}
+}
+
+/* ── the tear ────────────────────────────────────────────────────────────
+   The reference pulls its newspaper away to reveal a black world beneath.
+   Same beat, done as a mask rather than two duplicated halves: a vertical
+   band is cut out of the paper from the centre and widened on scroll, so the
+   dark page behind shows through a gap that grows into a tear. Duplicating
+   the hero into left/right copies would have read identically and shipped two
+   of every heading to a screen reader, which is not worth it.
+
+   --tear runs 0 -> 1, set from js/site.js.                                */
+#hero.paper{
+  --tear:0;
+  /* Ragged rather than a ruler-straight cut, so it reads as torn newsprint. */
+  -webkit-mask-image:
+    linear-gradient(90deg,#000 0 calc(50% - var(--tear) * 52vw),
+                    transparent calc(50% - var(--tear) * 52vw) calc(50% + var(--tear) * 52vw),
+                    #000 calc(50% + var(--tear) * 52vw) 100%);
+  mask-image:
+    linear-gradient(90deg,#000 0 calc(50% - var(--tear) * 52vw),
+                    transparent calc(50% - var(--tear) * 52vw) calc(50% + var(--tear) * 52vw),
+                    #000 calc(50% + var(--tear) * 52vw) 100%);
+}
+/* The paper surface is painted by the pseudo-element, so it has to be torn
+   with the content rather than left behind as a full-width sheet. */
+#hero.paper::before{
+  -webkit-mask-image:inherit;
+  mask-image:inherit;
+}
+/* A hairline of ink down each torn edge, the way a fold catches shadow. */
+#hero.paper::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+  opacity:calc(var(--tear) * 3);
+  background:
+    linear-gradient(90deg,transparent calc(50% - var(--tear) * 52vw - 14px),
+      rgba(23,19,14,.30) calc(50% - var(--tear) * 52vw - 1px),
+      transparent calc(50% - var(--tear) * 52vw)),
+    linear-gradient(270deg,transparent calc(50% - var(--tear) * 52vw - 14px),
+      rgba(23,19,14,.30) calc(50% - var(--tear) * 52vw - 1px),
+      transparent calc(50% - var(--tear) * 52vw));
+}
+@media(prefers-reduced-motion:reduce){
+  #hero.paper{-webkit-mask-image:none;mask-image:none;}
+  #hero.paper::before{-webkit-mask-image:none;mask-image:none;}
+  #hero.paper::after{display:none;}
+}
