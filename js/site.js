@@ -334,6 +334,24 @@
   const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
   let entered = false;
 
+  // One listener for all the plates, replaced rather than stacked, so a repeated
+  // refusal cannot pile up handlers on the document.
+  let retryArmed = false;
+  function armRetry() {
+    if (retryArmed) return;
+    retryArmed = true;
+    const events = ['touchstart', 'pointerdown'];
+    const go = () => {
+      retryArmed = false;
+      events.forEach((evt) => removeEventListener(evt, go));
+      document.querySelectorAll('.plate-video').forEach((el) => {
+        el.muted = true;
+        el.play().catch(() => {});
+      });
+    };
+    events.forEach((evt) => addEventListener(evt, go, { passive: true }));
+  }
+
   function playPortrait() {
     if (reduced) return;
     document.querySelectorAll('.plate-video').forEach((v) => {
@@ -343,7 +361,21 @@
       // the file, so the browser cannot read duration or dimensions until the
       // whole thing has arrived. Calling play() before that yields a 0x0 video
       // and silently does nothing. Wait for metadata, and only then start.
-      const start = () => { v.currentTime = 0; v.play().catch(() => {}); };
+      // If play() is refused the poster stays up and the visitor just sees a
+      // still, with nothing to tell them otherwise. Refusal is normal on a
+      // phone -- iOS blocks autoplay outright in Low Power Mode, muted and
+      // inline or not -- so the retry is armed on the next touch, which is a
+      // gesture the policy does accept.
+      const start = () => {
+        v.currentTime = 0;
+        const p = v.play();
+        if (p && p.catch) p.catch(() => armRetry());
+        // A rejected promise is not the only way autoplay fails, and testing
+        // showed it is not even the common one: play() can resolve and the
+        // video simply never advances. So the check is whether it actually
+        // moved, not whether the call claimed to succeed.
+        setTimeout(() => { if (v.paused) armRetry(); }, 400);
+      };
       if (v.readyState >= 1) start();
       else {
         v.addEventListener('loadedmetadata', start, { once: true });

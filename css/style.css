@@ -688,9 +688,33 @@ footer{padding-bottom:86px;}
 [data-sheet] .contents .ct{font-size:14.5px;}
 [data-sheet] .contents .cd{font-size:11px;}
 [data-sheet] .plate-img{aspect-ratio:1/1;}
+/* The plate is square, so its width sets its height, and the sheet cannot
+   scroll. Capping it against viewport height keeps it inside the box on a short
+   window as well as a narrow one; min() means a tall screen still cannot make it
+   wider than its column. */
+[data-sheet] .plate{max-width:min(100%,42vh);}
 [data-sheet] .fig{font-size:10.5px;margin-top:6px;}
 [data-sheet] .t-clust,[data-sheet] .colhead:nth-of-type(2) ~ .mosaic{display:none;}
 [data-sheet] .tile.t-links{margin-top:12px;}
+
+/* The sheet is a fixed 100vh box with overflow:hidden -- it has to be, or the
+   tear has nothing to rip across. On a wide screen the three-column spread fits
+   that box. Below 1080px the columns stack, the sheet runs about 1600px against
+   844px of room, and everything past the lead paragraph is clipped away: the
+   portrait, the contents index, the mosaic. The video was playing the whole
+   time, 790px below the bottom edge of a box that cannot scroll.
+
+   So the narrow sheet becomes what a front page actually is -- masthead,
+   headline, standfirst, picture. The detail those hidden columns carried is
+   the rest of the page's job, and the contents index only duplicates the nav
+   that is already on screen. */
+@media(max-width:1080px){
+  [data-sheet] .spread{grid-template-columns:1fr;gap:12px;}
+  [data-sheet] .spread > div:last-child{display:none;}   /* contents + mosaic */
+  [data-sheet] .prose p:not(.lead){display:none;}
+  [data-sheet] .plate{order:2;margin:2px auto 0;}
+  [data-sheet] .fig{display:none;}
+}
 
 /* The two torn halves. Clones, built and clipped in JS. */
 .sheethalf{position:absolute;inset:0;will-change:transform;pointer-events:none;}
@@ -888,4 +912,17 @@ footer{padding-bottom:86px;}
   /* Swap the entry instruction for one a phone can actually act on. */
   .ek-key,.enter .edot{display:none;}
   .ek-touch{display:inline;}
+}
+
+
+/* A short viewport -- a phone held sideways, or a small laptop window -- has no
+   vertical room for a full front page, and the sheet cannot scroll to make any.
+   Everything below the headline gives way, and the type is measured against
+   height rather than width because height is the scarce axis here. */
+@media(max-height:560px){
+  .paper[data-sheet]{padding-top:56px;padding-bottom:14px;}
+  [data-sheet] .masthead{margin-bottom:10px;padding-bottom:6px;}
+  [data-sheet] .display{font-size:clamp(24px,5vh,44px);}
+  [data-sheet] .display-sub,[data-sheet] .prose,[data-sheet] .colhead{display:none;}
+  [data-sheet] .plate{max-width:min(100%,34vh);}
 }
