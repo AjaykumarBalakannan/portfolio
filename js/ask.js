@@ -44,6 +44,32 @@ function landingSpot() {
   return { x: cx, y: cy };
 }
 
+// The callout is an invitation, so it belongs to the pre-conversation state. It
+// retires on a timer if ignored, and immediately once the panel opens -- leaving
+// it up beside an open chat crowds the corner and repeats an instruction the
+// visitor has visibly already taken.
+const callout = document.getElementById('askCallout');
+let calloutTimers = [];
+
+function showCallout() {
+  if (!callout) return;
+  callout.hidden = false;
+  void callout.offsetWidth; // commit start styles; rAF does not fire in a background tab
+  callout.classList.add('show');
+  calloutTimers = [
+    setTimeout(() => callout.classList.remove('show'), 9000),
+    setTimeout(() => { callout.hidden = true; }, 9600)
+  ];
+}
+
+function dismissCallout() {
+  if (!callout || callout.hidden) return;
+  calloutTimers.forEach(clearTimeout);
+  calloutTimers = [];
+  callout.classList.remove('show');
+  setTimeout(() => { callout.hidden = true; }, 420);
+}
+
 function landLauncher() {
   launcher.hidden = false;
   // Launcher pops in first, canvas fades a beat later, so the two overlap and
@@ -65,17 +91,7 @@ function landLauncher() {
   // Let the landing settle before speaking. Arriving and talking at the same
   // instant reads as a popup; a beat of silence first reads as someone landing
   // and then turning to you.
-  setTimeout(() => {
-    const call = document.getElementById('askCallout');
-    if (!call) return;
-    call.hidden = false;
-    void call.offsetWidth; // commit the start styles -- see landLauncher above
-    call.classList.add('show');
-    // It withdraws on its own. A permanent bubble beside a chat button is
-    // clutter, and anyone who wants it can still see the launcher pulsing.
-    setTimeout(() => call.classList.remove('show'), 9000);
-    setTimeout(() => { call.hidden = true; }, 9600);
-  }, 1100);
+  setTimeout(showCallout, 1100);
 }
 
 function runRocketIntro() {
@@ -369,6 +385,7 @@ function openPanel() {
   requestAnimationFrame(() => panel.classList.add('show'));
   launcher.setAttribute('aria-expanded', 'true');
   launcher.classList.remove('blink'); // stop nagging once they've engaged
+  dismissCallout();                   // and clear the invitation they just accepted
   setTimeout(() => input.focus(), 150);
 
   // Open the conversation ourselves rather than waiting to be asked something.

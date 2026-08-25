@@ -1,10 +1,17 @@
 :root{
-  --ink:#221c17; --ink-2:#2b2419; --ink-3:#332a1e;
-  --bone:#ece2cf; --bone-2:#f4eddd; --muted:#a2947b;
-  --ochre:#e0a12e; --teal:#3a8975; --clay:#bc5a34; --plum:#7d4a54;
-  /* Brightened accents used for card edges + CTAs. Deliberately lighter than the
-     base ochre/teal/clay so dark ink text stays readable on top of them. */
-  --a1:#e8ad3f; --a2:#4ecfab; --a3:#f0805a; --a4:#e2879e;
+  /* Monochrome. Two contexts, one ramp: --ink is whatever the surface is,
+     --bone is whatever sits on it. :root is the dark context; .paper inverts
+     the whole set, so a component dropped into either reads correctly without
+     knowing where it landed. */
+  --ink:#0b0b0c; --ink-2:#141416; --ink-3:#202023;
+  --bone:#e8e8ea; --bone-2:#fbfbfc; --muted:#8d8d95;
+  /* Tonal blocks, previously named for hues. They carry the mosaic tiles and
+     display accents; in a monochrome scheme they separate by value instead. */
+  --tone-1:#e3e3e6; --tone-2:#b9b9c0; --tone-3:#94949c; --tone-4:#6f6f78;
+  /* Card edges + CTAs. --a1 is the primary; anything sitting on top of it is
+     --on-accent, which flips with the context the same way. */
+  --a1:#f4f4f5; --a2:#c8c8ce; --a3:#9e9ea6; --a4:#7c7c85;
+  --on-accent:#0c0c0d;
   --serif:'Fraunces',Georgia,serif; --sans:'Hanken Grotesk',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
   --maxw:1120px; --r:14px;
 }
@@ -16,34 +23,58 @@ body{background:var(--ink);color:var(--bone);font-family:var(--sans);font-size:1
 a{color:inherit;} img{display:block;max-width:100%;}
 
 /* ===== INTERACTIVE PARTICLE GATE (WebGL) ===== */
-.gate{position:fixed;inset:0;z-index:900;overflow:hidden;background:
-  radial-gradient(120% 90% at 50% 42%, #2c2318 0%, #221c17 46%, #191410 100%);}
+/* Deep space. The stars themselves are WebGL points in #scene above this, but
+   the depth behind them is cheaper to paint as gradients than to render: a
+   faint galactic band on the diagonal, two dust clouds either side of it, and a
+   vignette pulling the corners down so the field reads as far rather than flat.
+   All of it is static, so it costs one paint and never touches a frame budget
+   the particle gate needs. */
+.gate{position:fixed;inset:0;z-index:900;overflow:hidden;
+  background:
+    /* the band, off-axis so it does not read as a stripe through the middle */
+    linear-gradient(107deg, transparent 30%, rgba(255,255,255,.055) 47%,
+                    rgba(255,255,255,.075) 52%, rgba(255,255,255,.04) 58%, transparent 74%),
+    /* dust either side of it */
+    radial-gradient(58% 42% at 24% 30%, rgba(255,255,255,.055), transparent 70%),
+    radial-gradient(52% 40% at 78% 68%, rgba(255,255,255,.042), transparent 72%),
+    radial-gradient(30% 26% at 62% 22%, rgba(255,255,255,.03), transparent 70%),
+    /* corners down, centre barely lifted */
+    radial-gradient(125% 95% at 50% 45%, #141418 0%, #0b0b0e 52%, #050507 100%);}
+.gate.leaving{background-position:center;}
 .gate.done{opacity:0;pointer-events:none;transition:opacity .8s ease;}
 #scene{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;}
+/* With the palette monochrome, the particles and the type are the same white,
+   and the clusters drift straight through the nameplate. A soft well of dark
+   behind the copy buys the contrast the colour used to provide -- sized in
+   percentages of the copy so it tracks the text at any viewport. */
+.gate-copy::before{content:"";position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);width:170%;height:270%;z-index:-1;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(5,5,7,.88),rgba(5,5,7,.66) 45%,transparent 78%);}
 .gate-copy{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;text-align:center;
   width:min(90vw,760px);pointer-events:none;opacity:0;transition:opacity .8s ease,transform .8s ease;}
 .gate-copy.show{opacity:1;}
 .gate.leaving .gate-copy{opacity:0;transform:translate(-50%,-58%);}
-.gate-rule{height:2px;background:linear-gradient(90deg,transparent,rgba(236,226,207,.55) 12%,rgba(236,226,207,.55) 88%,transparent);
+.gate-rule{height:2px;background:linear-gradient(90deg,transparent,rgba(227,227,227,.55) 12%,rgba(227,227,227,.55) 88%,transparent);
   margin:0 auto 16px;max-width:88%;}
 .gate-rule.thin{height:1px;margin:22px auto 0;
-  background:linear-gradient(90deg,transparent,rgba(236,226,207,.3) 12%,rgba(236,226,207,.3) 88%,transparent);}
-.gate-copy .gk{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--ochre);margin-bottom:18px;}
+  background:linear-gradient(90deg,transparent,rgba(227,227,227,.3) 12%,rgba(227,227,227,.3) 88%,transparent);}
+.gate-copy .gk{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--tone-1);margin-bottom:18px;}
 .gate-copy .gt{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.94;
-  font-size:clamp(44px,8.5vw,108px);color:var(--bone-2);text-shadow:0 4px 60px rgba(25,20,16,.9);}
-.gate-copy .gt em{font-style:italic;font-weight:500;color:var(--ochre);}
-.gate-copy .gs{margin-top:18px;font-size:clamp(14px,1.6vw,18px);color:var(--bone);opacity:.82;text-shadow:0 2px 30px rgba(25,20,16,.9);}
+  font-size:clamp(44px,8.5vw,108px);color:var(--bone-2);text-shadow:0 4px 60px rgba(11,11,12,.9);}
+.gate-copy .gt em{font-style:italic;font-weight:500;color:var(--tone-1);}
+.gate-copy .gt{text-shadow:0 2px 34px rgba(0,0,0,.9),0 0 12px rgba(0,0,0,.6);}
+.gate-copy .gs{margin-top:18px;font-size:clamp(14px,1.6vw,18px);color:var(--bone);opacity:.82;text-shadow:0 2px 30px rgba(11,11,12,.9);}
 /* No longer a lozenge to click: the way in is Enter or a scroll, and this is
    the instruction saying so. It stays a real <button> so keyboard and screen
    reader users get a focusable, announced control rather than a hidden gesture. */
 .enter{pointer-events:auto;margin-top:26px;display:inline-flex;align-items:center;gap:12px;
   font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
-  color:rgba(236,226,207,.72);background:none;border:none;padding:8px 4px;cursor:pointer;
+  color:rgba(227,227,227,.72);background:none;border:none;padding:8px 4px;cursor:pointer;
   transition:color .25s ease;}
 .enter:hover,.enter:focus-visible{color:var(--bone-2);}
-.enter:focus-visible{outline:1px solid var(--ochre);outline-offset:8px;border-radius:4px;}
-.enter b{font-weight:500;color:var(--ochre);}
-.edot{width:5px;height:5px;border-radius:50%;background:var(--ochre);flex:none;
+.enter:focus-visible{outline:1px solid var(--tone-1);outline-offset:8px;border-radius:4px;}
+.enter b{font-weight:500;color:var(--tone-1);}
+.edot{width:5px;height:5px;border-radius:50%;background:var(--tone-1);flex:none;
   animation:enterPulse 2.4s ease-in-out infinite;}
 @keyframes enterPulse{0%,100%{opacity:.25;transform:scale(.8);}50%{opacity:1;transform:scale(1);}}
 @media(prefers-reduced-motion:reduce){.edot{animation:none;opacity:.8;}}
@@ -55,30 +86,30 @@ a{color:inherit;} img{display:block;max-width:100%;}
    it reads at a glance and states what it does. */
 .skip{position:absolute;bottom:26px;right:26px;z-index:5;font-family:var(--mono);
   font-size:12px;letter-spacing:.08em;color:var(--bone-2);
-  background:rgba(236,226,207,.10);border:1px solid rgba(236,226,207,.42);
+  background:rgba(227,227,227,.10);border:1px solid rgba(227,227,227,.42);
   border-radius:100px;padding:10px 19px;cursor:pointer;backdrop-filter:blur(6px);
   transition:background .2s ease,border-color .2s ease,transform .2s ease;}
-.skip:hover{background:var(--bone-2);border-color:var(--bone-2);color:#1a1410;transform:translateY(-1px);}
+.skip:hover{background:var(--bone-2);border-color:var(--bone-2);color:var(--on-accent);transform:translateY(-1px);}
 .skip:focus-visible{outline:2px solid var(--a1);outline-offset:3px;}
 @media(max-width:520px){.skip{bottom:18px;right:50%;transform:translateX(50%);}
   .skip:hover{transform:translateX(50%) translateY(-1px);}}
-.replay{position:fixed;bottom:92px;right:16px;z-index:40;font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(43,36,25,.85);border:1px solid var(--ink-3);border-radius:100px;padding:8px 14px;cursor:pointer;transition:all .2s;}
-.replay:hover{color:var(--ochre);border-color:var(--ochre);}
+.replay{position:fixed;bottom:92px;right:16px;z-index:40;font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(37,37,37,.85);border:1px solid var(--ink-3);border-radius:100px;padding:8px 14px;cursor:pointer;transition:all .2s;}
+.replay:hover{color:var(--tone-1);border-color:var(--tone-1);}
 
 /* ===== NAV ===== */
 nav.topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
-  padding:16px clamp(20px,5vw,52px);background:linear-gradient(var(--ink),rgba(34,28,23,.4) 70%,transparent);}
+  padding:16px clamp(20px,5vw,52px);background:linear-gradient(var(--ink) 0%,rgba(11,11,12,.88) 58%,rgba(11,11,12,.42) 82%,transparent 100%);}
 .brand{font-family:var(--serif);font-weight:700;font-size:20px;letter-spacing:-.01em;color:var(--bone-2);}
-.brand span{color:var(--ochre);}
+.brand span{color:var(--tone-1);}
 .nav-links{display:flex;gap:22px;list-style:none;}
-.nav-links a{font-size:13px;text-decoration:none;color:var(--muted);transition:color .2s;}
+.nav-links a{font-size:13px;text-decoration:none;color:rgba(250,250,252,.72);transition:color .2s;}
 .nav-links a:hover{color:var(--bone-2);}
-.avail{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--ink);background:var(--ochre);padding:6px 13px;border-radius:100px;font-weight:500;}
+.avail{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--ink);background:var(--tone-1);padding:6px 13px;border-radius:100px;font-weight:500;}
 .avail::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink);animation:beat 2.4s ease-out infinite;}
-@keyframes beat{0%{box-shadow:0 0 0 0 rgba(34,28,23,.55)}70%,100%{box-shadow:0 0 0 7px rgba(34,28,23,0)}}
+@keyframes beat{0%{box-shadow:0 0 0 0 rgba(11,11,12,.55)}70%,100%{box-shadow:0 0 0 7px rgba(11,11,12,0)}}
 
 section{position:relative;z-index:2;max-width:var(--maxw);margin:0 auto;padding:88px clamp(20px,5vw,52px);}
-.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ochre);display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--tone-1);display:flex;align-items:center;gap:14px;margin-bottom:26px;}
 .eyebrow::after{content:"";flex:1;height:1px;background:var(--ink-3);}
 h2.title{font-family:var(--serif);font-weight:900;font-size:clamp(30px,4.4vw,50px);line-height:1;letter-spacing:-.02em;color:var(--bone-2);margin-bottom:42px;}
 
@@ -97,22 +128,22 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 
 .t-name{grid-area:name;background:var(--ink-2);justify-content:space-between;}
 .t-photo{grid-area:photo;padding:0;background:var(--ink-3);}
-.t-open{grid-area:open;background:var(--teal);color:#eafaf4;}
+.t-open{grid-area:open;background:var(--tone-2);color:var(--on-accent);}
 .t-loc{grid-area:loc;background:var(--bone);color:var(--ink);}
-.t-role{grid-area:role;background:var(--ochre);color:var(--ink);}
+.t-role{grid-area:role;background:var(--tone-1);color:var(--ink);}
 .t-intro{grid-area:intro;background:var(--ink-2);}
-.t-gpa{grid-area:gpa;background:var(--clay);color:#fbeee6;}
+.t-gpa{grid-area:gpa;background:var(--tone-3);color:var(--on-accent);}
 .t-clust{grid-area:clust;background:var(--ink-2);padding:0;}
 .t-records{grid-area:records;background:var(--bone);color:var(--ink);}
 .t-links{grid-area:links;background:var(--ink-2);justify-content:center;}
 
 .t-name .kicker{font-family:var(--mono);font-size:12px;color:var(--muted);}
 .t-name h1{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.92;font-size:clamp(38px,6vw,74px);color:var(--bone-2);}
-.t-name h1 em{font-style:italic;font-weight:500;color:var(--ochre);}
-.t-photo img{width:100%;height:100%;object-fit:cover;object-position:center 28%;filter:grayscale(.12) contrast(1.03);position:relative;z-index:1;}
+.t-name h1 em{font-style:italic;font-weight:500;color:var(--tone-1);}
+.t-photo img{width:100%;height:100%;object-fit:cover;object-position:center 28%;filter:grayscale(1) contrast(1.06);position:relative;z-index:1;}
 .t-photo .monogram{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(120% 120% at 30% 20%,rgba(224,161,46,.22),transparent 60%),linear-gradient(150deg,var(--ink-3),var(--ink-2));}
-.t-photo .monogram b{font-family:var(--serif);font-weight:900;font-size:64px;color:var(--ochre);}
+  background:radial-gradient(120% 120% at 30% 20%,rgba(166,166,166,.22),transparent 60%),linear-gradient(150deg,var(--ink-3),var(--ink-2));}
+.t-photo .monogram b{font-family:var(--serif);font-weight:900;font-size:64px;color:var(--tone-1);}
 .t-open .lbl,.t-loc .lbl,.t-gpa .lbl,.t-records .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.72;margin-bottom:auto;}
 .t-open strong{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.05;}
 .t-loc strong{font-family:var(--serif);font-size:26px;font-weight:700;}
@@ -129,9 +160,9 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 .t-clust .cap{position:absolute;left:14px;bottom:10px;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
 .t-links{flex-direction:row;flex-wrap:wrap;gap:9px;align-items:center;}
 .t-links a{font-family:var(--mono);font-size:12px;text-decoration:none;color:var(--bone);border:1px solid var(--ink-3);border-radius:100px;padding:8px 15px;transition:all .2s;}
-.t-links a:hover{border-color:var(--ochre);color:var(--ochre);}
+.t-links a:hover{border-color:var(--tone-1);color:var(--tone-1);}
 .t-links a.primary{background:var(--bone);color:var(--ink);border-color:var(--bone);font-weight:500;}
-.t-links a.primary:hover{background:var(--ochre);border-color:var(--ochre);color:var(--ink);}
+.t-links a.primary:hover{background:var(--tone-1);border-color:var(--tone-1);color:var(--ink);}
 
 /* Cards emerge one at a time rather than the whole grid landing at once: --i is
    stamped per card by site.js and staggers the delay down the group. */
@@ -153,7 +184,7 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 /* ===== WORK ===== */
 .job{display:grid;grid-template-columns:210px 1fr;gap:34px;padding:34px 0;border-top:1px solid var(--ink-3);}
 .job:last-child{border-bottom:1px solid var(--ink-3);}
-.job .when{font-family:var(--mono);font-size:12px;color:var(--accent,var(--ochre));}
+.job .when{font-family:var(--mono);font-size:12px;color:var(--accent,var(--tone-1));}
 .job .org{font-size:15px;color:var(--bone-2);font-weight:600;}
 .job .place{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px;}
 .orgrow{display:flex;align-items:center;gap:12px;margin-top:12px;}
@@ -163,7 +194,11 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
    monogram marks so the two styles line up in a row. */
 .mark.logo{background:#fff;border-color:rgba(255,255,255,.16);padding:7px;
   box-shadow:0 4px 14px -6px rgba(0,0,0,.55);}
-.mark.logo img{width:100%;height:100%;object-fit:contain;}
+/* Institution and vendor logos are the last coloured assets on the page.
+   Desaturated rather than replaced, so the files stay original and the marks
+   still read -- a wall of brand colours would undo the monochrome everywhere
+   else. */
+.mark.logo img,.mark.badge img{width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.05);}
 /* SKCET publish their logo only as a wide lockup (crest + name). Cover + left
    origin crops it down to just the crest, so no separate image file is needed. */
 .mark.logo.crest{overflow:hidden;}
@@ -184,40 +219,40 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 .job h3{font-family:var(--serif);font-weight:700;font-size:23px;color:var(--bone-2);margin-bottom:14px;letter-spacing:-.01em;}
 .job ul{list-style:none;display:flex;flex-direction:column;gap:11px;}
 .job li{position:relative;padding-left:22px;font-size:14.5px;color:var(--bone);line-height:1.6;}
-.job li::before{content:"";position:absolute;left:0;top:9px;width:8px;height:8px;border-radius:2px;background:var(--teal);}
-.job li b{color:var(--ochre);font-weight:600;}
+.job li::before{content:"";position:absolute;left:0;top:9px;width:8px;height:8px;border-radius:2px;background:var(--tone-2);}
+.job li b{color:var(--tone-1);font-weight:600;}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;}
 .chip{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--ink-3);border-radius:100px;padding:4px 11px;}
 
 /* ===== SKILLS ===== */
 .stackgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
 .stackcard{background:var(--ink-2);border-radius:var(--r);padding:24px;}
-.stackcard h4{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre);margin-bottom:16px;display:flex;align-items:center;gap:9px;}
-.stackcard h4::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--ochre);}
-.stackcard.teal h4{color:var(--teal);} .stackcard.teal h4::before{background:var(--teal);}
-.stackcard.clay h4{color:var(--clay);} .stackcard.clay h4::before{background:var(--clay);}
+.stackcard h4{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--tone-1);margin-bottom:16px;display:flex;align-items:center;gap:9px;}
+.stackcard h4::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--tone-1);}
+.stackcard.teal h4{color:var(--tone-2);} .stackcard.teal h4::before{background:var(--tone-2);}
+.stackcard.clay h4{color:var(--tone-3);} .stackcard.clay h4::before{background:var(--tone-3);}
 .stackcard.bone h4{color:var(--bone-2);} .stackcard.bone h4::before{background:var(--bone-2);}
 .tags{display:flex;flex-wrap:wrap;gap:7px;}
 .tags span{font-size:13px;color:var(--bone);background:var(--ink);border:1px solid var(--ink-3);border-radius:8px;padding:6px 11px;transition:all .18s;}
-.tags span:hover{border-color:var(--ochre);color:var(--bone-2);transform:translateY(-2px);}
+.tags span:hover{border-color:var(--tone-1);color:var(--bone-2);transform:translateY(-2px);}
 
 /* ===== PROJECTS ===== */
 .projgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
 .proj{background:var(--ink-2);border-radius:var(--r);padding:26px;position:relative;border:1px solid transparent;transition:border-color .22s,transform .22s;display:flex;flex-direction:column;}
 .proj:hover{border-color:var(--ink-3);transform:translateY(-3px);}
 .proj .ptop{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
-.proj .cat{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);}
+.proj .cat{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tone-2);}
 .proj .yr{font-family:var(--mono);font-size:11px;color:var(--muted);}
 .proj h3{font-family:var(--serif);font-weight:700;font-size:21px;color:var(--bone-2);line-height:1.15;margin-bottom:10px;letter-spacing:-.01em;}
 .proj p{font-size:14px;color:var(--bone);line-height:1.65;margin-bottom:16px;}
-.proj .badge{font-family:var(--mono);font-size:11.5px;color:var(--ochre);margin-bottom:14px;line-height:1.5;}
+.proj .badge{font-family:var(--mono);font-size:11.5px;color:var(--tone-1);margin-bottom:14px;line-height:1.5;}
 .proj .ptags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
 .proj .ptags span{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--ink-3);border-radius:100px;padding:3px 10px;}
 /* Was a faint underlined link that didn't read as clickable at all. Now a solid
    pill in the card's own accent, with an arrow that slides on hover. */
 .proj .go{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:9px;
   font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:.02em;text-decoration:none;
-  color:#1a1410;background:var(--accent,var(--a1));border-radius:100px;padding:11px 20px;
+  color:var(--on-accent);background:var(--accent,var(--a1));border-radius:100px;padding:11px 20px;
   box-shadow:0 8px 24px -12px var(--accent,var(--a1));
   transition:transform .2s ease,box-shadow .2s ease,filter .2s ease;}
 .proj .go .arw{transition:transform .22s ease;}
@@ -273,7 +308,7 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 .askw-flight.gone{opacity:0;}
 
 .askw-launcher{position:absolute;right:12px;bottom:12px;width:60px;height:60px;border-radius:50%;
-  background:var(--a1);border:none;color:#1a1410;display:grid;place-items:center;cursor:pointer;
+  background:var(--a1);border:none;color:var(--on-accent);display:grid;place-items:center;cursor:pointer;
   box-shadow:0 10px 30px -8px rgba(0,0,0,.55);
   opacity:0;transform:scale(.4);
   transition:opacity .4s cubic-bezier(.2,.8,.3,1.2),transform .4s cubic-bezier(.2,.8,.3,1.2),filter .2s ease;}
@@ -283,8 +318,8 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 /* Attention pulse -- stops permanently the first time the panel is opened. */
 .askw-launcher.blink{animation:askglow 2s ease-in-out infinite;}
 @keyframes askglow{
-  0%,100%{box-shadow:0 10px 30px -8px rgba(0,0,0,.55),0 0 0 0 rgba(255,196,90,.75),0 0 0 0 rgba(255,196,90,.35);transform:scale(1);}
-  50%{box-shadow:0 10px 30px -8px rgba(0,0,0,.55),0 0 0 8px rgba(255,196,90,0),0 0 0 22px rgba(255,196,90,0);transform:scale(1.07);}
+  0%,100%{box-shadow:0 10px 30px -8px rgba(0,0,0,.55),0 0 0 0 rgba(250,250,252,.75),0 0 0 0 rgba(250,250,252,.35);transform:scale(1);}
+  50%{box-shadow:0 10px 30px -8px rgba(0,0,0,.55),0 0 0 8px rgba(250,250,252,0),0 0 0 22px rgba(250,250,252,0);transform:scale(1.07);}
 }
 
 .askw-panel{position:absolute;right:0;bottom:84px;width:min(360px,calc(100vw - 32px));
@@ -312,7 +347,7 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 .ask-msg.them{align-self:flex-start;background:var(--ink);color:var(--bone);
   border:1px solid var(--ink-3);border-bottom-left-radius:5px;}
 /* The visitor's side: accent, mirrored corner. */
-.ask-msg.me{align-self:flex-end;background:var(--a1);color:#1a1410;
+.ask-msg.me{align-self:flex-end;background:var(--a1);color:var(--on-accent);
   border-bottom-right-radius:5px;}
 .ask-msg.error{align-self:flex-start;background:transparent;border:1px solid var(--ink-3);
   color:var(--a3);}
@@ -324,7 +359,7 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
   transition:border-color .2s ease;}
 .ask-input::placeholder{color:var(--muted);}
 .ask-input:focus{border-color:var(--a1);}
-.ask-submit{flex:none;font-family:var(--mono);font-size:12.5px;font-weight:500;color:#1a1410;
+.ask-submit{flex:none;font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--on-accent);
   background:var(--a1);border:none;border-radius:100px;padding:11px 18px;cursor:pointer;
   transition:transform .2s ease,filter .2s ease,opacity .2s ease;}
 .ask-submit:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.08);}
@@ -354,16 +389,16 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 /* ===== CONTACT ===== */
 #contact{text-align:center;padding-bottom:70px;}
 #contact .big{font-family:var(--serif);font-weight:900;font-size:clamp(38px,6vw,72px);line-height:.98;letter-spacing:-.03em;color:var(--bone-2);margin-bottom:18px;}
-#contact .big em{font-style:italic;font-weight:500;color:var(--ochre);}
+#contact .big em{font-style:italic;font-weight:500;color:var(--tone-1);}
 #contact .lede{max-width:440px;margin:0 auto 34px;color:var(--muted);font-size:15px;}
 .clinks{display:flex;justify-content:center;flex-wrap:wrap;gap:11px;}
 .clinks a{font-family:var(--mono);font-size:13px;text-decoration:none;color:var(--bone);border:1px solid var(--ink-3);border-radius:100px;padding:12px 22px;transition:all .2s;}
-.clinks a:hover{border-color:var(--ochre);color:var(--ochre);transform:translateY(-2px);}
-.clinks a.solid{background:var(--ochre);color:var(--ink);border-color:var(--ochre);font-weight:500;}
+.clinks a:hover{border-color:var(--tone-1);color:var(--tone-1);transform:translateY(-2px);}
+.clinks a.solid{background:var(--tone-1);color:var(--ink);border-color:var(--tone-1);font-weight:500;}
 .clinks a.solid:hover{background:var(--bone-2);border-color:var(--bone-2);}
 footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px solid var(--ink-3);font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;}
 
-::selection{background:var(--ochre);color:var(--ink);}
+::selection{background:var(--tone-1);color:var(--ink);}
 ::-webkit-scrollbar{width:9px;}::-webkit-scrollbar-track{background:var(--ink);}::-webkit-scrollbar-thumb{background:var(--ink-3);border-radius:10px;}
 
 @media(max-width:860px){
@@ -395,8 +430,14 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
    ═══════════════════════════════════════════════════════════════════════ */
 
 .paper{
-  --ink:#e9e4d8; --ink-2:#e2dccd; --ink-3:#d5cdb9;
-  --bone:#2f2820; --bone-2:#17130e; --muted:#6f6555;
+  --ink:#f1f1f0; --ink-2:#e7e7e6; --ink-3:#d6d6d5;
+  --bone:#191919; --bone-2:#0a0a0a; --muted:#6b6b71;
+  /* The accents and tones invert too. They are used as text on light sections
+     (education, certs, skills) and as fills on dark ones, so a single fixed
+     value cannot serve both -- it would vanish into one or the other. */
+  --tone-1:#1c1c1e; --tone-2:#3a3a3f; --tone-3:#57575d; --tone-4:#75757c;
+  --a1:#151517; --a2:#38383d; --a3:#55555b; --a4:#73737a;
+  --on-accent:#f4f4f5;
   color:var(--bone);
   position:relative;
 }
@@ -455,9 +496,9 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
 /* Contents index. Page numbers are the one magazine affectation kept: they give
    the eye a right-hand rail and make the list feel authored. */
 .contents a{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
-  padding:11px 0;border-bottom:1px solid rgba(128,110,80,.28);text-decoration:none;
+  padding:11px 0;border-bottom:1px solid rgba(112,112,112,.28);text-decoration:none;
   transition:padding-left .22s ease,background .22s ease;}
-.contents a:hover{padding-left:9px;background:linear-gradient(90deg,rgba(232,173,63,.13),transparent);}
+.contents a:hover{padding-left:9px;background:linear-gradient(90deg,rgba(235,235,238,.13),transparent);}
 .contents .ct{font-family:var(--serif);font-weight:700;font-size:17.5px;color:var(--bone-2);}
 .contents .cd{display:block;font-family:var(--sans);font-style:italic;font-weight:400;
   font-size:12.5px;color:var(--muted);margin-top:2px;}
@@ -477,7 +518,7 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
   align-items:start;padding:clamp(22px,3.4vw,34px) 0;
   border-bottom:1px solid rgba(255,255,255,.13);transition:background .25s ease;}
 .paper .projrow{border-bottom-color:rgba(0,0,0,.16);}
-.projrow:hover{background:rgba(232,173,63,.045);}
+.projrow:hover{background:rgba(235,235,238,.045);}
 .projnum{font-family:var(--sans);font-weight:700;font-size:clamp(34px,5vw,58px);
   line-height:.9;color:var(--bone-2);opacity:.16;letter-spacing:-.03em;}
 .projrow:hover .projnum{opacity:.4;transition:opacity .25s ease;}
@@ -495,15 +536,15 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
 /* ── floating pill nav ────────────────────────────────────────────────── */
 .pillnav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(0);
   z-index:70;display:flex;gap:2px;padding:5px;border-radius:100px;
-  background:rgba(28,23,18,.86);backdrop-filter:blur(14px);
+  background:rgba(11,11,12,.86);backdrop-filter:blur(14px);
   border:1px solid rgba(255,255,255,.10);box-shadow:0 12px 40px -12px rgba(0,0,0,.6);
   opacity:0;pointer-events:none;transition:opacity .3s ease,transform .3s ease;}
 .pillnav.show{opacity:1;pointer-events:auto;}
 .pillnav a{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
-  color:rgba(236,226,207,.62);text-decoration:none;padding:8px 15px;border-radius:100px;
+  color:rgba(227,227,227,.62);text-decoration:none;padding:8px 15px;border-radius:100px;
   transition:color .2s ease,background .2s ease;white-space:nowrap;}
 .pillnav a:hover{color:var(--bone-2);}
-.pillnav a.on{background:var(--bone-2);color:#1a1410;}
+.pillnav a.on{background:var(--bone-2);color:var(--on-accent);}
 @media(max-width:520px){
   .pillnav{bottom:14px;}
   .pillnav a{padding:7px 11px;font-size:9.5px;letter-spacing:.1em;}
@@ -530,15 +571,15 @@ footer{padding-bottom:86px;}
   background:var(--ink-2);aspect-ratio:1/1;}
 .plate-img img,.plate-img .plate-video{width:100%;height:100%;object-fit:cover;
   object-position:center 32%;display:block;
-  /* Newsprint ink: crushed to near-monochrome, then warmed back toward the
-     paper so it sits in the page rather than on it. */
-  filter:grayscale(1) contrast(1.28) brightness(1.04) sepia(.22);
+  /* Newsprint ink: crushed to monochrome and pushed for contrast, the way a
+     photo reproduces on a press. */
+  filter:grayscale(1) contrast(1.3) brightness(1.03);
   transform:none;
   animation:plateDrift 26s ease-in-out infinite alternate;}
 
 /* Halftone dot screen. Multiply keeps the dots reading as ink on paper. */
 .plate-img::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background-image:radial-gradient(circle at center,rgba(23,19,14,.62) 0.9px,transparent 1.15px);
+  background-image:radial-gradient(circle at center,rgba(12,12,13,.62) 0.9px,transparent 1.15px);
   background-size:3.4px 3.4px;mix-blend-mode:multiply;opacity:.55;}
 
 /* Press grain, drifting so the print never sits perfectly still. */
@@ -584,7 +625,7 @@ footer{padding-bottom:86px;}
 /* This is a <section>, so it picks up the global max-width, auto margins and
    88px padding meant for content sections. A runway needs none of that: it has
    to be full-bleed and exactly as tall as the scroll it provides. */
-.tearzone{position:relative;height:230vh;background:#0d0b09;
+.tearzone{position:relative;height:230vh;background:#0c0c0d;
   max-width:none;width:100%;margin:0;padding:0;}
 .tearstage{position:sticky;top:0;height:100vh;overflow:hidden;}
 
@@ -618,17 +659,17 @@ footer{padding-bottom:86px;}
 
 /* What is behind the paper. */
 .tearback{position:absolute;inset:0;display:grid;place-items:center;
-  background:#0d0b09;overflow:hidden;}
+  background:#0c0c0d;overflow:hidden;}
 .tearback-sky{position:absolute;inset:-20%;
   background:
-    radial-gradient(1.6px 1.6px at 18% 24%,rgba(236,226,207,.85),transparent 60%),
-    radial-gradient(1.4px 1.4px at 62% 14%,rgba(236,226,207,.6),transparent 60%),
-    radial-gradient(1.8px 1.8px at 82% 62%,rgba(232,173,63,.75),transparent 60%),
-    radial-gradient(1.3px 1.3px at 34% 78%,rgba(78,207,171,.6),transparent 60%),
-    radial-gradient(1.5px 1.5px at 8% 58%,rgba(236,226,207,.5),transparent 60%),
-    radial-gradient(1.2px 1.2px at 92% 30%,rgba(236,226,207,.55),transparent 60%),
-    radial-gradient(120% 90% at 50% 120%,rgba(232,173,63,.16) 0%,transparent 58%),
-    radial-gradient(90% 70% at 50% -10%,rgba(78,207,171,.10) 0%,transparent 60%);
+    radial-gradient(1.6px 1.6px at 18% 24%,rgba(227,227,227,.85),transparent 60%),
+    radial-gradient(1.4px 1.4px at 62% 14%,rgba(227,227,227,.6),transparent 60%),
+    radial-gradient(1.8px 1.8px at 82% 62%,rgba(235,235,238,.75),transparent 60%),
+    radial-gradient(1.3px 1.3px at 34% 78%,rgba(200,200,205,.6),transparent 60%),
+    radial-gradient(1.5px 1.5px at 8% 58%,rgba(227,227,227,.5),transparent 60%),
+    radial-gradient(1.2px 1.2px at 92% 30%,rgba(227,227,227,.55),transparent 60%),
+    radial-gradient(120% 90% at 50% 120%,rgba(235,235,238,.16) 0%,transparent 58%),
+    radial-gradient(90% 70% at 50% -10%,rgba(200,200,205,.10) 0%,transparent 60%);
   background-size:44% 44%,52% 52%,60% 60%,48% 48%,56% 56%,64% 64%,100% 100%,100% 100%;
   animation:skyDrift 90s linear infinite;}
 @keyframes skyDrift{to{transform:translate3d(-6%,-4%,0);}}
@@ -647,7 +688,10 @@ footer{padding-bottom:86px;}
 .tw.br{display:block;margin-top:.06em;}
 .tb-t{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.94;
   font-size:clamp(30px,6.2vw,84px);color:var(--bone-2);margin:0 auto;max-width:16ch;}
-.tb-t .tw:nth-child(n+5){font-size:.62em;color:var(--a1);}
+/* The second clause used to separate by hue. With one colour left it has to
+   separate by value instead -- dropped a step off white so the line still reads
+   as a subordinate clause rather than more of the same sentence. */
+.tb-t .tw:nth-child(n+5){font-size:.62em;color:var(--tone-2);}
 
 @media(prefers-reduced-motion:reduce){
   .tearzone{height:auto;}
@@ -666,14 +710,15 @@ footer{padding-bottom:86px;}
   width:96vmin;height:96vmin;pointer-events:none;
   opacity:calc(var(--reveal,0) * .95);transition:opacity .18s linear;}
 .earth-globe{position:absolute;inset:0;border-radius:50%;overflow:hidden;
-  background:#06111d;
+  background:#101010;
   box-shadow:inset -30px -20px 70px rgba(0,0,0,.78),
-             inset 16px 12px 44px rgba(140,200,255,.14);}
+             inset 16px 12px 44px rgba(191,191,191,.14);}
 /* NASA Blue Marble, equirectangular. Repeated on x and panned, so the map wraps
    seamlessly and reads as rotation without any 3D. */
 .entered .earth-land{background-image:url("../assets/earth-map.jpg");}
 .earth-land{position:absolute;inset:0;
   background-repeat:repeat-x;background-size:200% 100%;
+  filter:grayscale(1) contrast(1.12) brightness(.96);
   /* Painted only once body.entered lands, so the decode does not compete with
      the intro's animation frames. */
   animation:earthSpin 140s linear infinite;}
@@ -681,11 +726,11 @@ footer{padding-bottom:86px;}
    sells a flat map as a sphere. */
 .earth-night{position:absolute;inset:0;border-radius:50%;
   background:
-    radial-gradient(circle at 32% 28%,transparent 0 52%,rgba(2,7,14,.22) 74%,rgba(1,4,9,.72) 100%),
-    linear-gradient(104deg,transparent 44%,rgba(3,8,16,.26) 74%,rgba(1,4,9,.6) 96%);}
+    radial-gradient(circle at 32% 28%,transparent 0 52%,rgba(6,6,7,.22) 74%,rgba(3,3,4,.72) 100%),
+    linear-gradient(104deg,transparent 44%,rgba(8,8,8,.26) 74%,rgba(3,3,4,.6) 96%);}
 .earth-atmo{position:absolute;inset:-4%;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle at 32% 28%,rgba(150,205,255,.26) 0 50%,transparent 66%);
-  box-shadow:0 0 100px 22px rgba(120,185,255,.20);}
+  background:radial-gradient(circle at 32% 28%,rgba(197,197,197,.26) 0 50%,transparent 66%);
+  box-shadow:0 0 100px 22px rgba(176,176,176,.20);}
 @keyframes earthSpin{to{background-position:-100% 0;}}
 
 /* The copy has to clear the globe. */
@@ -699,11 +744,11 @@ footer{padding-bottom:86px;}
    chat launcher. */
 .soundtoggle{position:fixed;left:18px;bottom:22px;z-index:70;
   font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
-  color:rgba(236,226,207,.55);background:rgba(28,23,18,.82);backdrop-filter:blur(10px);
+  color:rgba(227,227,227,.55);background:rgba(11,11,12,.82);backdrop-filter:blur(10px);
   border:1px solid rgba(255,255,255,.10);border-radius:100px;padding:8px 13px;
   cursor:pointer;transition:color .2s ease,border-color .2s ease;}
 .soundtoggle:hover{color:var(--bone-2);border-color:rgba(255,255,255,.24);}
-.soundtoggle[aria-pressed="true"]{color:var(--a1);border-color:rgba(232,173,63,.4);}
+.soundtoggle[aria-pressed="true"]{color:var(--a1);border-color:rgba(235,235,238,.4);}
 @media(max-width:640px){.soundtoggle{left:12px;bottom:14px;font-size:9.5px;padding:7px 10px;}}
 
 /* Grain on the clone would double the cost of the page's heaviest filter for a
@@ -748,14 +793,14 @@ footer{padding-bottom:86px;}
 .askw-launcher.blink{animation:askglowStrong 2.4s ease-in-out infinite;}
 @keyframes askglowStrong{
   0%,100%{box-shadow:0 10px 30px -8px rgba(0,0,0,.55),
-                     0 0 0 0 rgba(255,196,90,.85),
-                     0 0 0 0 rgba(255,196,90,.45),
-                     0 0 22px 2px rgba(255,196,90,.35);
+                     0 0 0 0 rgba(250,250,252,.85),
+                     0 0 0 0 rgba(250,250,252,.45),
+                     0 0 22px 2px rgba(250,250,252,.35);
           transform:scale(1);}
   50%    {box-shadow:0 10px 30px -8px rgba(0,0,0,.55),
-                     0 0 0 14px rgba(255,196,90,0),
-                     0 0 0 34px rgba(255,196,90,0),
-                     0 0 34px 6px rgba(255,196,90,.55);
+                     0 0 0 14px rgba(250,250,252,0),
+                     0 0 0 34px rgba(250,250,252,0),
+                     0 0 34px 6px rgba(250,250,252,.55);
           transform:scale(1.09);}
 }
 @media(prefers-reduced-motion:reduce){.askw-launcher.blink{animation:none;}}

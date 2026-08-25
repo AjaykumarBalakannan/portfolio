@@ -13,10 +13,76 @@ const skipB  = document.getElementById('skip');
 const replay = document.getElementById('replay');
 const RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
 
-// warm palette -> point colors (kept a touch dim; additive blending brightens them)
-const PAL = [[0.78,0.55,0.16],[0.20,0.50,0.42],[0.70,0.33,0.19],[0.80,0.74,0.60],[0.46,0.28,0.33],[0.72,0.47,0.20]];
+// Monochrome. What used to separate the clusters by hue now separates them by
+// value, so the grouping still reads -- kept a touch dim, since additive
+// blending stacks overlapping points well past these numbers.
+const PAL = [[0.72,0.72,0.74],[0.55,0.55,0.58],[0.62,0.62,0.64],
+             [0.95,0.95,0.97],[0.46,0.46,0.49],[0.82,0.82,0.85]];
+
+// ── starfield ──────────────────────────────────────────────────────────────
+// A separate shell of points far behind the clusters, on its own material and
+// its own group. Separate so it can rotate at a fraction of the foreground's
+// speed: that difference in rate is the whole parallax effect, and it is what
+// makes the gate read as depth rather than as a flat field of dots.
+const STARS = innerWidth < 640 ? 900 : 2600;
+
+const STAR_VERT = `
+  uniform float uTime, uPixel;
+  attribute float aSize, aPhase, aTwinkle;
+  varying float vAlpha;
+  void main(){
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * mv;
+    // Most stars sit steady; aTwinkle decides how much each one breathes, so the
+    // sky shimmers unevenly the way a real one does instead of pulsing in unison.
+    float tw = 1.0 - aTwinkle * 0.42 * (0.5 + 0.5 * sin(uTime * (0.5 + aTwinkle * 2.2) + aPhase * 6.2831));
+    vAlpha = tw;
+    gl_PointSize = aSize * uPixel * (320.0 / -mv.z);
+  }`;
+
+const STAR_FRAG = `
+  varying float vAlpha;
+  void main(){
+    float r = length(gl_PointCoord - 0.5);
+    float a = smoothstep(0.5, 0.0, r);
+    a *= a * a;                       // tighten the falloff into a point, not a blob
+    gl_FragColor = vec4(vec3(1.0), a * vAlpha);
+    if (gl_FragColor.a < 0.01) discard;
+  }`;
+
+function buildStars(){
+  const g = new THREE.BufferGeometry();
+  const pos = new Float32Array(STARS * 3);
+  const size = new Float32Array(STARS);
+  const phase = new Float32Array(STARS);
+  const twinkle = new Float32Array(STARS);
+  for (let i = 0; i < STARS; i++){
+    // Uniform on a shell, not in a ball: an even volume fill crowds the centre
+    // and leaves the edges bare once it is projected.
+    const a = Math.random() * Math.PI * 2;
+    const b = Math.acos(2 * Math.random() - 1);
+    const rad = 26 + Math.random() * 22;
+    pos[i*3]   = rad * Math.sin(b) * Math.cos(a);
+    pos[i*3+1] = rad * Math.cos(b);
+    pos[i*3+2] = rad * Math.sin(b) * Math.sin(a);
+    // Heavily weighted small. A handful of bright ones carry the sky; an even
+    // spread of sizes just looks like noise.
+    const q = Math.random();
+    size[i] = q > 0.985 ? 0.42 + Math.random() * 0.30
+            : q > 0.90  ? 0.24 + Math.random() * 0.14
+            :             0.10 + Math.random() * 0.11;
+    phase[i] = Math.random();
+    twinkle[i] = Math.random() < 0.45 ? Math.random() : 0.0;
+  }
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+  g.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1));
+  g.setAttribute('aTwinkle', new THREE.BufferAttribute(twinkle, 1));
+  return g;
+}
 
 let renderer, scene, camera, points, mat, group, clock;
+let stars, starMat, starGroup;
 let raf=null, running=false, startT=0, leaving=false, timers=[];
 let mouse={x:0,y:0}, rotTarget={x:0,y:0}, rot={x:0,y:0}, pulse=0;
 
@@ -110,7 +176,7 @@ function buildScene(){
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x191410, 0.12);
+  scene.fog = new THREE.FogExp2(0x07070a, 0.12);
 
   camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 100);
   camera.position.set(0,0,6.4);
@@ -126,6 +192,18 @@ function buildScene(){
   points = new THREE.Points(buildPoints(), mat);
   points.frustumCulled=false;
   group.add(points); scene.add(group);
+
+  // Stars go in first and sit far out, so the clusters read as being inside
+  // something rather than floating on a backdrop.
+  starMat = new THREE.ShaderMaterial({
+    uniforms:{ uTime:{value:0}, uPixel:{value:Math.min(devicePixelRatio,1)} },
+    vertexShader:STAR_VERT, fragmentShader:STAR_FRAG,
+    transparent:true, depthWrite:false, blending:THREE.AdditiveBlending
+  });
+  starGroup = new THREE.Group();
+  stars = new THREE.Points(buildStars(), starMat);
+  stars.frustumCulled = false;
+  starGroup.add(stars); scene.add(starGroup);
 }
 
 const easeOut = t => 1-Math.pow(1-t,3);
@@ -145,6 +223,12 @@ function tick(){
     rot.y += (rotTarget.y - rot.y)*0.05;
     group.rotation.x = rot.x;
     group.rotation.y = rot.y + t*0.08;
+
+    // A fraction of the foreground's rotation, in both the cursor parallax and
+    // the drift. Far things move less; that is the entire trick.
+    starGroup.rotation.x = rot.x * 0.22;
+    starGroup.rotation.y = rot.y * 0.22 + t * 0.006;
+    starMat.uniforms.uTime.value = t;
 
     renderer.render(scene,camera);
     raf=requestAnimationFrame(tick);
@@ -268,6 +352,7 @@ addEventListener('resize',()=>{
   camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth,innerHeight);
   mat.uniforms.uPixel.value=Math.min(devicePixelRatio,1);
+  if(starMat) starMat.uniforms.uPixel.value=Math.min(devicePixelRatio,1);
 });
 
 if(RM){ gate.style.display='none'; document.body.classList.add('cinema','reveal'); replay.hidden=false; }
