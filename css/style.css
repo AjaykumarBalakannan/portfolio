@@ -69,7 +69,7 @@ section{position:relative;z-index:2;max-width:var(--maxw);margin:0 auto;padding:
 h2.title{font-family:var(--serif);font-weight:900;font-size:clamp(30px,4.4vw,50px);line-height:1;letter-spacing:-.02em;color:var(--bone-2);margin-bottom:42px;}
 
 /* ===== HERO ===== */
-#hero{min-height:100vh;display:flex;align-items:center;padding-top:104px;padding-bottom:56px;}
+#hero:not([data-sheet]){min-height:100vh;display:flex;align-items:center;padding-top:104px;padding-bottom:56px;}
 .mosaic{width:100%;display:grid;gap:14px;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(98px,auto);
   grid-template-areas:
     "name  name  photo open"
@@ -412,7 +412,7 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
   .masthead{justify-content:center;}}
 
 /* ── the oversized display headline ───────────────────────────────────── */
-#hero.paper{min-height:0;display:block;padding-top:112px;padding-bottom:72px;}
+#hero.paper:not([data-sheet]){min-height:0;display:block;padding-top:112px;padding-bottom:72px;}
 .display{font-family:var(--serif);font-weight:900;letter-spacing:-.035em;line-height:.87;
   /* Capped so "BUILDING WHAT" clears the measure at the widest breakpoint
      instead of running off the page. */
@@ -512,7 +512,7 @@ footer{padding-bottom:86px;}
 @media(max-width:900px){.spread{grid-template-columns:1fr;}}
 
 .plate{margin:0;}
-.plate-img{position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.18);
+.plate-img{position:relative;overflow:hidden;contain:paint;border:1px solid rgba(0,0,0,.18);
   background:var(--ink-2);aspect-ratio:4/5;}
 .plate-img img{width:100%;height:100%;object-fit:cover;display:block;
   /* Newsprint ink: crushed to near-monochrome, then warmed back toward the
@@ -527,13 +527,14 @@ footer{padding-bottom:86px;}
   background-size:3.4px 3.4px;mix-blend-mode:multiply;opacity:.55;}
 
 /* Press grain, drifting so the print never sits perfectly still. */
-.plate-img::before{content:"";position:absolute;inset:-40%;z-index:2;pointer-events:none;
+.plate-img::before{content:"";position:absolute;inset:-12%;z-index:2;pointer-events:none;
   background-image:url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'>\
-<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/>\
-</filter><rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
-  mix-blend-mode:multiply;opacity:.26;
-  animation:plateGrain 700ms steps(3) infinite;}
+<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'>\
+<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='1'/>\
+</filter><rect width='90' height='90' filter='url(%23n)' opacity='.5'/></svg>");
+  mix-blend-mode:multiply;opacity:.24;
+  will-change:transform;
+  animation:plateGrain 1.6s steps(4) infinite;}
 
 @keyframes plateDrift{
   from{transform:scale(1.06) translate3d(0,0,0);}
@@ -541,8 +542,8 @@ footer{padding-bottom:86px;}
 }
 @keyframes plateGrain{
   0%{transform:translate3d(0,0,0);}
-  33%{transform:translate3d(-3%,2%,0);}
-  66%{transform:translate3d(2%,-3%,0);}
+  33%{transform:translate3d(-1.6%,1.1%,0);}
+  66%{transform:translate3d(1.1%,-1.6%,0);}
   100%{transform:translate3d(0,0,0);}
 }
 @media(prefers-reduced-motion:reduce){
@@ -655,7 +656,6 @@ footer{padding-bottom:86px;}
     radial-gradient(22% 16% at 40% 30%,rgba(96,138,80,.9) 0 60%,transparent 62%),
     radial-gradient(12% 20% at 33% 80%,rgba(120,146,86,.85) 0 60%,transparent 62%),
     radial-gradient(26% 18% at 46% 52%,rgba(80,120,70,.88) 0 60%,transparent 62%);
-  filter:blur(.4px);
   animation:earthSpin 120s linear infinite;}
 /* Terminator: the limb falling into night. */
 .earth-night{position:absolute;inset:0;border-radius:50%;
@@ -683,3 +683,7 @@ footer{padding-bottom:86px;}
 .soundtoggle:hover{color:var(--bone-2);border-color:rgba(255,255,255,.24);}
 .soundtoggle[aria-pressed="true"]{color:var(--a1);border-color:rgba(232,173,63,.4);}
 @media(max-width:640px){.soundtoggle{left:12px;bottom:14px;font-size:9.5px;padding:7px 10px;}}
+
+/* Grain on the clone would double the cost of the page's heaviest filter for a
+   layer that is mostly hidden behind the tear. */
+.nograin .plate-img::before{display:none;}

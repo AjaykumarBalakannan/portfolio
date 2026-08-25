@@ -139,6 +139,11 @@
   clone.setAttribute('aria-hidden', 'true');
   clone.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
   clone.querySelectorAll('a, button, input').forEach((el) => el.setAttribute('tabindex', '-1'));
+  // The clone is decoration. Its animated canvas and film grain would double the
+  // per-frame cost of the most expensive thing on the page for no visible gain,
+  // since most of it sits behind the tear.
+  clone.querySelectorAll('canvas').forEach((el) => el.remove());
+  clone.classList.add('nograin');
 
   sheet.classList.add('sheethalf', 'live');
   clone.classList.add('sheethalf');
