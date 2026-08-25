@@ -87,28 +87,83 @@
   update();
 })();
 
-// Drives the tear. The paper is masked with a centre band that widens as the
-// opening spread leaves the viewport, so the dark section behind shows through
-// a gap that grows into a split page.
+// ── the tear ───────────────────────────────────────────────────────────────
+// The front page rips horizontally across the middle and the halves slide
+// apart, revealing the layer behind. Two clipped copies of the sheet are what
+// makes that possible: a single element cannot be split into two pieces that
+// move independently.
 //
-// Scroll position rather than a CSS scroll-timeline: animation-timeline is
-// still Chromium-only, and this needs to behave the same in Safari, which is
-// where a good share of recruiters will open the site.
+// The clone is built here rather than in the HTML on purpose. The markup ships
+// one copy, so a crawler and a screen reader see one masthead, one headline and
+// one contents list; the duplicate exists only in the DOM at runtime, is marked
+// aria-hidden, and has every id stripped so nothing ends up duplicated.
 (function () {
-  const hero = document.getElementById('hero');
-  if (!hero || !hero.classList.contains('paper')) return;
+  const zone = document.getElementById('tearzone');
+  const stage = document.getElementById('tearstage');
+  const sheet = document.querySelector('[data-sheet]');
+  const back = document.getElementById('tearback');
+  if (!zone || !stage || !sheet || !back) return;
+
   if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+
+  // A torn paper edge, not a cut: the fibres wander a few percent either side
+  // of the midline in irregular steps. Regenerated per load so it is never
+  // quite the same rip twice.
+  function tornEdge(steps = 46, mid = 49, spread = 2.4) {
+    const pts = [];
+    for (let i = 0; i <= steps; i++) {
+      const x = (i / steps) * 100;
+      // Two offset sines plus jitter reads more like fibre than pure noise,
+      // which comes out looking like static.
+      const wave =
+        Math.sin(i * 0.9) * spread * 0.42 +
+        Math.sin(i * 2.7 + 1.3) * spread * 0.28 +
+        (Math.random() - 0.5) * spread * 0.75;
+      pts.push([x, +(mid + wave).toFixed(2)]);
+    }
+    return pts;
+  }
+
+  const edge = tornEdge();
+  const topPoly = `polygon(0% 0%, 100% 0%, ${edge
+    .slice()
+    .reverse()
+    .map(([x, y]) => `${x}% ${y}%`)
+    .join(', ')})`;
+  const botPoly = `polygon(${edge.map(([x, y]) => `${x}% ${y}%`).join(', ')}, 100% 100%, 0% 100%)`;
+
+  // Build the halves. The original becomes the top; the clone becomes the
+  // bottom and is stripped of anything that must stay unique.
+  const clone = sheet.cloneNode(true);
+  clone.removeAttribute('id');
+  clone.setAttribute('aria-hidden', 'true');
+  clone.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
+  clone.querySelectorAll('a, button, input').forEach((el) => el.setAttribute('tabindex', '-1'));
+
+  sheet.classList.add('sheethalf', 'live');
+  clone.classList.add('sheethalf');
+  sheet.style.clipPath = topPoly;
+  clone.style.clipPath = botPoly;
+  stage.appendChild(clone);
 
   let ticking = false;
   function update() {
-    const rect = hero.getBoundingClientRect();
-    // Starts once the spread's bottom edge reaches the lower third of the
-    // viewport, completes as it clears the top. Nothing happens on the way in.
-    const start = window.innerHeight * 0.66;
-    const progress = (start - rect.bottom) / start;
-    const t = Math.max(0, Math.min(1, progress));
-    // Eased so the first movement is gentle and the split accelerates.
-    hero.style.setProperty('--tear', (t * t).toFixed(4));
+    const rect = zone.getBoundingClientRect();
+    // 0 while the sheet is still arriving, 1 once the runway is spent.
+    const travel = zone.offsetHeight - window.innerHeight;
+    const t = Math.max(0, Math.min(1, -rect.top / travel));
+
+    // Nothing happens for the first fifth: the reader gets to actually read the
+    // front page before it comes apart.
+    const rip = Math.max(0, (t - 0.2) / 0.8);
+    const eased = rip * rip * (3 - 2 * rip); // smoothstep
+
+    sheet.style.transform = `translate3d(0, ${-eased * 62}vh, 0)`;
+    clone.style.transform = `translate3d(0, ${eased * 62}vh, 0)`;
+    // The halves are lit from the tear, so they dim slightly as they leave.
+    const fade = 1 - eased * 0.25;
+    sheet.style.opacity = clone.style.opacity = fade.toFixed(3);
+    back.style.setProperty('--reveal', Math.min(1, eased * 1.9).toFixed(3));
   }
 
   addEventListener('scroll', () => {

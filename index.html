@@ -39,7 +39,22 @@
 </nav>
 
 <!-- ===== OPENING SPREAD (paper) ===== -->
-<section id="hero" class="paper">
+<!-- Scroll runway. The stage inside is pinned, so the tear plays out in place
+     while the page scrolls past it, rather than scrolling away mid-rip. -->
+<section class="tearzone" id="tearzone">
+<div class="tearstage" id="tearstage">
+
+  <!-- Behind the paper: the world it opens onto. -->
+  <div class="tearback" id="tearback" aria-hidden="true">
+    <div class="tearback-sky"></div>
+    <div class="tearback-copy">
+      <div class="tb-k">Now the actual work</div>
+      <h2 class="tb-t">WELCOME TO<br/>THE PIPELINE.</h2>
+      <p class="tb-s">Models, data and the people who have to trust them.</p>
+    </div>
+  </div>
+
+<section id="hero" class="paper" data-sheet>
   <div class="masthead">
     <span class="mh-l">Data Scientist / ML Engineering</span>
     <span class="mh-c">Ajaykumar Balakannan</span>
@@ -99,6 +114,8 @@
   </div>
 </section>
 
+</div>
+</section>
 <!-- ===== WORK ===== -->
 <section id="work">
   <div class="eyebrow rv">Work</div>

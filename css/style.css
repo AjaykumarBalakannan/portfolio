@@ -550,47 +550,82 @@ footer{padding-bottom:86px;}
   .plate-img::before{animation:none;}
 }
 
-/* ── the tear ────────────────────────────────────────────────────────────
-   The reference pulls its newspaper away to reveal a black world beneath.
-   Same beat, done as a mask rather than two duplicated halves: a vertical
-   band is cut out of the paper from the centre and widened on scroll, so the
-   dark page behind shows through a gap that grows into a tear. Duplicating
-   the hero into left/right copies would have read identically and shipped two
-   of every heading to a screen reader, which is not worth it.
 
-   --tear runs 0 -> 1, set from js/site.js.                                */
-#hero.paper{
-  --tear:0;
-  /* Ragged rather than a ruler-straight cut, so it reads as torn newsprint. */
-  -webkit-mask-image:
-    linear-gradient(90deg,#000 0 calc(50% - var(--tear) * 52vw),
-                    transparent calc(50% - var(--tear) * 52vw) calc(50% + var(--tear) * 52vw),
-                    #000 calc(50% + var(--tear) * 52vw) 100%);
-  mask-image:
-    linear-gradient(90deg,#000 0 calc(50% - var(--tear) * 52vw),
-                    transparent calc(50% - var(--tear) * 52vw) calc(50% + var(--tear) * 52vw),
-                    #000 calc(50% + var(--tear) * 52vw) 100%);
+/* ═══════════════════════════════════════════════════════════════════════
+   THE TEAR
+   A pinned stage: the front page fills one screen, then rips horizontally
+   across the middle and the two halves slide apart, revealing what is behind.
+
+   Geometry copied in spirit from the reference, which clips two copies of its
+   newspaper with an 85-point polygon whose y wanders between 46.6% and 51.2%
+   — a torn fibre edge, not a cut. The polygon here is generated in JS so the
+   ragged edge is regenerated per viewport instead of being frozen at one width.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.tearzone{position:relative;height:230vh;background:#0d0b09;}
+.tearstage{position:sticky;top:0;height:100vh;overflow:hidden;}
+
+/* The front page has to fit one screen for the tear to read: you cannot rip a
+   page you can only half see. */
+#hero.paper[data-sheet]{
+  position:absolute;inset:0;min-height:0;height:100vh;overflow:hidden;
+  padding:76px clamp(20px,5vw,52px) 28px;
+  max-width:none;margin:0;display:flex;flex-direction:column;
 }
-/* The paper surface is painted by the pseudo-element, so it has to be torn
-   with the content rather than left behind as a full-width sheet. */
-#hero.paper::before{
-  -webkit-mask-image:inherit;
-  mask-image:inherit;
-}
-/* A hairline of ink down each torn edge, the way a fold catches shadow. */
-#hero.paper::after{
-  content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
-  opacity:calc(var(--tear) * 3);
+#hero.paper[data-sheet] .spread{margin-top:20px;flex:1;min-height:0;}
+#hero.paper[data-sheet]::before{width:100%;left:0;transform:none;}
+
+/* Tighter measure inside a fixed-height sheet. */
+[data-sheet] .display{font-size:clamp(34px,6.6vw,86px);}
+[data-sheet] .display-sub{font-size:clamp(13px,1.5vw,17px);margin-top:9px;padding-bottom:14px;}
+[data-sheet] .masthead{margin-bottom:20px;padding-bottom:9px;}
+[data-sheet] .prose p{font-size:13px;line-height:1.5;margin-bottom:8px;}
+[data-sheet] .prose .lead::first-letter{font-size:40px;padding:3px 7px 0 0;}
+[data-sheet] .contents a{padding:7px 0;}
+[data-sheet] .contents .ct{font-size:14.5px;}
+[data-sheet] .contents .cd{font-size:11px;}
+[data-sheet] .plate-img{aspect-ratio:1/1.15;}
+[data-sheet] .fig{font-size:10.5px;margin-top:6px;}
+[data-sheet] .t-clust,[data-sheet] .colhead:nth-of-type(2) ~ .mosaic{display:none;}
+[data-sheet] .tile.t-links{margin-top:12px;}
+
+/* The two torn halves. Clones, built and clipped in JS. */
+.sheethalf{position:absolute;inset:0;will-change:transform;pointer-events:none;}
+.sheethalf.live{pointer-events:auto;}
+
+/* What is behind the paper. */
+.tearback{position:absolute;inset:0;display:grid;place-items:center;
+  background:#0d0b09;overflow:hidden;}
+.tearback-sky{position:absolute;inset:-20%;
   background:
-    linear-gradient(90deg,transparent calc(50% - var(--tear) * 52vw - 14px),
-      rgba(23,19,14,.30) calc(50% - var(--tear) * 52vw - 1px),
-      transparent calc(50% - var(--tear) * 52vw)),
-    linear-gradient(270deg,transparent calc(50% - var(--tear) * 52vw - 14px),
-      rgba(23,19,14,.30) calc(50% - var(--tear) * 52vw - 1px),
-      transparent calc(50% - var(--tear) * 52vw));
-}
+    radial-gradient(1.6px 1.6px at 18% 24%,rgba(236,226,207,.85),transparent 60%),
+    radial-gradient(1.4px 1.4px at 62% 14%,rgba(236,226,207,.6),transparent 60%),
+    radial-gradient(1.8px 1.8px at 82% 62%,rgba(232,173,63,.75),transparent 60%),
+    radial-gradient(1.3px 1.3px at 34% 78%,rgba(78,207,171,.6),transparent 60%),
+    radial-gradient(1.5px 1.5px at 8% 58%,rgba(236,226,207,.5),transparent 60%),
+    radial-gradient(1.2px 1.2px at 92% 30%,rgba(236,226,207,.55),transparent 60%),
+    radial-gradient(120% 90% at 50% 120%,rgba(232,173,63,.16) 0%,transparent 58%),
+    radial-gradient(90% 70% at 50% -10%,rgba(78,207,171,.10) 0%,transparent 60%);
+  background-size:44% 44%,52% 52%,60% 60%,48% 48%,56% 56%,64% 64%,100% 100%,100% 100%;
+  animation:skyDrift 90s linear infinite;}
+@keyframes skyDrift{to{transform:translate3d(-6%,-4%,0);}}
+
+.tearback-copy{position:relative;z-index:2;text-align:center;padding:0 24px;
+  /* Held back until the paper actually parts, so the reveal lands with the rip
+     rather than bleeding through it. */
+  opacity:var(--reveal,0);transform:translateY(calc((1 - var(--reveal,0)) * 26px));
+  transition:opacity .12s linear;}
+.tb-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--a1);margin-bottom:16px;}
+.tb-t{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.9;
+  font-size:clamp(34px,7vw,92px);color:var(--bone-2);margin:0;}
+.tb-s{margin-top:16px;font-family:var(--serif);font-style:italic;
+  font-size:clamp(13px,1.7vw,19px);color:var(--bone);opacity:.72;}
+
 @media(prefers-reduced-motion:reduce){
-  #hero.paper{-webkit-mask-image:none;mask-image:none;}
-  #hero.paper::before{-webkit-mask-image:none;mask-image:none;}
-  #hero.paper::after{display:none;}
+  .tearzone{height:auto;}
+  .tearstage{position:static;height:auto;overflow:visible;}
+  #hero.paper[data-sheet]{position:static;height:auto;min-height:0;padding-bottom:72px;}
+  .tearback{display:none;}
+  .tearback-sky{animation:none;}
 }
