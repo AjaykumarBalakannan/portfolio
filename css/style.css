@@ -513,12 +513,13 @@ footer{padding-bottom:86px;}
 
 .plate{margin:0;}
 .plate-img{position:relative;overflow:hidden;contain:paint;border:1px solid rgba(0,0,0,.18);
-  background:var(--ink-2);aspect-ratio:4/5;}
-.plate-img img{width:100%;height:100%;object-fit:cover;display:block;
+  background:var(--ink-2);aspect-ratio:1/1;}
+.plate-img img,.plate-img .plate-video{width:100%;height:100%;object-fit:cover;
+  object-position:center 32%;display:block;
   /* Newsprint ink: crushed to near-monochrome, then warmed back toward the
      paper so it sits in the page rather than on it. */
   filter:grayscale(1) contrast(1.28) brightness(1.04) sepia(.22);
-  transform:scale(1.06);
+  transform:none;
   animation:plateDrift 26s ease-in-out infinite alternate;}
 
 /* Halftone dot screen. Multiply keeps the dots reading as ink on paper. */
@@ -536,9 +537,12 @@ footer{padding-bottom:86px;}
   will-change:transform;
   animation:plateGrain 1.6s steps(4) infinite;}
 
+/* Drift without zoom: scaling up re-crops the frame, which is the opposite of
+   what is wanted here. A sub-pixel float is enough to keep it from feeling
+   frozen. */
 @keyframes plateDrift{
-  from{transform:scale(1.06) translate3d(0,0,0);}
-  to{transform:scale(1.12) translate3d(-1.4%,-1.8%,0);}
+  from{transform:translate3d(0,0,0);}
+  to{transform:translate3d(-0.6%,-0.8%,0);}
 }
 @keyframes plateGrain{
   0%{transform:translate3d(0,0,0);}
@@ -547,7 +551,7 @@ footer{padding-bottom:86px;}
   100%{transform:translate3d(0,0,0);}
 }
 @media(prefers-reduced-motion:reduce){
-  .plate-img img{animation:none;transform:scale(1.02);}
+  .plate-img img,.plate-img .plate-video{animation:none;transform:scale(1.02);}
   .plate-img::before{animation:none;}
 }
 
@@ -589,7 +593,7 @@ footer{padding-bottom:86px;}
 [data-sheet] .contents a{padding:7px 0;}
 [data-sheet] .contents .ct{font-size:14.5px;}
 [data-sheet] .contents .cd{font-size:11px;}
-[data-sheet] .plate-img{aspect-ratio:1/1.15;}
+[data-sheet] .plate-img{aspect-ratio:1/1;}
 [data-sheet] .fig{font-size:10.5px;margin-top:6px;}
 [data-sheet] .t-clust,[data-sheet] .colhead:nth-of-type(2) ~ .mosaic{display:none;}
 [data-sheet] .tile.t-links{margin-top:12px;}
@@ -615,17 +619,21 @@ footer{padding-bottom:86px;}
   animation:skyDrift 90s linear infinite;}
 @keyframes skyDrift{to{transform:translate3d(-6%,-4%,0);}}
 
-.tearback-copy{position:relative;z-index:2;text-align:center;padding:0 24px;
-  /* Held back until the paper actually parts, so the reveal lands with the rip
-     rather than bleeding through it. */
-  opacity:var(--reveal,0);transform:translateY(calc((1 - var(--reveal,0)) * 26px));
-  transition:opacity .12s linear;}
-.tb-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;
-  color:var(--a1);margin-bottom:16px;}
-.tb-t{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.9;
-  font-size:clamp(34px,7vw,92px);color:var(--bone-2);margin:0;}
-.tb-s{margin-top:16px;font-family:var(--serif);font-style:italic;
-  font-size:clamp(13px,1.7vw,19px);color:var(--bone);opacity:.72;}
+.tearback-copy{position:relative;z-index:2;text-align:center;padding:0 24px;}
+
+/* Each word watches the same --reveal the tear drives, and switches on once the
+   rip passes the point it was given. Doing it per word rather than fading the
+   whole block means the sentence is written by the tearing, not merely exposed
+   by it. */
+.tw{display:inline-block;margin:0 .18em;
+  opacity:clamp(0, (var(--reveal, 0) - var(--at)) * 14, 1);
+  transform:translateY(calc((1 - clamp(0, (var(--reveal, 0) - var(--at)) * 14, 1)) * 18px));
+  filter:blur(calc((1 - clamp(0, (var(--reveal, 0) - var(--at)) * 14, 1)) * 5px));
+  will-change:opacity,transform;}
+.tw.br{display:block;margin-top:.06em;}
+.tb-t{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.94;
+  font-size:clamp(30px,6.2vw,84px);color:var(--bone-2);margin:0;max-width:16ch;}
+.tb-t .tw:nth-child(n+5){font-size:.62em;color:var(--a1);}
 
 @media(prefers-reduced-motion:reduce){
   .tearzone{height:auto;}
@@ -644,26 +652,24 @@ footer{padding-bottom:86px;}
   width:96vmin;height:96vmin;pointer-events:none;
   opacity:calc(var(--reveal,0) * .95);transition:opacity .18s linear;}
 .earth-globe{position:absolute;inset:0;border-radius:50%;overflow:hidden;
-  background:
-    radial-gradient(circle at 32% 28%,#2d6ea8 0%,#1b4f80 38%,#10314f 72%,#081a2b 100%);
-  box-shadow:inset -26px -18px 60px rgba(0,0,0,.72),
-             inset 14px 10px 40px rgba(140,200,255,.16);}
-.earth-land{position:absolute;inset:-2%;opacity:.82;
-  background-repeat:repeat-x;background-size:50% 100%;
-  background-image:
-    radial-gradient(30% 22% at 12% 34%,rgba(74,124,72,.95) 0 60%,transparent 62%),
-    radial-gradient(16% 26% at 26% 62%,rgba(88,132,74,.92) 0 60%,transparent 62%),
-    radial-gradient(22% 16% at 40% 30%,rgba(96,138,80,.9) 0 60%,transparent 62%),
-    radial-gradient(12% 20% at 33% 80%,rgba(120,146,86,.85) 0 60%,transparent 62%),
-    radial-gradient(26% 18% at 46% 52%,rgba(80,120,70,.88) 0 60%,transparent 62%);
-  animation:earthSpin 120s linear infinite;}
-/* Terminator: the limb falling into night. */
+  background:#06111d;
+  box-shadow:inset -30px -20px 70px rgba(0,0,0,.78),
+             inset 16px 12px 44px rgba(140,200,255,.14);}
+/* NASA Blue Marble, equirectangular. Repeated on x and panned, so the map wraps
+   seamlessly and reads as rotation without any 3D. */
+.earth-land{position:absolute;inset:0;
+  background-image:url("../assets/earth-map.jpg");
+  background-repeat:repeat-x;background-size:200% 100%;
+  animation:earthSpin 140s linear infinite;}
+/* The limb falling into night, plus a lit crescent, which is what actually
+   sells a flat map as a sphere. */
 .earth-night{position:absolute;inset:0;border-radius:50%;
-  background:linear-gradient(102deg,transparent 34%,rgba(4,10,18,.55) 62%,rgba(2,6,12,.9) 88%);}
-/* Atmosphere, brighter on the lit limb. */
-.earth-atmo{position:absolute;inset:-3.5%;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle at 34% 30%,rgba(150,205,255,.30) 0 52%,transparent 66%);
-  box-shadow:0 0 90px 18px rgba(120,185,255,.18);}
+  background:
+    radial-gradient(circle at 30% 26%,transparent 0 44%,rgba(2,7,14,.42) 68%,rgba(1,4,9,.94) 100%),
+    linear-gradient(104deg,transparent 30%,rgba(3,8,16,.5) 64%,rgba(1,4,9,.9) 92%);}
+.earth-atmo{position:absolute;inset:-4%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 32% 28%,rgba(150,205,255,.26) 0 50%,transparent 66%);
+  box-shadow:0 0 100px 22px rgba(120,185,255,.20);}
 @keyframes earthSpin{to{background-position:-100% 0;}}
 
 /* The copy has to clear the globe. */

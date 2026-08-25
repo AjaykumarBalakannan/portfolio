@@ -51,10 +51,21 @@
       <div class="earth-globe"><div class="earth-land"></div><div class="earth-night"></div></div>
       <div class="earth-atmo"></div>
     </div>
+    <!-- The line assembles as the paper parts: WELCOME is there the moment the
+         tear opens, the rest arrives word by word as the gap widens. Each word
+         carries the point in the rip at which it appears. -->
     <div class="tearback-copy">
-      <div class="tb-k">Now the actual work</div>
-      <h2 class="tb-t">WELCOME TO<br/>THE PIPELINE.</h2>
-      <p class="tb-s">Models, data and the people who have to trust them.</p>
+      <h2 class="tb-t">
+        <span class="tw" style="--at:.00">WELCOME</span>
+        <span class="tw" style="--at:.16">TO</span>
+        <span class="tw" style="--at:.24">MY</span>
+        <span class="tw" style="--at:.32">WORLD,</span>
+        <span class="tw br" style="--at:.46">WHICH</span>
+        <span class="tw" style="--at:.54">IS</span>
+        <span class="tw" style="--at:.62">DATA</span>
+        <span class="tw" style="--at:.70">AND</span>
+        <span class="tw" style="--at:.78">NUMBERS.</span>
+      </h2>
     </div>
   </div>
 
@@ -81,7 +92,16 @@
 
     <figure class="plate">
       <div class="plate-img">
-        <img src="assets/ajay.jpg" alt="Ajaykumar Balakannan"/>
+        <!-- A printed photograph that happens to move. Muted, looping and
+             inline so it behaves like an image rather than media: no controls,
+             no sound, nothing to click. The poster is the still, so the frame is
+             never empty and it is what remains under reduced motion, where
+             autoplay is withheld in js/site.js. -->
+        <video class="plate-video" poster="assets/ajay.jpg" muted playsinline
+               preload="metadata" aria-label="Ajaykumar Balakannan">
+          <source src="assets/portrait-motion.mp4" type="video/mp4"/>
+          <img src="assets/ajay.jpg" alt="Ajaykumar Balakannan"/>
+        </video>
       </div>
       <figcaption class="fig"><b>Fig. 001</b> — The author, printed.</figcaption>
       <div class="tile t-clust" style="--d:.48s;margin-top:20px">

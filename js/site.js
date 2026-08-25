@@ -145,6 +145,29 @@
   clone.querySelectorAll('canvas').forEach((el) => el.remove());
   clone.classList.add('nograin');
 
+  // The tear cuts through the portrait, so the halves show the top and bottom of
+  // the same face. Two <video> elements started independently drift apart within
+  // seconds, and a face whose jaw moves out of step with its eyes is worse than
+  // no motion at all. The clone is slaved to the original and nudged back
+  // whenever it strays past a few frames.
+  const lead = sheet.querySelector('.plate-video');
+  const follow = clone.querySelector('.plate-video');
+  if (lead && follow) {
+    follow.muted = true;
+    const resync = () => {
+      if (lead.readyState < 2 || follow.readyState < 2) return;
+      if (Math.abs(follow.currentTime - lead.currentTime) > 0.08) {
+        follow.currentTime = lead.currentTime;
+      }
+    };
+    lead.addEventListener('play', () => { follow.play().catch(() => {}); resync(); });
+    lead.addEventListener('seeked', resync);
+    // Cheap and infrequent: drift accumulates slowly, and correcting it every
+    // frame would cost more than the mismatch it fixes.
+    setInterval(resync, 500);
+    if (!lead.paused) { follow.play().catch(() => {}); }
+  }
+
   sheet.classList.add('sheethalf', 'live');
   clone.classList.add('sheethalf');
   sheet.style.clipPath = topPoly;
@@ -280,4 +303,16 @@
     }
     lastProgress = progress;
   }, { passive: true });
+})();
+
+// The plate video autoplays only when motion is welcome. Left to the markup,
+// `autoplay` would run regardless of the reduced-motion preference, and a
+// looping face is exactly the kind of movement that setting exists to stop.
+// Without it the poster still shows, so the plate is never empty.
+(function () {
+  if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  document.querySelectorAll('.plate-video').forEach((v) => {
+    v.muted = true;               // belt and braces: iOS refuses inline autoplay otherwise
+    v.play().catch(() => {});     // a refused autoplay just leaves the poster
+  });
 })();
