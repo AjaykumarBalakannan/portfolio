@@ -36,13 +36,23 @@ a{color:inherit;} img{display:block;max-width:100%;}
 .hint{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);z-index:3;font-family:var(--mono);font-size:11px;
   letter-spacing:.16em;color:var(--muted);opacity:0;transition:opacity .8s ease;pointer-events:none;}
 .hint.show{opacity:.7;}
-.skip{position:absolute;bottom:22px;right:24px;z-index:5;font-family:var(--mono);font-size:12px;color:var(--muted);background:transparent;border:1px solid var(--ink-3);border-radius:100px;padding:7px 15px;cursor:pointer;transition:all .2s;}
-.skip:hover{color:var(--bone);border-color:var(--muted);}
+/* The gate is the first thing between a recruiter and the work, so the way past
+   it has to be obvious. Was muted text on a transparent chip in the corner; now
+   it reads at a glance and states what it does. */
+.skip{position:absolute;bottom:26px;right:26px;z-index:5;font-family:var(--mono);
+  font-size:12px;letter-spacing:.08em;color:var(--bone-2);
+  background:rgba(236,226,207,.10);border:1px solid rgba(236,226,207,.42);
+  border-radius:100px;padding:10px 19px;cursor:pointer;backdrop-filter:blur(6px);
+  transition:background .2s ease,border-color .2s ease,transform .2s ease;}
+.skip:hover{background:var(--bone-2);border-color:var(--bone-2);color:#1a1410;transform:translateY(-1px);}
+.skip:focus-visible{outline:2px solid var(--a1);outline-offset:3px;}
+@media(max-width:520px){.skip{bottom:18px;right:50%;transform:translateX(50%);}
+  .skip:hover{transform:translateX(50%) translateY(-1px);}}
 .replay{position:fixed;bottom:92px;right:16px;z-index:40;font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(43,36,25,.85);border:1px solid var(--ink-3);border-radius:100px;padding:8px 14px;cursor:pointer;transition:all .2s;}
 .replay:hover{color:var(--ochre);border-color:var(--ochre);}
 
 /* ===== NAV ===== */
-nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+nav.topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
   padding:16px clamp(20px,5vw,52px);background:linear-gradient(var(--ink),rgba(34,28,23,.4) 70%,transparent);}
 .brand{font-family:var(--serif);font-weight:700;font-size:20px;letter-spacing:-.01em;color:var(--bone-2);}
 .brand span{color:var(--ochre);}
@@ -359,3 +369,134 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
   .edge::after{transform:scaleX(1);transition:none;transition-delay:0s;}
   .avail::before{animation:none;}
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   EDITORIAL LAYER
+   Alternating paper/ink sections, magazine framing, oversized display type.
+
+   The whole inversion is a variable swap rather than a parallel stylesheet:
+   every component already draws from --ink (surface) and --bone (text), so
+   redefining those four variables inside .paper flips a section wholesale and
+   any component dropped into it inherits the right theme for free.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.paper{
+  --ink:#e9e4d8; --ink-2:#e2dccd; --ink-3:#d5cdb9;
+  --bone:#2f2820; --bone-2:#17130e; --muted:#6f6555;
+  color:var(--bone);
+  position:relative;
+}
+/* `section` is a centred max-width box, so painting its background would leave
+   dark gutters either side and the inversion would read as a broken card rather
+   than a change of world. This bleeds the surface to the full viewport while the
+   content stays in the measure. */
+.paper::before{
+  content:"";position:absolute;top:0;bottom:0;left:50%;
+  width:100vw;transform:translateX(-50%);
+  background:var(--ink);z-index:-1;
+}
+/* Hairline between worlds, so the flip reads as deliberate rather than broken. */
+.paper + section:not(.paper), section:not(.paper) + .paper{border-top:1px solid rgba(0,0,0,.16);}
+.paper .chip,.paper .tags span,.paper .ptags span{border-color:rgba(0,0,0,.14);}
+.paper .mark.logo{background:#fff;border-color:rgba(0,0,0,.10);}
+.paper .grain{opacity:.28;}
+
+/* ── masthead ─────────────────────────────────────────────────────────── */
+.masthead{display:flex;align-items:baseline;justify-content:space-between;gap:20px;
+  padding-bottom:12px;border-bottom:2px solid currentColor;margin-bottom:34px;}
+.masthead .mh-l,.masthead .mh-r{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--bone);opacity:.75;white-space:nowrap;}
+.masthead .mh-c{font-family:var(--serif);font-weight:900;font-size:15px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--bone-2);}
+@media(max-width:760px){.masthead .mh-l,.masthead .mh-r{display:none;}
+  .masthead{justify-content:center;}}
+
+/* ── the oversized display headline ───────────────────────────────────── */
+#hero.paper{min-height:0;display:block;padding-top:112px;padding-bottom:72px;}
+.display{font-family:var(--serif);font-weight:900;letter-spacing:-.035em;line-height:.87;
+  /* Capped so "BUILDING WHAT" clears the measure at the widest breakpoint
+     instead of running off the page. */
+  font-size:clamp(40px,9.2vw,124px);color:var(--bone-2);margin:0;
+  overflow-wrap:break-word;}
+.display em{font-style:italic;font-weight:900;}
+.display-sub{font-family:var(--serif);font-style:italic;font-weight:500;
+  font-size:clamp(15px,2.1vw,24px);color:var(--bone);opacity:.82;margin-top:14px;
+  padding-bottom:22px;border-bottom:1px solid currentColor;}
+
+/* ── two-column: prose with drop cap | contents index ─────────────────── */
+.spread{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(28px,5vw,72px);
+  margin-top:30px;align-items:start;}
+@media(max-width:900px){.spread{grid-template-columns:1fr;}}
+
+.colhead{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--muted);padding-bottom:7px;border-bottom:1px solid currentColor;margin-bottom:16px;}
+
+.prose p{font-size:15.5px;line-height:1.62;margin-bottom:13px;text-align:justify;
+  hyphens:auto;color:var(--bone);}
+.prose p:last-child{margin-bottom:0;}
+.prose .lead::first-letter{font-family:var(--serif);font-weight:900;float:left;
+  font-size:56px;line-height:.82;padding:5px 9px 0 0;color:var(--bone-2);}
+.prose .close{font-weight:700;color:var(--bone-2);}
+
+/* Contents index. Page numbers are the one magazine affectation kept: they give
+   the eye a right-hand rail and make the list feel authored. */
+.contents a{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding:11px 0;border-bottom:1px solid rgba(128,110,80,.28);text-decoration:none;
+  transition:padding-left .22s ease,background .22s ease;}
+.contents a:hover{padding-left:9px;background:linear-gradient(90deg,rgba(232,173,63,.13),transparent);}
+.contents .ct{font-family:var(--serif);font-weight:700;font-size:17.5px;color:var(--bone-2);}
+.contents .cd{display:block;font-family:var(--sans);font-style:italic;font-weight:400;
+  font-size:12.5px;color:var(--muted);margin-top:2px;}
+.contents .cp{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--muted);
+  white-space:nowrap;}
+
+/* ── figure captions ──────────────────────────────────────────────────── */
+.fig{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--muted);
+  margin-top:9px;}
+.fig b{font-family:var(--mono);font-style:normal;font-weight:500;font-size:10px;
+  letter-spacing:.16em;text-transform:uppercase;}
+
+/* ── numbered project list (replaces the card grid) ───────────────────── */
+.projlist{border-top:1px solid rgba(255,255,255,.13);}
+.paper .projlist{border-top-color:rgba(0,0,0,.16);}
+.projrow{display:grid;grid-template-columns:auto 1fr auto;gap:clamp(16px,3.5vw,40px);
+  align-items:start;padding:clamp(22px,3.4vw,34px) 0;
+  border-bottom:1px solid rgba(255,255,255,.13);transition:background .25s ease;}
+.paper .projrow{border-bottom-color:rgba(0,0,0,.16);}
+.projrow:hover{background:rgba(232,173,63,.045);}
+.projnum{font-family:var(--sans);font-weight:700;font-size:clamp(34px,5vw,58px);
+  line-height:.9;color:var(--bone-2);opacity:.16;letter-spacing:-.03em;}
+.projrow:hover .projnum{opacity:.4;transition:opacity .25s ease;}
+.projbody h3{font-family:var(--sans);font-weight:700;letter-spacing:-.02em;
+  font-size:clamp(21px,3.1vw,33px);line-height:1.05;color:var(--bone-2);margin-bottom:9px;}
+.projbody p{font-size:14.5px;line-height:1.6;color:var(--bone);opacity:.86;max-width:60ch;}
+.projmeta{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);margin-top:11px;}
+.projside{text-align:right;min-width:120px;}
+@media(max-width:820px){
+  .projrow{grid-template-columns:auto 1fr;}
+  .projside{grid-column:2;text-align:left;margin-top:12px;}
+}
+
+/* ── floating pill nav ────────────────────────────────────────────────── */
+.pillnav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(0);
+  z-index:70;display:flex;gap:2px;padding:5px;border-radius:100px;
+  background:rgba(28,23,18,.86);backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.10);box-shadow:0 12px 40px -12px rgba(0,0,0,.6);
+  opacity:0;pointer-events:none;transition:opacity .3s ease,transform .3s ease;}
+.pillnav.show{opacity:1;pointer-events:auto;}
+.pillnav a{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(236,226,207,.62);text-decoration:none;padding:8px 15px;border-radius:100px;
+  transition:color .2s ease,background .2s ease;white-space:nowrap;}
+.pillnav a:hover{color:var(--bone-2);}
+.pillnav a.on{background:var(--bone-2);color:#1a1410;}
+@media(max-width:520px){
+  .pillnav{bottom:14px;}
+  .pillnav a{padding:7px 11px;font-size:9.5px;letter-spacing:.1em;}
+}
+/* Clear the chat launcher, which lives bottom-right. */
+@media(max-width:640px){.pillnav{left:16px;right:76px;transform:none;justify-content:center;}}
+
+/* The pill nav is fixed bottom-centre, so the last thing on the page needs
+   clearance or it sits under the pill. */
+footer{padding-bottom:86px;}

@@ -49,3 +49,40 @@
   if(!mq.matches)timer=setTimeout(loop,5200);
   addEventListener('resize',()=>{clearTimeout(timer);size();seed();draw();if(!mq.matches)timer=setTimeout(loop,600);});
 })();
+
+// Floating pill nav: appears once the reader is past the opening spread, and
+// highlights whichever section is currently under the middle of the viewport.
+// Hidden at the top on purpose — the contents index is the navigation up there,
+// and two navs competing would be noise.
+(function () {
+  const pill = document.getElementById('pillnav');
+  if (!pill) return;
+  const links = [...pill.querySelectorAll('a')];
+  const targets = links
+    .map((a) => ({ a, el: document.querySelector(a.getAttribute('href')) }))
+    .filter((t) => t.el);
+
+  function update() {
+    const hero = document.getElementById('hero');
+    const past = hero ? window.scrollY > hero.offsetHeight * 0.6 : window.scrollY > 400;
+    pill.classList.toggle('show', past);
+
+    // Nearest section to the viewport's middle, rather than the first one
+    // intersecting — that reads as "where am I" instead of "what just entered".
+    const mid = window.scrollY + window.innerHeight / 2;
+    let best = null, bestGap = Infinity;
+    for (const t of targets) {
+      const gap = Math.abs(t.el.offsetTop + t.el.offsetHeight / 2 - mid);
+      if (gap < bestGap) { bestGap = gap; best = t; }
+    }
+    for (const t of targets) t.a.classList.toggle('on', t === best);
+  }
+
+  let ticking = false;
+  addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { update(); ticking = false; });
+  }, { passive: true });
+  update();
+})();

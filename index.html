@@ -24,11 +24,11 @@
     <button class="enter" id="enter">Enter portfolio ↓</button>
   </div>
   <div class="hint" id="hint">drag to orbit · click to pulse</div>
-  <button class="skip" id="skip">skip ↦</button>
+  <button class="skip" id="skip">Skip intro ↦</button>
 </div>
 <button class="replay" id="replay" hidden>↺ replay intro</button>
 
-<nav>
+<nav class="topbar">
   <div class="brand">Ajay<span>.</span></div>
   <ul class="nav-links">
     <li><a href="#work">Work</a></li><li><a href="#skills">Skills</a></li>
@@ -38,42 +38,56 @@
   <a href="#contact" class="avail">Open to work</a>
 </nav>
 
-<!-- ===== HERO ===== -->
-<section id="hero">
-  <div class="mosaic">
-    <div class="tile t-name" style="--d:.14s">
-      <div class="kicker">MS Data Science · University of Maryland</div>
-      <h1><em>Ajay</em>kumar<br/>Balakannan</h1>
+<!-- ===== OPENING SPREAD (paper) ===== -->
+<section id="hero" class="paper">
+  <div class="masthead">
+    <span class="mh-l">Data Scientist / ML Engineering</span>
+    <span class="mh-c">Ajaykumar Balakannan</span>
+    <span class="mh-r">Dallas, Texas</span>
+  </div>
+
+  <h1 class="display">BUILDING WHAT<br/>GETS <em>USED.</em></h1>
+  <p class="display-sub">A data scientist working where models, pipelines and the people who rely on them meet.</p>
+
+  <div class="spread">
+    <div>
+      <div class="colhead">The practitioner</div>
+      <div class="prose">
+        <p class="lead">For the past four years I've built data systems that have to hold up in production, not just in a notebook — across healthcare, job-market data and university operations.</p>
+        <p>At the University of Maryland Counseling Center I built a no-show prediction model on HIPAA-regulated clinical records, wrote the DuckDB pipelines underneath it, and built the dashboards the counseling staff open every morning. At Canaria I ran anomaly detection over 15M+ job-market records and a salary model across 40,000+ US zip codes.</p>
+        <p>The tools change. What hasn't is the approach: understand the problem properly, be suspicious of your own data, and make the result something a person can act on.</p>
+        <p class="close">A model nobody uses isn't finished.</p>
+      </div>
+      <div class="tile t-clust" style="--d:.48s;margin-top:22px;max-width:340px">
+        <canvas id="clust"></canvas><div class="cap">k-means, settling</div>
+      </div>
+      <p class="fig"><b>Fig. 001</b> — k-means finding its centroids, unsupervised.</p>
     </div>
-    <div class="tile t-photo" style="--d:.20s">
-      <div class="monogram"><b>A</b></div>
-      <img src="assets/ajay.jpg" alt="Ajaykumar Balakannan"/>
-    </div>
-    <div class="tile t-open" style="--d:.04s">
-      <div class="lbl">Status</div><strong>Open to data<br/>&amp; ML roles</strong>
-    </div>
-    <div class="tile t-loc" style="--d:.10s">
-      <div class="lbl">Based in</div><strong>Dallas, TX</strong><em>open to relocate / remote</em>
-    </div>
-    <div class="tile t-role" style="--d:.28s">
-      <div class="lbl">Currently</div><div class="typed"><span id="typed"></span><span class="cur"></span></div>
-    </div>
-    <div class="tile t-intro" style="--d:.34s">
-      <p>I build the data systems that help people make better calls: <b>no-show models</b> for a campus counseling center, <b>salary forecasts</b> across 40K+ zip codes, and lately <b>agentic AI</b> that orchestrates Claude and MCP. Production ML and NLP, with a stubborn habit of shipping things stakeholders actually use.</p>
-    </div>
-    <div class="tile t-gpa" style="--d:.42s">
-      <div class="lbl">Grad · May 2026</div><div class="big">3.74</div><div class="sub">GPA at UMD</div>
-    </div>
-    <div class="tile t-clust" style="--d:.48s">
-      <canvas id="clust"></canvas><div class="cap">k-means, settling</div>
-    </div>
-    <div class="tile t-records" style="--d:.54s">
-      <div class="lbl">In production</div><div class="big">15M+</div><div class="sub">records processed</div>
-    </div>
-    <div class="tile t-links" style="--d:.60s">
-      <a class="primary" href="mailto:ajayport2@gmail.com">Email me</a>
-      <a href="https://www.linkedin.com/in/ajaykumar-balakannan/" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="https://github.com/AjaykumarBalakannan" target="_blank" rel="noopener">GitHub</a>
+
+    <div>
+      <div class="colhead">Inside this portfolio</div>
+      <nav class="contents">
+        <a href="#work"><span class="ct">Experience<span class="cd">Three roles, and what actually shipped.</span></span><span class="cp">P. 02</span></a>
+        <a href="#skills"><span class="ct">Toolkit<span class="cd">What I reach for, and why.</span></span><span class="cp">P. 03</span></a>
+        <a href="#projects"><span class="ct">Selected Work<span class="cd">Things I built to find out if I could.</span></span><span class="cp">P. 04</span></a>
+        <a href="#education"><span class="ct">Education<span class="cd">Maryland, and Coimbatore before it.</span></span><span class="cp">P. 05</span></a>
+        <a href="#certs"><span class="ct">Credentials<span class="cd">Verified, with links to prove it.</span></span><span class="cp">P. 06</span></a>
+        <a href="#contact"><span class="ct">Contact<span class="cd">The inbox is always on.</span></span><span class="cp">P. 07</span></a>
+      </nav>
+
+      <div class="colhead" style="margin-top:30px">At a glance</div>
+      <div class="mosaic" style="grid-template-columns:1fr 1fr;grid-template-areas:'open loc' 'gpa records';gap:10px">
+        <div class="tile t-open" style="--d:.04s"><div class="lbl">Status</div><strong>Open to data<br/>&amp; ML roles</strong></div>
+        <div class="tile t-loc" style="--d:.10s"><div class="lbl">Based in</div><strong>Dallas, TX</strong><em>relocate / remote</em></div>
+        <div class="tile t-gpa" style="--d:.42s"><div class="lbl">MS · UMD 2026</div><div class="big">3.74</div><div class="sub">GPA</div></div>
+        <div class="tile t-records" style="--d:.54s"><div class="lbl">In production</div><div class="big">15M+</div><div class="sub">records</div></div>
+      </div>
+
+      <div class="tile t-links" style="--d:.60s;margin-top:10px">
+        <a class="primary" href="mailto:ajayport2@gmail.com">Email me</a>
+        <a href="https://www.linkedin.com/in/ajaykumar-balakannan/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://github.com/AjaykumarBalakannan" target="_blank" rel="noopener">GitHub</a>
+      </div>
     </div>
   </div>
 </section>
@@ -128,7 +142,7 @@
 </section>
 
 <!-- ===== SKILLS ===== -->
-<section id="skills">
+<section id="skills" class="paper">
   <div class="eyebrow rv">Toolkit</div>
   <h2 class="title rv">What I reach for</h2>
   <div class="stackgrid">
@@ -147,33 +161,61 @@
 <section id="projects">
   <div class="eyebrow rv">Projects</div>
   <h2 class="title rv">Things I built to find out if I could</h2>
-  <div class="projgrid">
-    <div class="proj rv edge"><div class="ptop"><span class="cat">Agentic AI</span><span class="yr">Dec 2025</span></div>
-      <h3>TravelGenie: AI travel planner</h3>
-      <p>An agentic trip planner that orchestrates 7 MCP servers through Claude, pulling live flights, hotels, and events via SerpAPI into a single request. I load-tested EC2 against ECS Fargate at 50 to 100 concurrent users; Fargate matched EC2's 460 RPS on half the compute.</p>
-      <div class="ptags"><span>Claude</span><span>MCP</span><span>SerpAPI</span><span>AWS ECS / EC2</span><span>Load Testing</span></div>
-      <a class="go" href="https://github.com/AjaykumarBalakannan" target="_blank" rel="noopener">View on GitHub <span class="arw">→</span></a></div>
-    <div class="proj rv edge"><div class="ptop"><span class="cat">Computer Vision</span><span class="yr">Mar 2023</span></div>
-      <h3>Farmland wildlife intrusion detection</h3>
-      <p>A YOLO computer-vision pipeline that flags wildlife intrusions on farmland in real time and fires the alert automatically, so no one is stuck watching a monitor. It handles multi-class classification straight off live camera feeds.</p>
-      <div class="badge">★ 2nd of 500+ teams · National Technocraft Hackathon · published in BIOGECKO (Vol 12, Iss 03, 2023)</div>
-      <div class="ptags"><span>YOLOv5</span><span>CNN</span><span>Python</span><span>IoT</span></div>
-      <a class="go" href="https://github.com/AjaykumarBalakannan/Framland_Protection" target="_blank" rel="noopener">View on GitHub <span class="arw">→</span></a></div>
-    <div class="proj rv edge"><div class="ptop"><span class="cat">Time Series</span><span class="yr">2025</span></div>
-      <h3>Bitcoin price forecasting</h3>
-      <p>End-to-end pipeline: live BTC data collection, ARIMA + XGBoost models, automated ETL, and interactive Qlik Sense dashboards. Landed around 85% accuracy and cut the manual work by 40%.</p>
-      <div class="ptags"><span>ARIMA</span><span>XGBoost</span><span>Qlik Sense</span><span>Python</span></div>
-      <a class="go" href="https://github.com/causify-ai/tutorials/tree/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense/DATA605/Spring2025/projects/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense" target="_blank" rel="noopener">View on GitHub <span class="arw">→</span></a></div>
-    <div class="proj rv edge"><div class="ptop"><span class="cat">Analytics</span><span class="yr">2025</span></div>
-      <h3>Sage Ventures: multifamily analytics</h3>
-      <p>Python and SQL analytics over a multifamily portfolio, quantifying $2.1M+ of loss-to-lease and a 26-point occupancy gap across properties, units, and rent rolls, with automated Excel and Power BI reporting for stakeholders.</p>
-      <div class="ptags"><span>Python</span><span>SQL</span><span>Power BI</span><span>Excel</span></div>
-      <a class="go" href="https://github.com/AjaykumarBalakannan/RealEstateModelling" target="_blank" rel="noopener">View on GitHub <span class="arw">→</span></a></div>
+  <div class="projlist">
+    <article class="projrow rv">
+      <div class="projnum">01</div>
+      <div class="projbody">
+        <h3>TravelGenie</h3>
+        <p>An agentic trip planner that orchestrates seven MCP servers through Claude, pulling live flights, hotels and events into a single request. I load-tested EC2 against ECS Fargate at 50 to 100 concurrent users; Fargate matched EC2's 460 RPS on half the compute.</p>
+        <div class="projmeta">Agentic AI · Dec 2025 · Claude / MCP / SerpAPI / AWS</div>
+      </div>
+      <div class="projside">
+        <a class="go" href="https://github.com/AjaykumarBalakannan/TravelGenie" target="_blank" rel="noopener">GitHub <span class="arw">→</span></a>
+      </div>
+    </article>
+
+    <article class="projrow rv">
+      <div class="projnum">02</div>
+      <div class="projbody">
+        <h3>Farmland Intrusion Detection</h3>
+        <p>A YOLO vision pipeline that spots wildlife on farmland in real time and fires a non-lethal deterrent matched to the animal, so nobody has to watch a monitor. Hardware prototype built and tested alongside the model.</p>
+        <div class="badge">★ 2nd of 500+ teams · National Technocraft Hackathon · published in BIOGECKO (Vol 12, Iss 03, 2023)</div>
+        <div class="projmeta">Computer Vision · Mar 2023 · YOLOv3 / CNN / Arduino</div>
+      </div>
+      <div class="projside">
+        <a class="go" href="https://github.com/AjaykumarBalakannan/Framland_Protection" target="_blank" rel="noopener">GitHub <span class="arw">→</span></a>
+      </div>
+    </article>
+
+    <article class="projrow rv">
+      <div class="projnum">03</div>
+      <div class="projbody">
+        <h3>Bitcoin Price Forecasting</h3>
+        <p>End-to-end pipeline: live BTC collection, ARIMA and XGBoost models at around 85% accuracy, automated ETL, and Qlik Sense dashboards giving real-time visibility into volatility. Cut the manual reporting effort by 40%.</p>
+        <div class="projmeta">Time Series · 2025 · ARIMA / XGBoost / Qlik Sense</div>
+      </div>
+      <div class="projside">
+        <a class="go" href="https://github.com/causify-ai/tutorials/tree/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense/DATA605/Spring2025/projects/TutorTask146_Spring_2025_Real_time_Bitcoin_Price_Analysis_Using_Qlik_Sense" target="_blank" rel="noopener">GitHub <span class="arw">→</span></a>
+      </div>
+    </article>
+
+    <article class="projrow rv">
+      <div class="projnum">04</div>
+      <div class="projbody">
+        <h3>Multifamily Real Estate Analytics</h3>
+        <p>A full analytics pipeline over a multifamily portfolio: SQLite to engineered features to five business reports, a seven-sheet Excel workbook and Power BI. Surfaced $2.14M of annual loss-to-lease and a 26-point occupancy gap. The data is synthetic, generated with Faker — this was built to demonstrate the pipeline, not to report on a real client.</p>
+        <div class="projmeta">Analytics · 2025 · Python / SQL / Power BI</div>
+      </div>
+      <div class="projside">
+        <a class="go" href="https://github.com/AjaykumarBalakannan/RealEstateModelling" target="_blank" rel="noopener">GitHub <span class="arw">→</span></a>
+      </div>
+    </article>
   </div>
+  <p class="fig"><b>Fig. 002</b> — Four projects, ordered by how much I learned rather than by date.</p>
 </section>
 
 <!-- ===== EDUCATION ===== -->
-<section id="education">
+<section id="education" class="paper">
   <div class="eyebrow rv">Education</div>
   <h2 class="title rv">Where I learned it</h2>
   <div class="edugrid">
@@ -189,7 +231,7 @@
 </section>
 
 <!-- ===== CERTIFICATIONS ===== -->
-<section id="certs">
+<section id="certs" class="paper">
   <div class="eyebrow rv">Certifications</div>
   <h2 class="title rv">Verified credentials</h2>
   <div class="certgrid">
@@ -223,6 +265,10 @@
     <a href="https://github.com/AjaykumarBalakannan" target="_blank" rel="noopener">GitHub ↗</a>
   </div>
 </section>
+
+<nav class="pillnav" id="pillnav" aria-label="Section navigation">
+  <a href="#work">Work</a><a href="#projects">Projects</a><a href="#contact">Contact</a>
+</nav>
 
 <footer>Ajaykumar Balakannan · Data Scientist · Dallas, TX</footer>
 
