@@ -12,6 +12,11 @@
      --on-accent, which flips with the context the same way. */
   --a1:#f4f4f5; --a2:#c8c8ce; --a3:#9e9ea6; --a4:#7c7c85;
   --on-accent:#0c0c0d;
+  /* The chat is the one thing on the page that is not the page: it answers as a
+     person. It gets its own colour, pulled from the blue-violet the intro's
+     nebula runs on, so it reads as belonging to this site without competing
+     with the black and white everywhere else. */
+  --chat:#8ea2ff; --chat-deep:#6b80ea; --chat-ink:#080a16;
   --serif:'Fraunces',Georgia,serif; --sans:'Hanken Grotesk',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
   --maxw:1120px; --r:14px;
 }
@@ -25,21 +30,23 @@ a{color:inherit;} img{display:block;max-width:100%;}
 /* ===== INTERACTIVE PARTICLE GATE (WebGL) ===== */
 /* Deep space. The stars themselves are WebGL points in #scene above this, but
    the depth behind them is cheaper to paint as gradients than to render: a
-   faint galactic band on the diagonal, two dust clouds either side of it, and a
+   faint galactic band on the diagonal, dust clouds either side of it, and a
    vignette pulling the corners down so the field reads as far rather than flat.
    All of it is static, so it costs one paint and never touches a frame budget
    the particle gate needs. */
 .gate{position:fixed;inset:0;z-index:900;overflow:hidden;
   background:
     /* the band, off-axis so it does not read as a stripe through the middle */
-    linear-gradient(107deg, transparent 30%, rgba(255,255,255,.055) 47%,
-                    rgba(255,255,255,.075) 52%, rgba(255,255,255,.04) 58%, transparent 74%),
-    /* dust either side of it */
-    radial-gradient(58% 42% at 24% 30%, rgba(255,255,255,.055), transparent 70%),
-    radial-gradient(52% 40% at 78% 68%, rgba(255,255,255,.042), transparent 72%),
-    radial-gradient(30% 26% at 62% 22%, rgba(255,255,255,.03), transparent 70%),
+    linear-gradient(107deg, transparent 30%, rgba(226,232,255,.07) 47%,
+                    rgba(240,236,255,.095) 52%, rgba(210,220,255,.05) 58%, transparent 74%),
+    /* dust clouds either side of it, cool one way and warm the other -- a
+       single tint everywhere reads as a colour cast rather than as depth */
+    radial-gradient(58% 42% at 24% 30%, rgba(84,104,214,.16), transparent 70%),
+    radial-gradient(52% 40% at 78% 68%, rgba(150,70,160,.13), transparent 72%),
+    radial-gradient(34% 30% at 62% 20%, rgba(48,150,170,.11), transparent 70%),
+    radial-gradient(40% 34% at 14% 78%, rgba(190,110,70,.075), transparent 72%),
     /* corners down, centre barely lifted */
-    radial-gradient(125% 95% at 50% 45%, #141418 0%, #0b0b0e 52%, #050507 100%);}
+    radial-gradient(125% 95% at 50% 45%, #0f1020 0%, #08080f 54%, #030307 100%);}
 .gate.leaving{background-position:center;}
 .gate.done{opacity:0;pointer-events:none;transition:opacity .8s ease;}
 #scene{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;}
@@ -140,7 +147,7 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 .t-name .kicker{font-family:var(--mono);font-size:12px;color:var(--muted);}
 .t-name h1{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.92;font-size:clamp(38px,6vw,74px);color:var(--bone-2);}
 .t-name h1 em{font-style:italic;font-weight:500;color:var(--tone-1);}
-.t-photo img{width:100%;height:100%;object-fit:cover;object-position:center 28%;filter:grayscale(1) contrast(1.06);position:relative;z-index:1;}
+.t-photo img{width:100%;height:100%;object-fit:cover;object-position:center 28%;filter:grayscale(.12) contrast(1.03);position:relative;z-index:1;}
 .t-photo .monogram{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   background:radial-gradient(120% 120% at 30% 20%,rgba(166,166,166,.22),transparent 60%),linear-gradient(150deg,var(--ink-3),var(--ink-2));}
 .t-photo .monogram b{font-family:var(--serif);font-weight:900;font-size:64px;color:var(--tone-1);}
@@ -194,11 +201,7 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
    monogram marks so the two styles line up in a row. */
 .mark.logo{background:#fff;border-color:rgba(255,255,255,.16);padding:7px;
   box-shadow:0 4px 14px -6px rgba(0,0,0,.55);}
-/* Institution and vendor logos are the last coloured assets on the page.
-   Desaturated rather than replaced, so the files stay original and the marks
-   still read -- a wall of brand colours would undo the monochrome everywhere
-   else. */
-.mark.logo img,.mark.badge img{width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.05);}
+.mark.logo img{width:100%;height:100%;object-fit:contain;}
 /* SKCET publish their logo only as a wide lockup (crest + name). Cover + left
    origin crops it down to just the crest, so no separate image file is needed. */
 .mark.logo.crest{overflow:hidden;}
@@ -308,7 +311,7 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 .askw-flight.gone{opacity:0;}
 
 .askw-launcher{position:absolute;right:12px;bottom:12px;width:60px;height:60px;border-radius:50%;
-  background:var(--a1);border:none;color:var(--on-accent);display:grid;place-items:center;cursor:pointer;
+  background:var(--chat);border:none;color:var(--chat-ink);display:grid;place-items:center;cursor:pointer;
   box-shadow:0 10px 30px -8px rgba(0,0,0,.55);
   opacity:0;transform:scale(.4);
   transition:opacity .4s cubic-bezier(.2,.8,.3,1.2),transform .4s cubic-bezier(.2,.8,.3,1.2),filter .2s ease;}
@@ -318,8 +321,8 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 /* Attention pulse -- stops permanently the first time the panel is opened. */
 .askw-launcher.blink{animation:askglow 2s ease-in-out infinite;}
 @keyframes askglow{
-  0%,100%{box-shadow:0 10px 30px -8px rgba(0,0,0,.55),0 0 0 0 rgba(250,250,252,.75),0 0 0 0 rgba(250,250,252,.35);transform:scale(1);}
-  50%{box-shadow:0 10px 30px -8px rgba(0,0,0,.55),0 0 0 8px rgba(250,250,252,0),0 0 0 22px rgba(250,250,252,0);transform:scale(1.07);}
+  0%,100%{box-shadow:0 10px 30px -8px rgba(0,0,0,.55),0 0 0 0 rgba(142,162,255,.75),0 0 0 0 rgba(142,162,255,.35);transform:scale(1);}
+  50%{box-shadow:0 10px 30px -8px rgba(0,0,0,.55),0 0 0 8px rgba(142,162,255,0),0 0 0 22px rgba(142,162,255,0);transform:scale(1.07);}
 }
 
 .askw-panel{position:absolute;right:0;bottom:84px;width:min(360px,calc(100vw - 32px));
@@ -333,7 +336,7 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 .askw-head span{font-family:var(--serif);font-weight:700;font-size:16px;color:var(--bone-2);}
 .askw-close{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;
   padding:2px 6px;transition:color .18s ease;}
-.askw-close:hover{color:var(--a1);}
+.askw-close:hover{color:var(--chat);}
 
 .ask-log{margin:4px 0 2px;max-height:min(46vh,320px);overflow-y:auto;overscroll-behavior:contain;
   display:flex;flex-direction:column;gap:9px;padding-right:4px;scrollbar-width:thin;
@@ -347,7 +350,7 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
 .ask-msg.them{align-self:flex-start;background:var(--ink);color:var(--bone);
   border:1px solid var(--ink-3);border-bottom-left-radius:5px;}
 /* The visitor's side: accent, mirrored corner. */
-.ask-msg.me{align-self:flex-end;background:var(--a1);color:var(--on-accent);
+.ask-msg.me{align-self:flex-end;background:var(--chat);color:var(--chat-ink);
   border-bottom-right-radius:5px;}
 .ask-msg.error{align-self:flex-start;background:transparent;border:1px solid var(--ink-3);
   color:var(--a3);}
@@ -358,9 +361,9 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
   padding:11px 16px;color:var(--bone-2);font-family:var(--sans);font-size:13.5px;outline:none;
   transition:border-color .2s ease;}
 .ask-input::placeholder{color:var(--muted);}
-.ask-input:focus{border-color:var(--a1);}
-.ask-submit{flex:none;font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--on-accent);
-  background:var(--a1);border:none;border-radius:100px;padding:11px 18px;cursor:pointer;
+.ask-input:focus{border-color:var(--chat);}
+.ask-submit{flex:none;font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--chat-ink);
+  background:var(--chat);border:none;border-radius:100px;padding:11px 18px;cursor:pointer;
   transition:transform .2s ease,filter .2s ease,opacity .2s ease;}
 .ask-submit:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.08);}
 .ask-submit:disabled{opacity:.55;cursor:default;}
@@ -512,25 +515,57 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
   letter-spacing:.16em;text-transform:uppercase;}
 
 /* ── numbered project list (replaces the card grid) ───────────────────── */
-.projlist{border-top:1px solid rgba(255,255,255,.13);}
-.paper .projlist{border-top-color:rgba(0,0,0,.16);}
-.projrow{display:grid;grid-template-columns:auto 1fr auto;gap:clamp(16px,3.5vw,40px);
-  align-items:start;padding:clamp(22px,3.4vw,34px) 0;
-  border-bottom:1px solid rgba(255,255,255,.13);transition:background .25s ease;}
-.paper .projrow{border-bottom-color:rgba(0,0,0,.16);}
-.projrow:hover{background:rgba(235,235,238,.045);}
-.projnum{font-family:var(--sans);font-weight:700;font-size:clamp(34px,5vw,58px);
-  line-height:.9;color:var(--bone-2);opacity:.16;letter-spacing:-.03em;}
-.projrow:hover .projnum{opacity:.4;transition:opacity .25s ease;}
+/* ── project cards ───────────────────────────────────────────────────────
+   Was a ruled list: rows separated by hairlines, which read as an index rather
+   than as work. Cards give each project its own surface, so the four of them
+   scan as four things instead of one table.                                */
+.projlist{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(14px,1.6vw,20px);}
+
+.projrow{position:relative;display:flex;flex-direction:column;overflow:hidden;
+  background:var(--ink-2);border:1px solid var(--ink-3);border-radius:var(--r);
+  padding:clamp(22px,2.4vw,30px);
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;}
+/* The accent edge draws across the top of each card, giving the four a tonal
+   order without four different colours. */
+.projrow::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--accent,var(--a1));opacity:.9;}
+.projrow:nth-child(1){--accent:var(--a1);}
+.projrow:nth-child(2){--accent:var(--a2);}
+.projrow:nth-child(3){--accent:var(--a3);}
+.projrow:nth-child(4){--accent:var(--a4);}
+.projrow:hover{transform:translateY(-4px);
+  border-color:color-mix(in srgb,var(--accent,var(--a1)) 42%,transparent);
+  box-shadow:0 20px 44px -22px rgba(0,0,0,.75);}
+.paper .projrow{box-shadow:none;}
+.paper .projrow:hover{box-shadow:0 18px 40px -24px rgba(0,0,0,.3);}
+
+/* The index number sits behind the card's own content rather than beside it. */
+.projnum{position:absolute;top:clamp(10px,1.4vw,16px);right:clamp(14px,1.8vw,22px);
+  font-family:var(--sans);font-weight:700;font-size:clamp(44px,4.6vw,68px);
+  line-height:.9;color:var(--bone-2);opacity:.09;letter-spacing:-.04em;
+  pointer-events:none;transition:opacity .25s ease;}
+.projrow:hover .projnum{opacity:.2;}
+
+.projbody{flex:1;min-width:0;}
+/* Only the heading has to clear the index number; reserving that space on the
+   whole body left every paragraph wrapping short against nothing. */
 .projbody h3{font-family:var(--sans);font-weight:700;letter-spacing:-.02em;
-  font-size:clamp(21px,3.1vw,33px);line-height:1.05;color:var(--bone-2);margin-bottom:9px;}
-.projbody p{font-size:14.5px;line-height:1.6;color:var(--bone);opacity:.86;max-width:60ch;}
+  font-size:clamp(19px,1.9vw,25px);line-height:1.12;color:var(--bone-2);margin-bottom:10px;
+  padding-right:clamp(46px,4.6vw,72px);}
+.projbody p{font-size:14px;line-height:1.62;color:var(--bone);opacity:.86;}
 .projmeta{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--muted);margin-top:11px;}
-.projside{text-align:right;min-width:120px;}
-@media(max-width:820px){
-  .projrow{grid-template-columns:auto 1fr;}
-  .projside{grid-column:2;text-align:left;margin-top:12px;}
+  color:var(--muted);margin-top:14px;}
+
+/* Pinned to the bottom so the buttons line up across cards of unequal length. */
+.projside{margin-top:18px;padding-top:16px;border-top:1px solid var(--ink-3);}
+.projrow .go{display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+  font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.04em;
+  color:var(--accent,var(--a1));transition:gap .2s ease;}
+.projrow .go:hover{gap:13px;}
+.projrow .go .arw{transition:transform .22s ease;}
+
+@media(max-width:880px){
+  .projlist{grid-template-columns:1fr;}
 }
 
 /* ── floating pill nav ────────────────────────────────────────────────── */
@@ -571,9 +606,9 @@ footer{padding-bottom:86px;}
   background:var(--ink-2);aspect-ratio:1/1;}
 .plate-img img,.plate-img .plate-video{width:100%;height:100%;object-fit:cover;
   object-position:center 32%;display:block;
-  /* Newsprint ink: crushed to monochrome and pushed for contrast, the way a
-     photo reproduces on a press. */
-  filter:grayscale(1) contrast(1.3) brightness(1.03);
+  /* Newsprint ink: crushed to near-monochrome, then warmed back toward the
+     paper so it sits in the page rather than on it. */
+  filter:grayscale(1) contrast(1.28) brightness(1.04) sepia(.22);
   transform:none;
   animation:plateDrift 26s ease-in-out infinite alternate;}
 
@@ -662,14 +697,14 @@ footer{padding-bottom:86px;}
   background:#0c0c0d;overflow:hidden;}
 .tearback-sky{position:absolute;inset:-20%;
   background:
-    radial-gradient(1.6px 1.6px at 18% 24%,rgba(227,227,227,.85),transparent 60%),
-    radial-gradient(1.4px 1.4px at 62% 14%,rgba(227,227,227,.6),transparent 60%),
-    radial-gradient(1.8px 1.8px at 82% 62%,rgba(235,235,238,.75),transparent 60%),
-    radial-gradient(1.3px 1.3px at 34% 78%,rgba(200,200,205,.6),transparent 60%),
-    radial-gradient(1.5px 1.5px at 8% 58%,rgba(227,227,227,.5),transparent 60%),
-    radial-gradient(1.2px 1.2px at 92% 30%,rgba(227,227,227,.55),transparent 60%),
-    radial-gradient(120% 90% at 50% 120%,rgba(235,235,238,.16) 0%,transparent 58%),
-    radial-gradient(90% 70% at 50% -10%,rgba(200,200,205,.10) 0%,transparent 60%);
+    radial-gradient(1.6px 1.6px at 18% 24%,rgba(214,228,255,.9),transparent 60%),
+    radial-gradient(1.4px 1.4px at 62% 14%,rgba(255,236,205,.7),transparent 60%),
+    radial-gradient(1.8px 1.8px at 82% 62%,rgba(255,214,170,.8),transparent 60%),
+    radial-gradient(1.3px 1.3px at 34% 78%,rgba(186,214,255,.7),transparent 60%),
+    radial-gradient(1.5px 1.5px at 8% 58%,rgba(240,240,248,.55),transparent 60%),
+    radial-gradient(1.2px 1.2px at 92% 30%,rgba(255,225,225,.6),transparent 60%),
+    radial-gradient(120% 90% at 50% 120%,rgba(120,90,190,.20) 0%,transparent 58%),
+    radial-gradient(90% 70% at 50% -10%,rgba(60,130,190,.16) 0%,transparent 60%);
   background-size:44% 44%,52% 52%,60% 60%,48% 48%,56% 56%,64% 64%,100% 100%,100% 100%;
   animation:skyDrift 90s linear infinite;}
 @keyframes skyDrift{to{transform:translate3d(-6%,-4%,0);}}
@@ -710,15 +745,14 @@ footer{padding-bottom:86px;}
   width:96vmin;height:96vmin;pointer-events:none;
   opacity:calc(var(--reveal,0) * .95);transition:opacity .18s linear;}
 .earth-globe{position:absolute;inset:0;border-radius:50%;overflow:hidden;
-  background:#101010;
+  background:#06111d;
   box-shadow:inset -30px -20px 70px rgba(0,0,0,.78),
-             inset 16px 12px 44px rgba(191,191,191,.14);}
+             inset 16px 12px 44px rgba(140,200,255,.14);}
 /* NASA Blue Marble, equirectangular. Repeated on x and panned, so the map wraps
    seamlessly and reads as rotation without any 3D. */
 .entered .earth-land{background-image:url("../assets/earth-map.jpg");}
 .earth-land{position:absolute;inset:0;
   background-repeat:repeat-x;background-size:200% 100%;
-  filter:grayscale(1) contrast(1.12) brightness(.96);
   /* Painted only once body.entered lands, so the decode does not compete with
      the intro's animation frames. */
   animation:earthSpin 140s linear infinite;}
@@ -726,11 +760,11 @@ footer{padding-bottom:86px;}
    sells a flat map as a sphere. */
 .earth-night{position:absolute;inset:0;border-radius:50%;
   background:
-    radial-gradient(circle at 32% 28%,transparent 0 52%,rgba(6,6,7,.22) 74%,rgba(3,3,4,.72) 100%),
-    linear-gradient(104deg,transparent 44%,rgba(8,8,8,.26) 74%,rgba(3,3,4,.6) 96%);}
+    radial-gradient(circle at 32% 28%,transparent 0 52%,rgba(2,7,14,.22) 74%,rgba(1,4,9,.72) 100%),
+    linear-gradient(104deg,transparent 44%,rgba(3,8,16,.26) 74%,rgba(1,4,9,.6) 96%);}
 .earth-atmo{position:absolute;inset:-4%;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle at 32% 28%,rgba(197,197,197,.26) 0 50%,transparent 66%);
-  box-shadow:0 0 100px 22px rgba(176,176,176,.20);}
+  background:radial-gradient(circle at 32% 28%,rgba(150,205,255,.26) 0 50%,transparent 66%);
+  box-shadow:0 0 100px 22px rgba(120,185,255,.20);}
 @keyframes earthSpin{to{background-position:-100% 0;}}
 
 /* The copy has to clear the globe. */
@@ -768,10 +802,10 @@ footer{padding-bottom:86px;}
 .askw-callout.show{opacity:1;transform:none;}
 .askw-callout[hidden]{display:none;}
 .ac-k{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.26em;
-  text-transform:uppercase;color:var(--a1);margin-bottom:5px;}
+  text-transform:uppercase;color:var(--chat);margin-bottom:5px;}
 .ac-t{display:block;font-family:var(--serif);font-weight:900;font-size:19px;line-height:1.12;
   letter-spacing:-.01em;color:var(--bone-2);text-shadow:0 2px 22px rgba(0,0,0,.8);}
-.ac-t em{font-style:italic;color:var(--a1);}
+.ac-t em{font-style:italic;color:var(--chat);}
 .ac-s{display:block;margin-top:5px;font-size:11.5px;color:var(--muted);}
 /* Each line arrives just behind the one above it, so the thought lands in the
    order it is read rather than all at once. */
@@ -793,14 +827,14 @@ footer{padding-bottom:86px;}
 .askw-launcher.blink{animation:askglowStrong 2.4s ease-in-out infinite;}
 @keyframes askglowStrong{
   0%,100%{box-shadow:0 10px 30px -8px rgba(0,0,0,.55),
-                     0 0 0 0 rgba(250,250,252,.85),
-                     0 0 0 0 rgba(250,250,252,.45),
-                     0 0 22px 2px rgba(250,250,252,.35);
+                     0 0 0 0 rgba(142,162,255,.85),
+                     0 0 0 0 rgba(142,162,255,.45),
+                     0 0 22px 2px rgba(142,162,255,.38);
           transform:scale(1);}
   50%    {box-shadow:0 10px 30px -8px rgba(0,0,0,.55),
-                     0 0 0 14px rgba(250,250,252,0),
-                     0 0 0 34px rgba(250,250,252,0),
-                     0 0 34px 6px rgba(250,250,252,.55);
+                     0 0 0 14px rgba(142,162,255,0),
+                     0 0 0 34px rgba(142,162,255,0),
+                     0 0 34px 6px rgba(142,162,255,.6);
           transform:scale(1.09);}
 }
 @media(prefers-reduced-motion:reduce){.askw-launcher.blink{animation:none;}}

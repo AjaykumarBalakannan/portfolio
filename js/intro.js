@@ -13,11 +13,17 @@ const skipB  = document.getElementById('skip');
 const replay = document.getElementById('replay');
 const RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
 
-// Monochrome. What used to separate the clusters by hue now separates them by
-// value, so the grouping still reads -- kept a touch dim, since additive
-// blending stacks overlapping points well past these numbers.
-const PAL = [[0.72,0.72,0.74],[0.55,0.55,0.58],[0.62,0.62,0.64],
-             [0.95,0.95,0.97],[0.46,0.46,0.49],[0.82,0.82,0.85]];
+// Nebula palette: the colours you actually see in deep-field images -- ionised
+// hydrogen red, oxygen teal, hot young blue-white, and dust lit warm. Kept
+// under-saturated and a touch dim, since additive blending stacks overlapping
+// points well past these numbers and saturated points turn to mush where the
+// clusters are dense.
+const PAL = [[0.34,0.48,0.92],   // hot blue
+             [0.22,0.68,0.72],   // oxygen teal
+             [0.72,0.30,0.52],   // hydrogen rose
+             [0.86,0.84,0.95],   // blue-white core
+             [0.52,0.34,0.82],   // violet dust
+             [0.90,0.62,0.34]];  // warm dust
 
 // ── starfield ──────────────────────────────────────────────────────────────
 // A separate shell of points far behind the clusters, on its own material and
@@ -29,7 +35,9 @@ const STARS = innerWidth < 640 ? 900 : 2600;
 const STAR_VERT = `
   uniform float uTime, uPixel;
   attribute float aSize, aPhase, aTwinkle;
+  attribute vec3 aColor;
   varying float vAlpha;
+  varying vec3 vColor;
   void main(){
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -37,16 +45,22 @@ const STAR_VERT = `
     // sky shimmers unevenly the way a real one does instead of pulsing in unison.
     float tw = 1.0 - aTwinkle * 0.42 * (0.5 + 0.5 * sin(uTime * (0.5 + aTwinkle * 2.2) + aPhase * 6.2831));
     vAlpha = tw;
+    vColor = aColor;
     gl_PointSize = aSize * uPixel * (320.0 / -mv.z);
   }`;
 
 const STAR_FRAG = `
   varying float vAlpha;
+  varying vec3 vColor;
   void main(){
     float r = length(gl_PointCoord - 0.5);
     float a = smoothstep(0.5, 0.0, r);
     a *= a * a;                       // tighten the falloff into a point, not a blob
-    gl_FragColor = vec4(vec3(1.0), a * vAlpha);
+    // The core stays near-white and the colour lives in the falloff, which is
+    // how a bright point actually reads -- fully tinting the centre makes stars
+    // look like coloured dots rather than light.
+    vec3 c = mix(vColor, vec3(1.0), smoothstep(0.34, 0.0, r));
+    gl_FragColor = vec4(c, a * vAlpha);
     if (gl_FragColor.a < 0.01) discard;
   }`;
 
@@ -56,6 +70,19 @@ function buildStars(){
   const size = new Float32Array(STARS);
   const phase = new Float32Array(STARS);
   const twinkle = new Float32Array(STARS);
+  const col = new Float32Array(STARS * 3);
+  // Roughly the stellar sequence, in the proportions a real sky shows: mostly
+  // white and faintly warm, a decent minority blue, and a few strong reds and
+  // golds to break it up. Sampling uniformly across the ramp would give a
+  // rainbow, which is the thing that makes fake starfields look fake.
+  const RAMP = [
+    [0.62,0.74,1.00, 0.20],   // blue giant
+    [0.80,0.87,1.00, 0.18],   // blue-white
+    [1.00,1.00,1.00, 0.26],   // white
+    [1.00,0.96,0.88, 0.18],   // yellow-white
+    [1.00,0.86,0.66, 0.12],   // gold
+    [1.00,0.72,0.56, 0.06]    // red dwarf
+  ];
   for (let i = 0; i < STARS; i++){
     // Uniform on a shell, not in a ball: an even volume fill crowds the centre
     // and leaves the edges bare once it is projected.
@@ -73,11 +100,20 @@ function buildStars(){
             :             0.10 + Math.random() * 0.11;
     phase[i] = Math.random();
     twinkle[i] = Math.random() < 0.45 ? Math.random() : 0.0;
+
+    let pick = Math.random(), band = RAMP[0];
+    for (const entry of RAMP){ if ((pick -= entry[3]) <= 0){ band = entry; break; } }
+    // Slight per-star jitter so no two are exactly the same swatch.
+    const j = 0.94 + Math.random() * 0.12;
+    col[i*3]   = Math.min(1, band[0] * j);
+    col[i*3+1] = Math.min(1, band[1] * j);
+    col[i*3+2] = Math.min(1, band[2] * j);
   }
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   g.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
   g.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1));
   g.setAttribute('aTwinkle', new THREE.BufferAttribute(twinkle, 1));
+  g.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
   return g;
 }
 
