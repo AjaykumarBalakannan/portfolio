@@ -329,8 +329,17 @@
     if (reduced) return;
     document.querySelectorAll('.plate-video').forEach((v) => {
       v.muted = true;
-      v.currentTime = 0;
-      v.play().catch(() => {});   // a refused autoplay just leaves the poster
+
+      // The export is not fast-start: its moov header sits at the very end of
+      // the file, so the browser cannot read duration or dimensions until the
+      // whole thing has arrived. Calling play() before that yields a 0x0 video
+      // and silently does nothing. Wait for metadata, and only then start.
+      const start = () => { v.currentTime = 0; v.play().catch(() => {}); };
+      if (v.readyState >= 1) start();
+      else {
+        v.addEventListener('loadedmetadata', start, { once: true });
+        v.load();   // preload is "none", so nothing is fetched until here
+      }
     });
   }
 
@@ -338,9 +347,11 @@
     if (entered) return;
     entered = true;
     document.body.classList.add('entered');   // lets the earth texture paint
-    // One frame's grace so the gate's teardown paints before the video decode
-    // starts competing with it.
-    requestAnimationFrame(() => setTimeout(playPortrait, 260));
+    // A plain timer, not requestAnimationFrame: rAF is frozen while a tab is in
+    // the background, so chaining the portrait behind it meant a page opened in
+    // a background tab never started its video at all. The delay still gives the
+    // gate's teardown room to paint before the decode competes with it.
+    setTimeout(playPortrait, 300);
   }
 
   // The gate signals completion by unhiding the replay button on every exit
