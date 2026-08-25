@@ -206,6 +206,55 @@ addEventListener('touchmove',e=>{ if(e.touches[0]) onMove(e.touches[0].clientX,e
 canvas.addEventListener('pointerdown',()=>{ pulse=1; });
 
 enterB.addEventListener('click',reveal);
+
+// Enter, or a scroll. Both are how people already try to get past a splash, so
+// this is less an instruction than getting out of the way of an instinct.
+//
+// The scroll path deliberately accumulates rather than firing on the first
+// event: a trackpad emits a burst of tiny deltas from a resting hand, and
+// triggering on any one of them would make the page feel like it was waiting to
+// pounce. Roughly a deliberate flick's worth of travel is needed, and the
+// intent decays if they stop, so a stray nudge never counts.
+(function(){
+  let travel = 0, decay = 0, done = false;
+  const NEEDED = 90;
+
+  function go(){
+    if (done) return;
+    done = true;
+    reveal();
+  }
+
+  addEventListener('keydown', (e) => {
+    if (done || gate.classList.contains('done')) return;
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'PageDown') {
+      e.preventDefault();
+      go();
+    }
+    if (e.key === 'Escape') skipB.click();
+  });
+
+  addEventListener('wheel', (e) => {
+    if (done || gate.classList.contains('done')) return;
+    if (e.deltaY <= 0) return;                 // only downward counts
+    travel += Math.min(e.deltaY, 40);          // one violent flick cannot skip the whole gate
+    clearTimeout(decay);
+    decay = setTimeout(() => { travel = 0; }, 320);
+    // Fade the field out in step with the gesture, so the scroll feels connected
+    // to something rather than arming an invisible trigger.
+    copy.style.setProperty('opacity', String(1 - Math.min(travel / NEEDED, 1) * 0.45));
+    if (travel >= NEEDED) go();
+  }, { passive: true });
+
+  // Same idea for a touch drag.
+  let touchY = null;
+  addEventListener('touchstart', (e) => { touchY = e.touches[0]?.clientY ?? null; }, { passive: true });
+  addEventListener('touchmove', (e) => {
+    if (done || touchY === null || gate.classList.contains('done')) return;
+    const dy = touchY - (e.touches[0]?.clientY ?? touchY);
+    if (dy > 70) go();
+  }, { passive: true });
+})();
 skipB.addEventListener('click',()=>{ // skip = instant, no burst
   timers.forEach(clearTimeout); timers=[];
   running=false; if(raf)cancelAnimationFrame(raf);

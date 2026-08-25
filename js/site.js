@@ -180,6 +180,7 @@
   stage.appendChild(clone);
 
   let ticking = false;
+  let torn = false;
   function update() {
     const rect = zone.getBoundingClientRect();
     // 0 while the sheet is still arriving, 1 once the runway is spent.
@@ -197,6 +198,14 @@
     const fade = 1 - eased * 0.25;
     sheet.style.opacity = clone.style.opacity = fade.toFixed(3);
     back.style.setProperty('--reveal', Math.min(1, eased * 1.9).toFixed(3));
+
+    // The rocket waits for this. Fired once the paper is essentially fully
+    // parted, so the arrival happens in the world the tear opened rather than
+    // over the top of the page still tearing.
+    if (!torn && eased > 0.96) {
+      torn = true;
+      dispatchEvent(new CustomEvent('portfolio:tearcomplete'));
+    }
   }
 
   addEventListener('scroll', () => {

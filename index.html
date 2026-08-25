@@ -17,13 +17,26 @@
 <!-- ===== INTERACTIVE PARTICLE GATE (WebGL) ===== -->
 <div class="gate" id="gate">
   <canvas id="scene"></canvas>
+  <!-- Dressed as the paper's own nameplate rather than a separate splash: the
+       same rules, the same letterspaced mono, the same serif. The page behind it
+       is a front page, so this reads as the masthead before the ink dries. -->
   <div class="gate-copy" id="gateCopy">
-    <div class="gk">Data Scientist · Dallas, TX</div>
+    <div class="gate-rule"></div>
+    <div class="gk">Vol. I &nbsp;·&nbsp; Data Scientist &nbsp;·&nbsp; Dallas, Texas</div>
     <h1 class="gt">Ajaykumar <em>Balakannan</em></h1>
-    <p class="gs">Production ML, NLP &amp; LLM-orchestrated systems. Move your cursor.</p>
-    <button class="enter" id="enter">Enter portfolio ↓</button>
+    <p class="gs">Production ML, NLP and LLM-orchestrated systems.</p>
+    <div class="gate-rule thin"></div>
+
+    <!-- Still a real button so it is focusable and announced, but styled as the
+         instruction rather than a call to action: pressing Enter or scrolling is
+         the intended way in, and the button is the accessible equivalent. -->
+    <button class="enter" id="enter">
+      <span class="ek">Press <b>Enter</b></span>
+      <span class="edot"></span>
+      <span class="ek">or scroll to begin</span>
+    </button>
   </div>
-  <div class="hint" id="hint">drag to orbit · click to pulse</div>
+  <div class="hint" id="hint">move the cursor to disturb the field · click to pulse</div>
   <button class="skip" id="skip">Skip intro ↦</button>
 </div>
 <button class="replay" id="replay" hidden>↺ replay intro</button>
@@ -326,6 +339,13 @@
   <button class="askw-launcher" id="askLauncher" type="button" aria-label="Ask about my work" aria-expanded="false" hidden>
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v10c0 .83-.67 1.5-1.5 1.5H9l-4 4v-4H5.5C4.67 17 4 16.33 4 15.5v-10Z" fill="currentColor"/><circle cx="8.5" cy="10.5" r="1.15" fill="var(--ink)"/><circle cx="12" cy="10.5" r="1.15" fill="var(--ink)"/><circle cx="15.5" cy="10.5" r="1.15" fill="var(--ink)"/></svg>
   </button>
+  <!-- Shown once the rocket has landed, then withdrawn on its own. -->
+  <div class="askw-callout" id="askCallout" hidden aria-hidden="true">
+    <span class="ac-k">Just landed</span>
+    <span class="ac-t">Ask my <em>digital twin</em> something</span>
+    <span class="ac-s">It answers as me, from my real work</span>
+  </div>
+
   <div class="askw-panel" id="askPanel" hidden>
     <div class="askw-head">
       <span>Chat with Ajay</span>

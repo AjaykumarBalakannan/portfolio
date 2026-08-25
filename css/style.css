@@ -24,15 +24,29 @@ a{color:inherit;} img{display:block;max-width:100%;}
   width:min(90vw,760px);pointer-events:none;opacity:0;transition:opacity .8s ease,transform .8s ease;}
 .gate-copy.show{opacity:1;}
 .gate.leaving .gate-copy{opacity:0;transform:translate(-50%,-58%);}
-.gate-copy .gk{font-family:var(--mono);font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--ochre);margin-bottom:20px;}
+.gate-rule{height:2px;background:linear-gradient(90deg,transparent,rgba(236,226,207,.55) 12%,rgba(236,226,207,.55) 88%,transparent);
+  margin:0 auto 16px;max-width:88%;}
+.gate-rule.thin{height:1px;margin:22px auto 0;
+  background:linear-gradient(90deg,transparent,rgba(236,226,207,.3) 12%,rgba(236,226,207,.3) 88%,transparent);}
+.gate-copy .gk{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--ochre);margin-bottom:18px;}
 .gate-copy .gt{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.94;
   font-size:clamp(44px,8.5vw,108px);color:var(--bone-2);text-shadow:0 4px 60px rgba(25,20,16,.9);}
 .gate-copy .gt em{font-style:italic;font-weight:500;color:var(--ochre);}
 .gate-copy .gs{margin-top:18px;font-size:clamp(14px,1.6vw,18px);color:var(--bone);opacity:.82;text-shadow:0 2px 30px rgba(25,20,16,.9);}
-.enter{pointer-events:auto;margin-top:34px;font-family:var(--mono);font-size:13px;letter-spacing:.06em;color:var(--ink);
-  background:var(--ochre);border:none;border-radius:100px;padding:13px 26px;cursor:pointer;transition:transform .2s,box-shadow .2s;
-  box-shadow:0 10px 40px -10px rgba(224,161,46,.6);}
-.enter:hover{transform:translateY(-2px);box-shadow:0 16px 50px -10px rgba(224,161,46,.75);}
+/* No longer a lozenge to click: the way in is Enter or a scroll, and this is
+   the instruction saying so. It stays a real <button> so keyboard and screen
+   reader users get a focusable, announced control rather than a hidden gesture. */
+.enter{pointer-events:auto;margin-top:26px;display:inline-flex;align-items:center;gap:12px;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(236,226,207,.72);background:none;border:none;padding:8px 4px;cursor:pointer;
+  transition:color .25s ease;}
+.enter:hover,.enter:focus-visible{color:var(--bone-2);}
+.enter:focus-visible{outline:1px solid var(--ochre);outline-offset:8px;border-radius:4px;}
+.enter b{font-weight:500;color:var(--ochre);}
+.edot{width:5px;height:5px;border-radius:50%;background:var(--ochre);flex:none;
+  animation:enterPulse 2.4s ease-in-out infinite;}
+@keyframes enterPulse{0%,100%{opacity:.25;transform:scale(.8);}50%{opacity:1;transform:scale(1);}}
+@media(prefers-reduced-motion:reduce){.edot{animation:none;opacity:.8;}}
 .hint{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);z-index:3;font-family:var(--mono);font-size:11px;
   letter-spacing:.16em;color:var(--muted);opacity:0;transition:opacity .8s ease;pointer-events:none;}
 .hint.show{opacity:.7;}
@@ -695,3 +709,53 @@ footer{padding-bottom:86px;}
 /* Grain on the clone would double the cost of the page's heaviest filter for a
    layer that is mostly hidden behind the tear. */
 .nograin .plate-img::before{display:none;}
+
+/* ── the callout ─────────────────────────────────────────────────────────
+   Appears after the rocket lands, then retires. A bubble that never leaves is
+   clutter beside a button that is already pulsing for attention.            */
+/* Stacked above the replay pill rather than beside the launcher. That corner is
+   already two deep -- launcher at the bottom, replay pill directly on top of it
+   -- so anything placed level with either one lands on top of it. */
+.askw-callout{position:absolute;right:6px;bottom:134px;z-index:79;width:max-content;max-width:250px;
+  text-align:right;pointer-events:none;
+  opacity:0;transform:translateY(10px) scale(.94);transform-origin:100% 100%;
+  transition:opacity .5s cubic-bezier(.2,.8,.3,1),transform .5s cubic-bezier(.2,.8,.3,1);}
+.askw-callout.show{opacity:1;transform:none;}
+.askw-callout[hidden]{display:none;}
+.ac-k{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.26em;
+  text-transform:uppercase;color:var(--a1);margin-bottom:5px;}
+.ac-t{display:block;font-family:var(--serif);font-weight:900;font-size:19px;line-height:1.12;
+  letter-spacing:-.01em;color:var(--bone-2);text-shadow:0 2px 22px rgba(0,0,0,.8);}
+.ac-t em{font-style:italic;color:var(--a1);}
+.ac-s{display:block;margin-top:5px;font-size:11.5px;color:var(--muted);}
+/* Each line arrives just behind the one above it, so the thought lands in the
+   order it is read rather than all at once. */
+.askw-callout.show .ac-k{animation:acIn .45s cubic-bezier(.2,.8,.3,1) both;}
+.askw-callout.show .ac-t{animation:acIn .5s cubic-bezier(.2,.8,.3,1) .07s both;}
+.askw-callout.show .ac-s{animation:acIn .5s cubic-bezier(.2,.8,.3,1) .15s both;}
+@keyframes acIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+@media(max-width:520px){
+  .askw-callout{right:4px;bottom:120px;max-width:190px;}
+  .ac-t{font-size:16px;} .ac-s{display:none;}
+}
+@media(prefers-reduced-motion:reduce){
+  .askw-callout,.askw-callout.show .ac-k,.askw-callout.show .ac-t,.askw-callout.show .ac-s{
+    animation:none;transition:opacity .3s ease;transform:none;}
+}
+
+/* A stronger radar now that it has to carry the callout's invitation: wider
+   rings, warmer core, and a second ring offset so the pulse never fully rests. */
+.askw-launcher.blink{animation:askglowStrong 2.4s ease-in-out infinite;}
+@keyframes askglowStrong{
+  0%,100%{box-shadow:0 10px 30px -8px rgba(0,0,0,.55),
+                     0 0 0 0 rgba(255,196,90,.85),
+                     0 0 0 0 rgba(255,196,90,.45),
+                     0 0 22px 2px rgba(255,196,90,.35);
+          transform:scale(1);}
+  50%    {box-shadow:0 10px 30px -8px rgba(0,0,0,.55),
+                     0 0 0 14px rgba(255,196,90,0),
+                     0 0 0 34px rgba(255,196,90,0),
+                     0 0 34px 6px rgba(255,196,90,.55);
+          transform:scale(1.09);}
+}
+@media(prefers-reduced-motion:reduce){.askw-launcher.blink{animation:none;}}

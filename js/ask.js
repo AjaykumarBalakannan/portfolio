@@ -48,12 +48,34 @@ function landLauncher() {
   launcher.hidden = false;
   // Launcher pops in first, canvas fades a beat later, so the two overlap and
   // the rocket reads as becoming the logo rather than being swapped for it.
-  requestAnimationFrame(() => launcher.classList.add('show'));
+  //
+  // Reading offsetWidth rather than waiting a frame: an element that has just
+  // stopped being hidden needs its start styles committed before the class can
+  // transition off them, and requestAnimationFrame does not fire in a
+  // background tab. This forces the same commit synchronously, so the reveal
+  // survives being opened in a tab the visitor is not looking at yet.
+  void launcher.offsetWidth;
+  launcher.classList.add('show');
   canvas.classList.add('gone');
   setTimeout(() => {
     canvas.remove();
     launcher.classList.add('blink');
   }, 420);
+
+  // Let the landing settle before speaking. Arriving and talking at the same
+  // instant reads as a popup; a beat of silence first reads as someone landing
+  // and then turning to you.
+  setTimeout(() => {
+    const call = document.getElementById('askCallout');
+    if (!call) return;
+    call.hidden = false;
+    void call.offsetWidth; // commit the start styles -- see landLauncher above
+    call.classList.add('show');
+    // It withdraws on its own. A permanent bubble beside a chat button is
+    // clutter, and anyone who wants it can still see the launcher pulsing.
+    setTimeout(() => call.classList.remove('show'), 9000);
+    setTimeout(() => { call.hidden = true; }, 9600);
+  }, 1100);
 }
 
 function runRocketIntro() {
@@ -206,8 +228,13 @@ function runRocketIntro() {
   const waves = 2;
   const amplitude = Math.min(H * 0.13, 130);
 
-  const FLY_MS = 1700;
-  const MORPH_MS = 420;
+  // Stretched from 1700+420. At two seconds the rocket read as a transition
+  // effect; at three and a half it reads as an arrival, which is the point now
+  // that it lands into the world behind the torn page rather than over the top
+  // of it. The descent below also eases harder at the end, so the last stretch
+  // is a settle rather than a stop.
+  const FLY_MS = 2800;
+  const MORPH_MS = 600;
   const TOTAL_MS = FLY_MS + MORPH_MS;
 
   function easeInOutSine(t) { return -(Math.cos(Math.PI * t) - 1) / 2; }
@@ -299,24 +326,41 @@ function runRocketIntro() {
   raf = requestAnimationFrame(tick);
 }
 
-// Wait for the WebGL intro gate to finish (it sets replay.hidden = false on
-// every exit path: normal, skip, and reduced-motion) so the rocket doesn't
-// compete with it.
-const replay = document.getElementById('replay');
-if (replay) {
-  if (!replay.hidden) {
+// The rocket used to launch when the WebGL gate finished, which put it on
+// screen long before the page had torn open. It now waits for the tear to
+// complete, so the sequence reads: paper rips, world behind it, then something
+// arrives in that world.
+//
+// site.js dispatches portfolio:tearcomplete. The fallbacks matter: reduced
+// motion and a missing tearzone both mean the tear never runs, and the launcher
+// still has to appear or the chat becomes unreachable.
+(function () {
+  let started = false;
+  function once() {
+    if (started) return;
+    started = true;
     runRocketIntro();
-  } else {
-    const mo = new MutationObserver(() => {
-      if (!replay.hidden) { mo.disconnect(); runRocketIntro(); }
-    });
-    mo.observe(replay, { attributes: true, attributeFilter: ['hidden'] });
-    // Fallback in case the intro's completion signal is ever missed.
-    setTimeout(() => { mo.disconnect(); runRocketIntro(); }, 9000);
   }
-} else {
-  runRocketIntro();
-}
+
+  const zone = document.getElementById('tearzone');
+  const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  if (!zone || reduced) {
+    // No tear to wait for. Fall back to the old cue so the launcher still lands.
+    const replay = document.getElementById('replay');
+    if (!replay || !replay.hidden) once();
+    else {
+      const mo = new MutationObserver(() => { if (!replay.hidden) { mo.disconnect(); once(); } });
+      mo.observe(replay, { attributes: true, attributeFilter: ['hidden'] });
+      setTimeout(() => { mo.disconnect(); once(); }, 9000);
+    }
+  } else {
+    addEventListener('portfolio:tearcomplete', once, { once: true });
+    // If the reader never scrolls far enough to finish the tear, the chat must
+    // not stay hidden forever.
+    setTimeout(once, 45000);
+  }
+})();
 
 // ---------- panel open/close ----------
 
