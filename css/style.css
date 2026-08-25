@@ -609,16 +609,18 @@ footer{padding-bottom:86px;}
   background:var(--ink-2);aspect-ratio:1/1;}
 .plate-img img,.plate-img .plate-video{width:100%;height:100%;object-fit:cover;
   object-position:center 32%;display:block;
-  /* Newsprint ink: crushed to near-monochrome, then warmed back toward the
-     paper so it sits in the page rather than on it. */
-  filter:grayscale(1) contrast(1.28) brightness(1.04) sepia(.22);
+  /* The intro arrives already graded, so the plate no longer drains it. What
+     stays is the press behaviour rather than the press palette: contrast lifted
+     the way ink lifts it, and a touch of saturation so the halftone below does
+     not read as a grey film over the colour. */
+  filter:contrast(1.12) saturate(1.06);
   transform:none;
   animation:plateDrift 26s ease-in-out infinite alternate;}
 
 /* Halftone dot screen. Multiply keeps the dots reading as ink on paper. */
 .plate-img::after{content:"";position:absolute;inset:0;pointer-events:none;
   background-image:radial-gradient(circle at center,rgba(12,12,13,.62) 0.9px,transparent 1.15px);
-  background-size:3.4px 3.4px;mix-blend-mode:multiply;opacity:.55;}
+  background-size:3.4px 3.4px;mix-blend-mode:multiply;opacity:.3;}
 
 /* Press grain, drifting so the print never sits perfectly still. */
 .plate-img::before{content:"";position:absolute;inset:-12%;z-index:2;pointer-events:none;
@@ -626,7 +628,7 @@ footer{padding-bottom:86px;}
 <svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'>\
 <filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='1'/>\
 </filter><rect width='90' height='90' filter='url(%23n)' opacity='.5'/></svg>");
-  mix-blend-mode:multiply;opacity:.24;
+  mix-blend-mode:multiply;opacity:.16;
   will-change:transform;
   animation:plateGrain 1.6s steps(4) infinite;}
 
