@@ -17,7 +17,7 @@ WHAT'S HERE
   assets/cert-aws-saa.png    AWS Solutions Architect Associate credential badge
   assets/logo-aws.svg        AWS logo (spare, not currently placed)
 
-  Canaria and AastraZen have no publicly available logo file, so they use the
+  Cigna, Canaria and Siemens use designed monogram marks rather than logo files, so the
   designed monogram marks instead. Drop a logo in and swap the <span class="mark
   s2"> for the same <span class="mark logo"><img ...></span> pattern to upgrade.
 

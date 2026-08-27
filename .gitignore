@@ -7,3 +7,6 @@ node_modules/
 .wrangler/
 .dev.vars
 __devices.html
+
+# Local secrets. Never committed.
+.local/
