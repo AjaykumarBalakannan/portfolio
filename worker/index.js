@@ -19,7 +19,7 @@ import Anthropic from "@anthropic-ai/sdk";
 // vectors.json to make the new corpus take effect immediately instead of
 // waiting out VECTORS_CACHE_SECONDS.
 const VECTORS_URL =
-  "https://ajaykumarbalakannan.github.io/portfolio/data/vectors.json?v=4";
+  "https://ajaykumarbalakannan.github.io/portfolio/data/vectors.json?v=5";
 
 // The prose is read from resume_chunks.json and joined onto the embeddings by
 // id, rather than using the copy of the text baked into vectors.json. That
