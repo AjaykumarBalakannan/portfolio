@@ -319,15 +319,39 @@
     events.forEach((evt) => addEventListener(evt, go, { passive: true }));
   }
 
+  // The hero is on screen about a second before the gate finishes unmounting,
+  // and the fetch used to start only after that. So the plate sat on its poster,
+  // then swapped to video once the bytes arrived: the hitch. Start the fetch as
+  // the gate begins to leave, and only call play() on entry. Deliberately not at
+  // page load -- that was the original bug, where the clip ran out behind the
+  // gate and its decode fought the intro for frames.
+  let warmed = false;
+  function warmPortrait() {
+    if (warmed || reduced) return;
+    warmed = true;
+    document.querySelectorAll('.plate-video').forEach((v) => {
+      v.muted = true;
+      if (v.readyState === 0) v.load();
+    });
+  }
+
+  // body.reveal lands when the gate starts handing the page over.
+  if (document.body.classList.contains('reveal')) warmPortrait();
+  else {
+    const bodyWatch = new MutationObserver(() => {
+      if (document.body.classList.contains('reveal')) { bodyWatch.disconnect(); warmPortrait(); }
+    });
+    bodyWatch.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  }
+
   function playPortrait() {
     if (reduced) return;
     document.querySelectorAll('.plate-video').forEach((v) => {
       v.muted = true;
 
-      // The export is not fast-start: its moov header sits at the very end of
-      // the file, so the browser cannot read duration or dimensions until the
-      // whole thing has arrived. Calling play() before that yields a 0x0 video
-      // and silently does nothing. Wait for metadata, and only then start.
+      // Wait for metadata before starting: play() on a video with no known
+      // dimensions yields a 0x0 frame and silently does nothing. Cheap now that
+      // the file is fast-start, and free when warmPortrait already fetched it.
       // If play() is refused the poster stays up and the visitor just sees a
       // still, with nothing to tell them otherwise. Refusal is normal on a
       // phone -- iOS blocks autoplay outright in Low Power Mode, muted and

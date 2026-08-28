@@ -108,15 +108,21 @@
 
     <figure class="plate">
       <div class="plate-img">
-        <!-- A printed photograph that happens to move. Muted, looping and
-             inline so it behaves like an image rather than media: no controls,
-             no sound, nothing to click. The poster is the still, so the frame is
-             never empty and it is what remains under reduced motion, where
-             autoplay is withheld in js/site.js. -->
-        <video class="plate-video" poster="assets/ajay.jpg" muted playsinline
+        <!-- A printed photograph that happens to move. Muted and inline so it
+             behaves like an image rather than media: no controls, no sound,
+             nothing to click.
+
+             The poster is the video's own first frame, not a separate photo.
+             It used to be assets/ajay.jpg, which is 620x775 where the video is
+             1280x720; both are cropped to a square with object-fit:cover, so
+             the portrait still showed almost the whole frame and the landscape
+             video showed a much tighter centre crop. Handing over from one to
+             the other looked like the picture suddenly zoomed in. Same frame,
+             same aspect, no visible swap. -->
+        <video class="plate-video" poster="assets/portrait-poster.jpg" muted playsinline
                preload="none" aria-label="Ajaykumar Balakannan">
           <source src="assets/portrait-motion.mp4" type="video/mp4"/>
-          <img src="assets/ajay.jpg" alt="Ajaykumar Balakannan"/>
+          <img src="assets/portrait-poster.jpg" alt="Ajaykumar Balakannan"/>
         </video>
       </div>
       <figcaption class="fig"><b>Fig. 001</b> · The author, printed.</figcaption>

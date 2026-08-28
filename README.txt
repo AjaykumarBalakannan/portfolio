@@ -6,7 +6,8 @@ WHAT'S HERE
   js/intro.js       the interactive WebGL particle gate (three.js)
   js/site.js        staggered scroll reveal, card accents, the page tear, tear sound
   libs/three.module.min.js   three.js, self-hosted (no CDN needed)
-  assets/ajay.jpg   your photo (swap this file to change it)
+  assets/portrait-motion.mp4  the hero portrait (see THE PLATE below)
+  assets/portrait-poster.jpg  its first frame, used as the video poster
 
   Logos (self-hosted, no hotlinking):
   assets/logo-umd.svg        University of Maryland
@@ -190,4 +191,8 @@ THE INTRO
   (or auto-skip). Reduced-motion visitors skip straight to the page.
 
 TWEAKS
-  - Replace your photo: drop a new image in as assets/ajay.jpg
+  - Replace the portrait: swap assets/portrait-motion.mp4, then regenerate its
+    poster so the two still match:
+      qlmanage -t -s 1200 -o /tmp assets/portrait-motion.mp4
+      sips -s format jpeg -s formatOptions 68 -Z 1000 \
+        /tmp/portrait-motion.mp4.png --out assets/portrait-poster.jpg
