@@ -126,49 +126,12 @@ h2.title{font-family:var(--serif);font-weight:900;font-size:clamp(30px,4.4vw,50p
 
 /* ===== HERO ===== */
 #hero:not([data-sheet]){min-height:100vh;display:flex;align-items:center;padding-top:104px;padding-bottom:56px;}
-.mosaic{width:100%;display:grid;gap:14px;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(98px,auto);
-  grid-template-areas:
-    "name  name  photo open"
-    "name  name  photo loc"
-    "role  role  intro intro"
-    "gpa   clust records links";}
 .tile{position:relative;border-radius:var(--r);padding:22px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 14px 30px -18px rgba(0,0,0,.7);}
 body.cinema .tile{opacity:0;transform:scale(.84);}
 body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,transform .55s cubic-bezier(.18,.8,.25,1.05);transition-delay:var(--d,0s);}
 .tile:hover{transform:translateY(-4px);transition:transform .28s ease;}
 
-.t-name{grid-area:name;background:var(--ink-2);justify-content:space-between;}
-.t-photo{grid-area:photo;padding:0;background:var(--ink-3);}
-.t-open{grid-area:open;background:var(--tone-2);color:var(--on-accent);}
-.t-loc{grid-area:loc;background:var(--bone);color:var(--ink);}
-.t-role{grid-area:role;background:var(--tone-1);color:var(--ink);}
-.t-intro{grid-area:intro;background:var(--ink-2);}
-.t-gpa{grid-area:gpa;background:var(--tone-3);color:var(--on-accent);}
-.t-clust{grid-area:clust;background:var(--ink-2);padding:0;}
-.t-records{grid-area:records;background:var(--bone);color:var(--ink);}
-.t-links{grid-area:links;background:var(--ink-2);justify-content:center;}
-
-.t-name .kicker{font-family:var(--mono);font-size:12px;color:var(--muted);}
-.t-name h1{font-family:var(--serif);font-weight:900;letter-spacing:-.03em;line-height:.92;font-size:clamp(38px,6vw,74px);color:var(--bone-2);}
-.t-name h1 em{font-style:italic;font-weight:500;color:var(--tone-1);}
-.t-photo img{width:100%;height:100%;object-fit:cover;object-position:center 28%;filter:grayscale(.12) contrast(1.03);position:relative;z-index:1;}
-.t-photo .monogram{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(120% 120% at 30% 20%,rgba(166,166,166,.22),transparent 60%),linear-gradient(150deg,var(--ink-3),var(--ink-2));}
-.t-photo .monogram b{font-family:var(--serif);font-weight:900;font-size:64px;color:var(--tone-1);}
-.t-open .lbl,.t-loc .lbl,.t-gpa .lbl,.t-records .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.72;margin-bottom:auto;}
-.t-open strong{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.05;}
-.t-loc strong{font-family:var(--serif);font-size:26px;font-weight:700;}
-.t-loc em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted);display:block;margin-top:2px;}
-.t-gpa .big,.t-records .big{font-family:var(--serif);font-weight:900;font-size:40px;line-height:1;letter-spacing:-.02em;}
-.t-gpa .sub,.t-records .sub{font-size:12px;opacity:.8;margin-top:3px;}
-.t-role .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.72;margin-bottom:auto;}
-.t-role .typed{font-family:var(--serif);font-weight:700;font-size:clamp(24px,3.4vw,38px);line-height:1;letter-spacing:-.01em;}
-.t-role .cur{display:inline-block;width:3px;height:.9em;background:var(--ink);vertical-align:-2px;margin-left:2px;animation:blink .9s step-end infinite;}
-@keyframes blink{50%{opacity:0}}
-.t-intro p{font-size:14.5px;line-height:1.7;color:var(--bone);}
-.t-intro p b{color:var(--bone-2);font-weight:600;}
-.t-clust canvas{width:100%;height:100%;display:block;}
-.t-clust .cap{position:absolute;left:14px;bottom:10px;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.t-links{background:var(--ink-2);justify-content:center;}
 .t-links{flex-direction:row;flex-wrap:wrap;gap:9px;align-items:center;}
 .t-links a{font-family:var(--mono);font-size:12px;text-decoration:none;color:var(--bone);border:1px solid var(--ink-3);border-radius:100px;padding:8px 15px;transition:all .2s;}
 .t-links a:hover{border-color:var(--tone-1);color:var(--tone-1);}
@@ -210,6 +173,14 @@ body.cinema.reveal .tile{opacity:1;transform:none;transition:opacity .5s ease,tr
    origin crops it down to just the crest, so no separate image file is needed. */
 .mark.logo.crest{overflow:hidden;}
 .mark.logo.crest img{object-fit:cover;object-position:left center;}
+
+/* Wordmark logos have no square symbol to crop down to, so instead of shrinking
+   one into a 44px box until it is unreadable, the badge keeps a constant 44px
+   height and lets its width follow the artwork. Every mark in the column still
+   lines up on the same baseline. */
+.mark.logo.wide{width:auto;min-width:44px;max-width:118px;padding:7px 11px;}
+.mark.logo.wide img{width:auto;height:100%;max-width:100%;}
+
 /* The AWS credential badge is already a finished coloured badge, so it needs no
    chip behind it. */
 .mark.badge{background:none;border:none;box-shadow:none;padding:0;}
@@ -410,14 +381,8 @@ footer{position:relative;z-index:2;text-align:center;padding:26px;border-top:1px
 
 @media(max-width:860px){
   .nav-links{display:none;}
-  .mosaic{grid-template-columns:repeat(2,1fr);
-    grid-template-areas:"name name" "photo open" "photo loc" "role role" "intro intro" "gpa records" "clust links";}
   .job{grid-template-columns:1fr;gap:14px;}
   .stackgrid,.projgrid,.edugrid,.certgrid{grid-template-columns:1fr;}
-}
-@media(max-width:480px){
-  .mosaic{grid-template-columns:1fr;grid-template-areas:"name" "photo" "role" "intro" "open" "loc" "gpa" "records" "clust" "links";}
-  .t-photo{min-height:280px;}
 }
 @media(prefers-reduced-motion:reduce){
   .tile,body.cinema .tile{opacity:1!important;transform:none!important;}
@@ -694,7 +659,6 @@ footer{padding-bottom:86px;}
    wider than its column. */
 [data-sheet] .plate{max-width:min(100%,42vh);}
 [data-sheet] .fig{font-size:10.5px;margin-top:6px;}
-[data-sheet] .t-clust,[data-sheet] .colhead:nth-of-type(2) ~ .mosaic{display:none;}
 [data-sheet] .tile.t-links{margin-top:12px;}
 
 /* The sheet is a fixed 100vh box with overflow:hidden -- it has to be, or the
@@ -926,3 +890,12 @@ footer{padding-bottom:86px;}
   [data-sheet] .display-sub,[data-sheet] .prose,[data-sheet] .colhead{display:none;}
   [data-sheet] .plate{max-width:min(100%,34vh);}
 }
+
+/* While the gate is up the document behind it must not move. Without this the
+   wheel gesture that enters the page also scrolls it, and since the tear is
+   driven by scroll position, the hero is already torn open by the time anyone
+   sees it. touch-action keeps the same true on a phone, where overflow alone
+   does not reliably stop a pan; the entry handler reads touchmove, which still
+   fires. Applied from JS, so a failed script leaves the page scrollable. */
+html.gate-locked, html.gate-locked body{overflow:hidden;}
+html.gate-locked{touch-action:none;overscroll-behavior:none;}

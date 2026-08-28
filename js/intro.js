@@ -274,6 +274,28 @@ function tick(){
   }
 }
 
+// The page sits behind the gate at full height and scrolls freely, so the same
+// wheel gesture that arms the entry also scrolls the document. The tear is
+// driven off the tearzone's scroll position, which meant a visitor who scrolled
+// in rather than pressing Enter arrived at a hero that had already ripped open,
+// having never seen it whole. Lock while the gate is up, rewind before handing
+// the page over.
+function lockScroll(){
+  document.documentElement.classList.add('gate-locked');
+}
+function releaseScroll(){
+  const html = document.documentElement;
+  if (!html.classList.contains('gate-locked')) return;
+  // Rewind first, unlock second. The other order lets a queued scroll land.
+  // Instant, not smooth: html has scroll-behavior:smooth, and animating this
+  // reset is exactly the drift being removed.
+  const prev = html.style.scrollBehavior;
+  html.style.scrollBehavior = 'auto';
+  scrollTo(0, 0);
+  html.classList.remove('gate-locked');
+  html.style.scrollBehavior = prev;
+}
+
 function reveal(){
   if(leaving) return; leaving=true;
   gate.classList.add('leaving');
@@ -284,19 +306,21 @@ function reveal(){
     if(mat) mat.uniforms.uBurst.value = easeOut(k);
     if(k<1 && running){ requestAnimationFrame(burst); }
   })();
-  timers.push(setTimeout(()=>{ document.body.classList.add('reveal'); }, 500));
+  timers.push(setTimeout(()=>{ releaseScroll(); document.body.classList.add('reveal'); }, 500));
   timers.push(setTimeout(()=>{ gate.classList.add('done'); }, 650));
   timers.push(setTimeout(finish, 1250));
 }
 
 function finish(){
   running=false; if(raf)cancelAnimationFrame(raf);
+  releaseScroll();   // backstop: a crash must never strand the page unscrollable
   gate.style.display='none'; replay.hidden=false;
   if(renderer) renderer.dispose();
 }
 
 function start(){
   try{
+    lockScroll();
     document.body.classList.add('cinema'); document.body.classList.remove('reveal');
     gate.style.display=''; gate.classList.remove('done','leaving');
     copy.classList.remove('show'); hint.classList.remove('show');
@@ -310,7 +334,8 @@ function start(){
     timers.push(setTimeout(()=>hint.classList.add('show'), 1400));
   }catch(err){
     console.error('3D gate failed, skipping to page:',err);
-    running=false; document.body.classList.add('cinema','reveal');
+    running=false; releaseScroll();
+    document.body.classList.add('cinema','reveal');
     gate.style.display='none'; replay.hidden=false;
   }
 }
@@ -378,6 +403,7 @@ enterB.addEventListener('click',reveal);
 skipB.addEventListener('click',()=>{ // skip = instant, no burst
   timers.forEach(clearTimeout); timers=[];
   running=false; if(raf)cancelAnimationFrame(raf);
+  releaseScroll();
   document.body.classList.add('cinema','reveal'); gate.classList.add('done');
   setTimeout(()=>{ gate.style.display='none'; replay.hidden=false; if(renderer)renderer.dispose(); },500);
 });

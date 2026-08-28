@@ -4,7 +4,7 @@ WHAT'S HERE
   index.html        the page
   css/style.css     styles
   js/intro.js       the interactive WebGL particle gate (three.js)
-  js/site.js        typewriter, staggered scroll reveal, card accents, k-means tile
+  js/site.js        staggered scroll reveal, card accents, the page tear, tear sound
   libs/three.module.min.js   three.js, self-hosted (no CDN needed)
   assets/ajay.jpg   your photo (swap this file to change it)
 
